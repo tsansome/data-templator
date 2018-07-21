@@ -1,0 +1,120 @@
+{
+    "cells": [
+        {
+            "cell_type": "code",
+            "source": [
+                "dbutils.widgets.text(\"filename\", \"\",\"\")\ndbutils.widgets.get(\"filename\")\nfilename = getArgument(\"filename\")\nprint (\"Param -\\'input':\")\nprint (filename)\nspark.conf.set(\"dfs.adls.oauth2.access.token.provider.type\", \"ClientCredential\")\nspark.conf.set(\"dfs.adls.oauth2.client.id\", \"{{ source.client_id }}\")\nspark.conf.set(\"dfs.adls.oauth2.credential\", \"{{ source.credential }}\")\nspark.conf.set(\"dfs.adls.oauth2.refresh.url\", \"https://login.microsoftonline.com/ae5ab930-6b7b-4b0c-9a92-dcc7e8008cb9/oauth2/token \")"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": null
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "raw_folder = \"{{ source.raw_folder }}\"\ninfile = \"/Raw/{{ source.raw_folder }}/\" + filename\n\nmyRecords = spark.read.option(\"delimiter\", \" {{ source.delimeter }}\").csv(\"adl://{{ source.datalakestore_accountname }}.azuredatalakestore.net/\" + infile, quote='\"', escape='\"', header=True)\nmyRecords.createOrReplaceTempView(\"myRecords\")"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": null
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "sdf = spark.sql(\"\"\"\nSELECT \n       
+                {{#source.date_columns}}
+                    to_utc_timestamp(TO_DATE(CAST(UNIX_TIMESTAMP(``, \\\{{ source.date_format }}\\\) AS TIMESTAMP)), {{ source.date_locale }}) AS `{{.}}_UTC`,\\n
+                {{/source.date_columns}}
+                {{#source.columns}}
+                    \\tTRIM(m.`{{.}}`) as `{{.}}`,\\n
+                {{/source.columns}}
+                current_timestamp() AS run_date_utc\n   FROM myRecords AS m\n\"\"\")"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": null
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "%sql\nCREATE TABLE IF NOT EXISTS {{ target.database }}master.{{ source.tablename }}(\n
+                {{#source.date_columns}}
+                    \\t`{{.}}_UTC` datetime,\\n
+                {{/source.date_columns}}
+                {{#source.columns}}
+                    \\t`{{.}}` string,\\n
+                {{/souce.columns}}
+                `run_date_utc` timestamp)	 \nUSING CSV;\n\n"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": null
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "master_table = spark.sql(\"\"\"SELECT \n   
+                {{#source.date_columns}}
+                    \\t`{{.}}_UTC` datetime,\\n
+                {{/source.date_columns}}
+                {{#source.columns}}
+                    \\t`{{.}}` string,\\n
+                {{/souce.columns}}
+                run_date_utc\nFROM {{ target.database}}master.{{ source.tablename }}\"\"\")\n\nunioned = master_table.union(sdf)"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": 5
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "max_ids = unioned.groupBy(\"{{ source.primary_keys_string }}\").agg({\"{{ source.max_date }}\": \"max\"}).withColumnRenamed('max({{ source.max_date }})', '{{ source.max_date }}')\n\ndisplay(max_ids)"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": 6
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "join_condition = [\"{{ source.primary_keys_string }}\", \"{{ source.max_date }}\"]\n\nreconciled = unioned.join(max_ids, join_condition, 'inner')"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": 7
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "distinct_reconciled = reconciled.groupBy(\"<# Write(String.Join("\\\",\\\"", date_columns.ToArray()));#>\",\"<# Write(String.Join("\\\",\\\"", columns.ToArray()));#>\").agg({\"run_date_utc\": \"min\"}).withColumnRenamed('min(run_date_utc)', 'run_date_utc')\n\ndistinct_reconciled.createOrReplaceTempView(\"distinct_reconciled\")\n"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": 8
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "%sql\n-- TRUNCATE TABLE {{ target.database }}master.{{ source.tablename }};\nDROP TABLE IF EXISTS {{ target.database }}master.{{ source.tablename }}_new;\n\nCREATE TABLE {{target.database}}master.{{ source.tablename }}_new\n  USING CSV\n  AS\n    SELECT *\n      FROM distinct_reconciled;"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": 9
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "%sql\n\nDROP TABLE IF EXISTS {{ target.database }}master.{{ source.tablename }};\n\nALTER TABLE {{ target.database }}master.{{ source.tablename }}_new RENAME TO {{ target.databasename }}master.{{ source.tablename }};"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": 10
+        }
+    ],
+    "metadata": {
+        "name": "R2M_DL3_{{ source.tablename }}"
+    },
+    "nbformat": 4,
+    "nbformat_minor": 0
+}

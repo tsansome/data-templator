@@ -1,0 +1,23 @@
+[
+    {
+        "script_name": "BlobDataSource",
+        "output": {
+            "extension": "json",
+            "filename": "ADFDataSet_{{ source.schema }}_{{ source.tablename }}_BlobSource"
+        }
+    },
+    {
+        "script_name": "OracleDataSource",
+        "output": {
+            "extension": "json",
+            "filename": "ADFDataSet_{{ source.schema }}_{{ source.tablename }}_OracleSource"
+        }
+    },
+    {
+        "script_name": "S2RDelta",
+        "output": {
+            "extension": "json",
+            "filename": "ADFPipeline_S2R_{{ source.schema }}_{{ source.tablename }}_OracleSource"
+        }
+    }
+]

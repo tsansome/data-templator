@@ -1,0 +1,61 @@
+{
+    "config_file": "Templator",
+    "datasets": [
+        {
+            "name": "",
+            "source": {
+                "system_type": "Oracle Database",
+                "system_version": "0.9",
+                "database": "OracleSales",
+                "schema": "Finance",
+                "tablename": "Invoice_Header",
+                "columns": ["Invoice_ID", "Total_Amount", "Date_Created"],
+                "primary_key": ["Invoice_ID"],
+                "date_columns": ["Date_Created"]
+            },
+            "patterns": [
+                {
+                    "name": "R2M_DL1",
+                    "generate": [
+                        {
+                            "language": "IPYNB",
+                            "target": {
+                                "database": "Finance_master",
+                                "table": "Invoice_Header",
+                                "date_format": "yyyy-MM-dd"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "S2R_FULLTABLE",
+                    "generate": [
+                        {
+                            "language": "DataFactory",
+                            "target": {
+                                "service_name": "RAW_STORAGE",
+                                "folder": "Finance/Invoice"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "S2R_DELTA",
+                    "generate": [
+                        {
+                            "language": "DataFactory",
+                            "source": {
+                                "service_name": "OracleSales_UAT",
+                                "date_latest": ["Date_Created", "Date_Modified"]
+                            },
+                            "target": {
+                                "service_name": "RAW_STORAGE",
+                                "folder": "Finance/Invoice"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

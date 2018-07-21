@@ -1,0 +1,16 @@
+[
+    {
+        "script_name": "script",
+        "output": {
+            "extension": "json",
+            "filename": "test"
+        }
+    },
+    {
+        "script_name": "script2",
+        "output": {
+            "extension": "json",
+            "filename": "test2"
+        }
+    }
+]

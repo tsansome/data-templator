@@ -1,0 +1,119 @@
+{
+    "name": "S2M_DL2_{{ source.database }}_{{ source.schema }}_{{ source.tablename }}",
+    "properties": {
+        "activities": [
+            {
+                "name": "CopyTheNewRecords",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "Get Maximum Date",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "source": {
+                        "type": "OracleSource",
+                        "oracleReaderQuery": {
+                            "value": "{{ oracle_reader_query }}",
+                            "type": "Expression"
+                        }
+                    },
+                    "sink": {
+                        "type": "BlobSink"
+                    },
+                    "enableStaging": false,
+                    "dataIntegrationUnits": 0
+                },
+                "inputs": [
+                    {
+                        "referenceName": "Oracle_{{ source.database }}_{{ source.schema }}_{{ source.tablename }}",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "BLOB_{{ source.database }}_{{ source.schema }}_{{ source.tablename }}",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "subfolder": "{{ destination_subfolder }}",
+                            "filename": "{{ destination_filename }}"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "ExportTheNewFile",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "CopyTheNewRecords",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "source": {
+                        "type": "SqlDWSource",
+                        "sqlReaderQuery": "{{ export_the_new_file_source_query }}"
+                    },
+                    "sink": {
+                        "type": "BlobSink"
+                    },
+                    "enableStaging": false,
+                    "dataIntegrationUnits": 0
+                },
+                "inputs": [
+                    {
+                        "referenceName": "{{ export_the_new_file_datasource_name }}",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "{{ export_the_new_file_destination_datasource_name }}",
+                        "type": "DatasetReference"
+                    }
+                ]
+            },
+            {
+                "name": "Get Maximum Date",
+                "type": "Lookup",
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "source": {
+                        "type": "SqlDWSource",
+                        "sqlReaderQuery": "{{ maximum_date_query }}"
+                    },
+                    "dataset": {
+                        "referenceName": "{{ maximum_datasource_name }}",
+                        "type": "DatasetReference"
+                    }
+                }
+            }
+        ],
+        "folder": {
+            "name": "{{ folder_name }}"
+        }
+    }
+}
