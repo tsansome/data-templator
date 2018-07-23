@@ -23,8 +23,7 @@
                     "source": {
                         "type": "OracleSource",
                         "oracleReaderQuery": {
-                            "value": "{{ oracle_reader_query }}",
-                            "type": "Expression"
+                            "value": "SELECT {{#source.date_columns}}to_utc_timestamp(TO_DATE(CAST(UNIX_TIMESTAMP(``, \\\{{ source.date_format }}\\\) AS TIMESTAMP)), {{ source.date_locale }}) AS `{{name}}_UTC`{{^last}},\\n {{/last}}{{/source.date_columns}}{{#source.columns}}\\tTRIM(m.`{{name}}`) as `{{name}}`{{^last}},\\n {{/last}}{{/source.columns}} From {{ source.tablename }} Where {{ source.modified_date_column }} >= TO_DATE( SubStr('@{activity('Get Maximum Date').output.firstRow.MaxDate}',1,10) ,  'YYYY-MM-DD')"
                         }
                     },
                     "sink": {
@@ -70,7 +69,7 @@
                 "typeProperties": {
                     "source": {
                         "type": "SqlDWSource",
-                        "sqlReaderQuery": "{{ export_the_new_file_source_query }}"
+                        "sqlReaderQuery": "Select * From stage_{{ target.schema }}"
                     },
                     "sink": {
                         "type": "BlobSink"
@@ -80,13 +79,13 @@
                 },
                 "inputs": [
                     {
-                        "referenceName": "{{ export_the_new_file_datasource_name }}",
+                        "referenceName": "Oracle_{{ source.database }}_{{ source.schema }}_{{ source.tablename }}",
                         "type": "DatasetReference"
                     }
                 ],
                 "outputs": [
                     {
-                        "referenceName": "{{ export_the_new_file_destination_datasource_name }}",
+                        "referenceName": "BLOB_{{ source.database }}_{{ source.schema }}_{{ source.tablename }}",
                         "type": "DatasetReference"
                     }
                 ]
@@ -103,17 +102,14 @@
                 "typeProperties": {
                     "source": {
                         "type": "SqlDWSource",
-                        "sqlReaderQuery": "{{ maximum_date_query }}"
+                        "sqlReaderQuery": "Select Cast(MAX({{ source.modified_date_column.name }}) as date) as MaxDate From [{{ target.schema }}].[{{ target.tablename }}]"
                     },
                     "dataset": {
-                        "referenceName": "{{ maximum_datasource_name }}",
+                        "referenceName": "Oracle_{{ source.database }}_{{ source.schema }}_{{ source.tablename }}",
                         "type": "DatasetReference"
                     }
                 }
             }
-        ],
-        "folder": {
-            "name": "{{ folder_name }}"
-        }
+        ]
     }
 }

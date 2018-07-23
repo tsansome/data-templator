@@ -48,6 +48,13 @@ for(var dataset_index in obj.datasets) {
             dsFinalConfig.target = Object.assign(dataset_to_generate.target, pattern_language_implementation_config.target);
             dsFinalConfig.language = pattern_language_implementation_config.language;
             dsFinalConfig.pattern = pattern_to_generate.name;
+            //now for the arrays like columns and date_columns we need to add a last boolean to help with string generation
+            if (dsFinalConfig.source.columns == null) dsFinalConfig.source.columns = [];
+            if (dsFinalConfig.source.date_columns == null) dsFinalConfig.source.date_columns = [];
+            if (dsFinalConfig.source.primary_key == null) dsFinalConfig.source.primary_key = [];
+            dsFinalConfig.source.columns[dsFinalConfig.source.columns.length - 1].last = true;
+            dsFinalConfig.source.date_columns[dsFinalConfig.source.date_columns.length - 1].last = true;
+            dsFinalConfig.source.primary_key[dsFinalConfig.source.primary_key.length - 1].last = true;
             //now let's render
             //we need to choose the right template
             //find the template folder

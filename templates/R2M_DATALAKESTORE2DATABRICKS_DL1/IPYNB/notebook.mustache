@@ -23,10 +23,10 @@
             "source": [
                 "sdf = spark.sql(\"\"\"\nSELECT \n       
                 {{#source.date_columns}}
-                    to_utc_timestamp(TO_DATE(CAST(UNIX_TIMESTAMP(``, \\\{{ source.date_format }}\\\) AS TIMESTAMP)), {{ source.date_locale }}) AS `{{.}}_UTC`,\\n
+                    to_utc_timestamp(TO_DATE(CAST(UNIX_TIMESTAMP(``, \\\{{ source.date_format }}\\\) AS TIMESTAMP)), {{ source.date_locale }}) AS `{{name}}_UTC`{{^last}},\\n {{/last}}
                 {{/source.date_columns}}
                 {{#source.columns}}
-                    \\tTRIM(m.`{{.}}`) as `{{.}}`,\\n
+                    \\tTRIM(m.`{{name}}`) as `{{name}}`{{^last}},\\n {{/last}}
                 {{/source.columns}}       
                 current_timestamp() AS run_date_utc\n   FROM myRecords AS m\n\"\"\")\nsdf.createOrReplaceTempView(\"sdf\")"
             ],
