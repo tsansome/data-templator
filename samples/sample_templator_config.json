@@ -2,7 +2,7 @@
     "config_file": "Templator",
     "datasets": [
         {
-            "name": "",
+            "name": "{{source.tablename}}",
             "source": {
                 "system_type": "Oracle Database",
                 "system_version": "0.9",

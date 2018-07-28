@@ -10,7 +10,7 @@
             "name": "Launch Program",
             "program": "${workspaceFolder}/template.js",
             "args": [
-                "-c", "../sample_config.json"
+                "-c", "./samples/sample_templator_config.json", "-g", "../generated", "-s", "../sample_files"
             ]
         }
     ]

@@ -20,6 +20,17 @@ var templatorConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 var generatedFolder = path.resolve(program.generated);
 if (!fs.existsSync(generatedFolder)) fs.mkdirSync(generatedFolder);
 
+function profile_file(filePath) {
+    var fp = path.resolve(filePath);
+    var ext = path.extname(fp);
+    assert.strictEqual(ext, ".csv", "Comma Delimeted CSV is the only format supported for samples at this time.");
+    //now profile
+    var delimeter = ",";
+    var firstLine = fs.readFileSync(fp, 'utf-8').split('\n')[0];
+    var columns = firstLine.split(delimeter).map(function(x) { return { "name": x.replace('\r','').replace('\n','') }; });
+    return columns;
+}
+
 var outputtedFilesCount = 0;
 console.log("Found " + templatorConfig.datasets.length + " datasets to generate code for.");
 //di = dataset index
@@ -31,6 +42,16 @@ for(var di in templatorConfig.datasets) {
     var new_dataset_to_generate_string = Mustache.render(template, dataset_to_generate);
     dataset_to_generate = JSON.parse(new_dataset_to_generate_string);
     //let's validate that they've defined the dataset properly
+    //firstly let's ensure that they've either or defined the columns
+    if (program.samples != undefined && dataset_to_generate.source.columns == undefined) {
+        var samplePath = path.resolve(program.samples + "/" + dataset_to_generate.name + ".csv");
+        if (dataset_to_generate.sample_filePath != undefined) samplePath = path.resolve(program.s + dataset_to_generate.sample_filePath);
+        if (fs.existsSync(samplePath)) {
+            //run the profiler
+            dataset_to_generate.source.columns = profile_file(samplePath);
+        }
+    } 
+    assert.notStrictEqual(dataset_to_generate.source.columns, undefined, "Dataset " + dataset_to_generate.name + " does not have it's columns defined either by passing a sample or defining in the config.");
     //#TODO: Validation of config
     //now let's loop through the patterns requested
     console.log(dataset_to_generate.patterns.length + " patterns requested for generation.");
