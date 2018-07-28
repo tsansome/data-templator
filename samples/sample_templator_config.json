@@ -15,7 +15,7 @@
             },
             "patterns": [
                 {
-                    "name": "R2M_DL1",
+                    "name": "R2M_DATALAKESTORE2DATABRICKS_DL1",
                     "generate": [
                         {
                             "language": "IPYNB",
@@ -23,34 +23,6 @@
                                 "database": "Finance_master",
                                 "table": "Invoice_Header",
                                 "date_format": "yyyy-MM-dd"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "S2R_FULLTABLE",
-                    "generate": [
-                        {
-                            "language": "DataFactory",
-                            "target": {
-                                "service_name": "RAW_STORAGE",
-                                "folder": "Finance/Invoice"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "S2R_DELTA",
-                    "generate": [
-                        {
-                            "language": "DataFactory",
-                            "source": {
-                                "service_name": "OracleSales_UAT",
-                                "date_latest": ["Date_Created", "Date_Modified"]
-                            },
-                            "target": {
-                                "service_name": "RAW_STORAGE",
-                                "folder": "Finance/Invoice"
                             }
                         }
                     ]
