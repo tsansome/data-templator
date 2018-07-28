@@ -83,7 +83,7 @@ for(var di in templatorConfig.datasets) {
                 var template_str = fs.readFileSync(fp, 'utf8');
                 var output = Mustache.render(template_str, dataSetFinalConfig);                        
                 //prepare the output folder if not present
-                var output_filedir = generatedFolder + dataSetFinalConfig.language; 
+                var output_filedir = generatedFolder + "/" + dataSetFinalConfig.language; 
                 if (!fs.existsSync(output_filedir)) fs.mkdirSync(output_filedir);
                 //write out the file
                 var outputFileNameWithExt = Mustache.render(scriptConf[0].output.filename, dataSetFinalConfig) + "." + scriptConf[0].output.extension;                        
