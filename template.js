@@ -20,12 +20,14 @@ var templatorConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 var generatedFolder = path.resolve(program.generated);
 if (!fs.existsSync(generatedFolder)) fs.mkdirSync(generatedFolder);
 
-function profile_file(filePath) {
-    var fp = path.resolve(filePath);
+function profile_file(sample) {
+    assert.notStrictEqual(sample.file_path, undefined, "Invalid sample, could not find a file path attribute.");
+    var fp = path.resolve(sample.file_path);
     var ext = path.extname(fp);
     assert.strictEqual(ext, ".csv", "Comma Delimeted CSV is the only format supported for samples at this time.");
     //now profile
     var delimeter = ",";
+    if (sample.delimeter != undefined) delimeter = sample.delimeter;
     var firstLine = fs.readFileSync(fp, 'utf-8').split('\n')[0];
     var columns = firstLine.split(delimeter).map(function(x) { return { "name": x.replace('\r','').replace('\n','') }; });
     return columns;
@@ -42,13 +44,19 @@ for(var di in templatorConfig.datasets) {
     var new_dataset_to_generate_string = Mustache.render(template, dataset_to_generate);
     dataset_to_generate = JSON.parse(new_dataset_to_generate_string);
     //let's validate that they've defined the dataset properly
-    //firstly let's ensure that they've either or defined the columns
+    //firstly we ensure the columns are defined either through config or a sample
     if (program.samples != undefined && dataset_to_generate.source.columns == undefined) {
-        var samplePath = path.resolve(program.samples + "/" + dataset_to_generate.name + ".csv");
-        if (dataset_to_generate.sample_filePath != undefined) samplePath = path.resolve(program.s + dataset_to_generate.sample_filePath);
-        if (fs.existsSync(samplePath)) {
+        var sample = {
+          file_path: path.resolve(program.samples + "/" + dataset_to_generate.name + ".csv")   
+        };
+        if (dataset_to_generate.sample != undefined) {
+            if (dataset_to_generate.sample.file_path != undefined) {
+                sample = dataset_to_generate.sample.file_path;
+            }
+        }
+        if (fs.existsSync(sample.file_path)) {
             //run the profiler
-            dataset_to_generate.source.columns = profile_file(samplePath);
+            dataset_to_generate.source.columns = profile_file(sample);
         }
     } 
     assert.notStrictEqual(dataset_to_generate.source.columns, undefined, "Dataset " + dataset_to_generate.name + " does not have it's columns defined either by passing a sample or defining in the config.");

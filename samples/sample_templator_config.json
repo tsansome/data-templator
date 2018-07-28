@@ -9,7 +9,7 @@
                 "database": "OracleSales",
                 "schema": "Finance",
                 "tablename": "Invoice_Header",
-                "columns": ["Invoice_ID", "Total_Amount", "Date_Created"],
+                
                 "primary_key": ["Invoice_ID"],
                 "date_columns": ["Date_Created"]
             },
