@@ -84,12 +84,15 @@ for(var di in templatorConfig.datasets) {
             dataSetFinalConfig.language = pattern_language_implementation_config.language;
             dataSetFinalConfig.pattern = pattern_to_generate.name;
             //now for the arrays like columns and date_columns we need to add a last boolean to help with string generation
-            if (dataSetFinalConfig.source.columns == null) dataSetFinalConfig.source.columns = [];
-            if (dataSetFinalConfig.source.date_columns == null) dataSetFinalConfig.source.date_columns = [];
-            if (dataSetFinalConfig.source.primary_key == null) dataSetFinalConfig.source.primary_key = [];
-            dataSetFinalConfig.source.columns[dataSetFinalConfig.source.columns.length - 1].last = true;
-            dataSetFinalConfig.source.date_columns[dataSetFinalConfig.source.date_columns.length - 1].last = true;
-            dataSetFinalConfig.source.primary_key[dataSetFinalConfig.source.primary_key.length - 1].last = true;
+            assert.notStrictEqual(dataSetFinalConfig.source.columns, null, "It seems you did not define any columns for the dataset. This is not allowed. Please provide either through samples or the config.");
+            assert.notStrictEqual(dataSetFinalConfig.source.columns.length, 0, "You cannot have 0 columns in a dataset.");
+            if (dataSetFinalConfig.source.date_columns != null && dataSetFinalConfig.source.date_columns.length > 0) {
+                dataSetFinalConfig.source.date_columns[dataSetFinalConfig.source.date_columns.length - 1].last = true;
+            }
+            if (dataSetFinalConfig.source.primary_key != null) {
+                dataSetFinalConfig.source.primary_key[dataSetFinalConfig.source.primary_key.length - 1].last = true;
+            } dataSetFinalConfig.source.primary_key = [];
+            dataSetFinalConfig.source.columns[dataSetFinalConfig.source.columns.length - 1].last = true;            
             //now let's render
             //we need to choose the right template
             //find the template folder

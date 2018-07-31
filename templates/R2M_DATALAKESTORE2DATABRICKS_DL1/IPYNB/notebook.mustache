@@ -21,14 +21,7 @@
         {
             "cell_type": "code",
             "source": [
-                "sdf = spark.sql(\"\"\"\nSELECT \n       
-                {{#source.date_columns}}
-                    to_utc_timestamp(TO_DATE(CAST(UNIX_TIMESTAMP(``, \\\{{ source.date_format }}\\\) AS TIMESTAMP)), {{ source.date_locale }}) AS `{{name}}_UTC`{{^last}},\\n {{/last}}
-                {{/source.date_columns}}
-                {{#source.columns}}
-                    \\tTRIM(m.`{{name}}`) as `{{name}}`{{^last}},\\n {{/last}}
-                {{/source.columns}}       
-                current_timestamp() AS run_date_utc\n   FROM myRecords AS m\n\"\"\")\nsdf.createOrReplaceTempView(\"sdf\")"
+                "sdf = spark.sql(\"\"\"\nSELECT \n{{#source.date_columns}}to_utc_timestamp(TO_DATE(CAST(UNIX_TIMESTAMP(`{{name}}`, \\\{{ source.date_format }}\\\) AS TIMESTAMP)), {{ source.date_locale }}) AS `{{name}}_UTC,\n{{/source.date_columns}}{{#source.columns}}\tTRIM(m.`{{name}}`) as `{{name}}`{{^last}},\n {{/last}}{{/source.columns}}\n\tcurrent_timestamp() AS run_date_utc\n   FROM myRecords AS m\n\"\"\")\nsdf.createOrReplaceTempView(\"sdf\")"
             ],
             "metadata": {},
             "outputs": [],
@@ -37,7 +30,7 @@
         {
             "cell_type": "code",
             "source": [
-                "%sql\nDROP TABLE IF EXISTS {{ target.database }}master.{{ source.tablename }}_temp;\n\nCREATE TABLE {{ target.database }}master.{{ source.tablename }}_temp\n  USING CSV\n    AS\n    SELECT *\n      FROM sdf;"
+                "%sql\nDROP TABLE IF EXISTS {{ target.database }}_master.{{ source.tablename }}_temp;\n\nCREATE TABLE {{ target.database }}master.{{ source.tablename }}_temp\n  USING CSV\n    AS\n    SELECT *\n      FROM sdf;"
             ],
             "metadata": {},
             "outputs": [],
@@ -46,7 +39,7 @@
         {
             "cell_type": "code",
             "source": [
-                "%sql\n\nDROP TABLE IF EXISTS {{ target.database }}master.{{ source.tablename }};\n\nALTER TABLE {{ target.database }}master.{{ source.tablename }}_temp RENAME TO {{ target.database }}master.{{ source.tablename }};"
+                "%sql\n\nDROP TABLE IF EXISTS {{ target.database }}_master.{{ source.tablename }};\n\nALTER TABLE {{ target.database }}master.{{ source.tablename }}_temp RENAME TO {{ target.database }}master.{{ source.tablename }};"
             ],
             "metadata": {},
             "outputs": [],
