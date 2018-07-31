@@ -91,7 +91,7 @@ for(var di in templatorConfig.datasets) {
             }
             if (dataSetFinalConfig.source.primary_key != null) {
                 dataSetFinalConfig.source.primary_key[dataSetFinalConfig.source.primary_key.length - 1].last = true;
-            } dataSetFinalConfig.source.primary_key = [];
+            }
             dataSetFinalConfig.source.columns[dataSetFinalConfig.source.columns.length - 1].last = true;            
             //now let's render
             //we need to choose the right template

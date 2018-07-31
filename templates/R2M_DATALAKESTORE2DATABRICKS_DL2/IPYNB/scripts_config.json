@@ -3,14 +3,14 @@
         "script_name": "notebook",
         "output": {
             "extension": "ipynb",
-            "filename": "R2M_DL2_{{source.datatabase}}_{{source.schema}}_{{source.tablename}}"
+            "filename": "R2M_DL2_{{source.database}}_{{source.schema}}_{{source.tablename}}"
         }
     },
     {
         "script_name": "datafactory",
         "output": {
             "extension": "json",
-            "filename": "R2M_DL2_{{source.datatabase}}_{{source.schema}}_{{source.tablename}}"
+            "filename": "R2M_DL2_{{source.database}}_{{source.schema}}_{{source.tablename}}"
         }
     }
 ]
