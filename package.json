@@ -11,6 +11,8 @@
   "dependencies": {
     "assert": "^1.4.1",
     "commander": "^2.16.0",
+    "fs-extra": "^7.0.0",
+    "mkdirp": "^0.5.1",
     "mustache": "^2.3.0",
     "path": "^0.12.7"
   }

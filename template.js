@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 const Mustache = require("mustache");
-const fs = require("fs");
+//const fs = require("fs");
+var fs = require("fs-extra");
 const path = require("path");
 const assert = require("assert");
 
@@ -121,6 +122,12 @@ function process_config(configPath) {
                     //prepare the output folder if not present
                     var output_filedir = generatedFolder + "/" + dataSetFinalConfig.language; 
                     if (!fs.existsSync(output_filedir)) fs.mkdirSync(output_filedir);
+                    if (scriptConf[0].output.sub_folder != null) {
+                        output_filedir += "/" + Mustache.render(scriptConf[0].output.sub_folder, dataSetFinalConfig);
+                        if (!fs.existsSync(output_filedir)) {
+                            fs.ensureDirSync(output_filedir);
+                        }
+                    }
                     //write out the file
                     var outputFileNameWithExt = Mustache.render(scriptConf[0].output.filename, dataSetFinalConfig) + "." + scriptConf[0].output.extension;                        
                     fs.writeFileSync(output_filedir + "/" + outputFileNameWithExt, output);
