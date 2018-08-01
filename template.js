@@ -40,6 +40,10 @@ function process_config(configPath) {
         dataset_to_generate = templatorConfig.datasets[di];
         //let's just apply mustache on the config so they can use anything in the dataset
         var template = JSON.stringify(dataset_to_generate);
+        //apply the global config if defined
+        if (templatorConfig.global != null) {
+            dataset_to_generate.global = templatorConfig.global;
+        }
         var new_dataset_to_generate_string = Mustache.render(template, dataset_to_generate);
         dataset_to_generate = JSON.parse(new_dataset_to_generate_string);
         //let's validate that they've deffined the dataset properly
@@ -74,6 +78,7 @@ function process_config(configPath) {
                 var pattern_language_implementation_config = pattern_to_generate.generate[pli];
                 //now prepare the final config for the mustache template
                 var dataSetFinalConfig = dataset_to_generate;
+                //first let's flatten the source and target defined 
                 if (dataset_to_generate.source == null) dataset_to_generate.source = {};
                 if (pattern_language_implementation_config.source == null) pattern_language_implementation_config.source = {};
                 if (dataset_to_generate.target == null) dataset_to_generate.target = {};
@@ -81,7 +86,7 @@ function process_config(configPath) {
                 dataSetFinalConfig.source = Object.assign(dataset_to_generate.source, pattern_language_implementation_config.source);
                 dataSetFinalConfig.target = Object.assign(dataset_to_generate.target, pattern_language_implementation_config.target);
                 dataSetFinalConfig.language = pattern_language_implementation_config.language;
-                dataSetFinalConfig.pattern = pattern_to_generate.name;
+                dataSetFinalConfig.pattern = pattern_to_generate.name;              
                 //now for the arrays like columns and date_columns we need to add a last boolean to help with string generation
                 assert.notStrictEqual(dataSetFinalConfig.source.columns, null, "It seems you did not define any columns for the dataset. This is not allowed. Please provide either through samples or the config.");
                 assert.notStrictEqual(dataSetFinalConfig.source.columns.length, 0, "You cannot have 0 columns in a dataset.");
