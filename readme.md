@@ -7,13 +7,13 @@ So welcome to the templator, be a consumer or even a template author. If you dev
 ## Getting Started
 ### Step 1. Define your config
 
-The templator works off a config that you define. It should be JSON format and it should define a collection of datasets that you wish to template. See the samples folder for several config examples to teach you how to define the config.
+The templator works off a config that you define. It should be JSON format and it should define a collection of datasets that you wish to invoke templates for. See the samples folder for several config examples to teach you how to define the config.
 
 ### Step 2. Make use of Mustache
 
-The templator uses [Mustache](https://www.npmjs.com/package/mustache) under the covers to use your config defined in step 1 and apply it to a script that a template author has defined. 
+The templator uses [Mustache](https://www.npmjs.com/package/mustache) under the covers to use your config defined in step 1 and apply it to a template that a template author has defined. 
 
-Let's see an example of how we could use it. Suppose the pattern your wishing to template requires that you specify the target table to insert the data into. You know that the target table is going to be named the same as the source table name. We could define this in mustache with:
+Let's see an example of how we could use it. Suppose the template your wishing to invoke requires that you specify the target table to insert the data into. You know that the target table is going to be named the same as the source table name. We could define this in mustache with:
 
 ```json
 "target": {
