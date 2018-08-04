@@ -2,7 +2,7 @@
 
 Migrating datasets or tables into some system? that's what this was originally built for. An experiment between some data engineers. A templating utility with in built templates, fed by a config and a minimal code footprint. Developer productivity here we come!
 
-So welcome to the templator, be a consumer or even a pattern author. If you develop a new pattern, submit a pull request! 
+So welcome to the templator, be a consumer or even a template author. If you develop a new pattern, submit a pull request! 
 
 ## Getting Started
 ### Step 1. Define your config
