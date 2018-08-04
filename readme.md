@@ -4,7 +4,7 @@ Migrating datasets or tables into some system? that's what this was originally b
 
 So welcome to the templator, be a consumer or even a pattern author. If you develop a new pattern, submit a pull request! 
 
-## For the consumer
+## Getting Started
 ### Step 1. Define your config
 
 The templator works off a config that you define. It should be JSON format and it should define a collection of datasets that you wish to template. See the samples folder for several config examples to teach you how to define the config.
