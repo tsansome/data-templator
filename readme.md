@@ -2,7 +2,7 @@
 
 Migrating datasets or tables into some system? that's what this was originally built for. An experiment between some data engineers. A templating utility with in built templates, fed by a config and a minimal code footprint. Developer productivity here we come!
 
-So welcome to the templator, be a consumer or even a template author. If you develop a new pattern, submit a pull request! 
+So welcome to the templator, be a consumer or even a template author. If you develop a new template, submit a pull request! 
 
 ## Getting Started
 ### Step 1. Define your config
@@ -11,7 +11,7 @@ The templator works off a config that you define. It should be JSON format and i
 
 ### Step 2. Make use of Mustache
 
-The templator uses [Mustache](https://www.npmjs.com/package/mustache) under the covers to use your config defined in step 1 and apply it to a script that a pattern author defines. 
+The templator uses [Mustache](https://www.npmjs.com/package/mustache) under the covers to use your config defined in step 1 and apply it to a script that a template author has defined. 
 
 Let's see an example of how we could use it. Suppose the pattern your wishing to template requires that you specify the target table to insert the data into. You know that the target table is going to be named the same as the source table name. We could define this in mustache with:
 
