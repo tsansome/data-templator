@@ -49,10 +49,12 @@ This can be very useful for declaring variables that you can use across all your
 ```json
 {
   "generate": [
-     "language": "IPYNB",
-     "source": {
+    {
+      "language": "IPYNB",
+      "source": {
          "default_date_format": "{{global.date_format}}"
-     }
+      }
+    }
   ]
 }
 ```
