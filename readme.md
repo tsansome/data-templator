@@ -11,7 +11,7 @@ The templator works off a config that you define. It should be JSON format and i
 
 ### Step 2. Make use of Mustache
 
-The templator uses Mustache under the covers to use your config defined in step 1 and apply it to a script that a pattern author defines. To find detailed instructions on mustache go here.
+The templator uses [Mustache](https://www.npmjs.com/package/mustache) under the covers to use your config defined in step 1 and apply it to a script that a pattern author defines. 
 
 Let's see an example of how we could use it. Suppose the pattern your wishing to template requires that you specify the target table to insert the data into. You know that the target table is going to be named the same as the source table name. We could define this in mustache with:
 
