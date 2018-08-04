@@ -31,7 +31,7 @@ as a bonus suppose we wanted to bring in the source database name as well, we co
 
 You can use mustache anywhere to call into different parts of your config. 
 
-### Step 3. Make use of globally defined values in your config
+### Step 3. Say hello to Global Variables
 
 The templator supports declaring variables globally in your config file. In this way you would have structure for your config that looks like this:
 
