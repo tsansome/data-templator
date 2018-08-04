@@ -1,6 +1,6 @@
 # The Templator 
 
-Migrating datasets or tables into some system? that's what this was originally built for. An experiment between some data engineers. A templating utility with in built templates, fed by a config and a minimal code footprint. Developer productivity ++ here we come!
+Migrating datasets or tables into some system? that's what this was originally built for. An experiment between some data engineers. A templating utility with in built templates, fed by a config and a minimal code footprint. Developer productivity here we come!
 
 So welcome to the templator, be a consumer or even a pattern author. If you develop a new pattern, submit a pull request! 
 
@@ -64,8 +64,12 @@ This can be very useful for declaring variables that you can use across all your
 With your config defined, you can run the templator. 
 
 from outside the repository run below:
+```console
 node .\data-templator\template.js -c <FILE_OR_FOLDER_PATH_TO_CONFIG> -g <FILE_OR_FOLDER_PATH_TO_OUTPUT>
+```
 
 if you want to provide CSV samples instead of defining columns in config it would look like this
+```console
 node .\data-templator\template.js -c <FILE_OR_FOLDER_PATH_TO_CONFIG> -g <FILE_OR_FOLDER_PATH_TO_OUTPUT> -s <FILE_OR_FOLDER_PATH_TO_SAMPLES>
+```
 
