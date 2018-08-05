@@ -3,6 +3,7 @@
         "script_name": "notebook",
         "output": {
             "extension": "ipynb",
+            "sub_folder": "ipynb/{{target.database}}/Master", 
             "filename": "R2M_DL3_{{source.database}}_{{source.schema}}_{{source.tablename}}"
         }
     },
