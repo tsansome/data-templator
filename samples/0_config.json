@@ -8,6 +8,9 @@
                 "schema": "SourceSchema",
                 "tablename": "SourceTableName",                
                 "primary_key": [ { "name": "PersonID" }],
+                "columns": [{ "name": "PersonID" },
+                            { "name": "FirstName" },
+                            { "name": "LastName" }],
                 "date_columns": [ {"name": "Date_Created" }]
             },
             "patterns": [
