@@ -1,0 +1,17 @@
+[
+    {
+        "script_name": "notebook",
+        "output": {
+            "extension": "ipynb",            
+            "filename": "R2M_DL1_{{source.database}}_{{source.schema}}_{{source.tablename}}"
+        }
+    },
+    {
+        "script_name": "datafactory",
+        "output": {
+            "extension": "json",
+            "sub_folder": "adf/pipelines",
+            "filename": "R2M_DL1_{{source.database}}_{{source.schema}}_{{source.tablename}}"
+        }
+    }
+]

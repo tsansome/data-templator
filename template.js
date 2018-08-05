@@ -19,7 +19,7 @@ function profile_file(sample) {
     assert.notStrictEqual(sample.file_path, undefined, "Invalid sample, could not find a file path attribute.");
     var fp = path.resolve(sample.file_path);
     var ext = path.extname(fp);
-    assert.strictEqual(ext, ".csv", "Comma Delimeted CSV is the only format supported for samples at this time.");
+    assert.strictEqual(ext, ".csv", "CSV is the only format supported for samples at this time.");
     //now profile
     var delimeter = ",";
     if (sample.delimeter != undefined) delimeter = sample.delimeter;
@@ -55,7 +55,10 @@ function process_config(configPath) {
             };
             if (dataset_to_generate.sample != undefined) {
                 if (dataset_to_generate.sample.file_path != undefined) {
-                    sample = dataset_to_generate.sample.file_path;
+                    sample.file_path = dataset_to_generate.sample.file_path;
+                }
+                if (dataset_to_generate.sample.delimeter != undefined) {
+                    sample.delimeter = dataset_to_generate.sample.delimeter;
                 }
             }
             if (fs.existsSync(sample.file_path)) {

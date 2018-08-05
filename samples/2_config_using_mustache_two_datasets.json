@@ -1,0 +1,61 @@
+{
+    "config_file": "Templator",
+    "datasets": [
+        {
+            "name": "MyTable",
+            "source": {
+                "database": "SourceDB",
+                "schema": "SourceSchema",
+                "tablename": "SourceTableName",                
+                "primary_key": [ { "name": "PersonID" }],
+                "columns": [{ "name": "PersonID" },
+                            { "name": "FirstName" },
+                            { "name": "LastName" }],
+                "date_columns": [ {"name": "Date_Created" }]
+            },
+            "patterns": [
+                {
+                    "name": "0_HELLOWORLD",
+                    "generate": [
+                        {
+                            "language": "IPYNB",
+                            "target": {
+                                "database": "TargetDB",
+                                "table": "{{source.database}}_{{ source.tablename}}",
+                                "default_date_format": "yyyy-MM-dd"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "MySecondTable",
+            "source": {
+                "database": "SourceDB",
+                "schema": "SourceSchema",
+                "tablename": "SourceSecondTableName",                
+                "primary_key": [ { "name": "OrderID" }],
+                "columns": [{ "name": "OrderID" },
+                            { "name": "ProductName" },
+                            { "name": "Quantity" }],
+                "date_columns": [ {"name": "Date_Created" }]
+            },
+            "patterns": [
+                {
+                    "name": "0_HELLOWORLD",
+                    "generate": [
+                        {
+                            "language": "IPYNB",
+                            "target": {
+                                "database": "TargetDB",
+                                "table": "{{source.database}}_{{ source.tablename}}",
+                                "default_date_format": "yyyy-MM-dd"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
