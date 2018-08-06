@@ -80,7 +80,9 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder) {
                 dataSetFinalConfig.source = Object.assign(dataset_to_generate.source, pattern_language_implementation_config.source);
                 dataSetFinalConfig.target = Object.assign(dataset_to_generate.target, pattern_language_implementation_config.target);
                 dataSetFinalConfig.language = pattern_language_implementation_config.language;
-                dataSetFinalConfig.pattern = pattern_to_generate.name;              
+                dataSetFinalConfig.pattern = pattern_to_generate.name;     
+                if (pattern_language_implementation_config.properties = null) pattern_language_implementation_config.properties = {};
+                dataSetFinalConfig.properties = pattern_language_implementation_config.properties;         
                 //now for the arrays like columns and date_columns we need to add a last boolean to help with string generation
                 assert.notStrictEqual(dataSetFinalConfig.source.columns, null, `It seems you did not define any columns for the dataset. This is not allowed. Please provide either through samples or the config.`);
                 assert.notStrictEqual(dataSetFinalConfig.source.columns.length, 0, `You cannot have 0 columns in a dataset.`);
