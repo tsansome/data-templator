@@ -4,7 +4,7 @@ var fs = require("fs-extra");
 const path = require("path");
 const assert = require("assert");
 
-const templates_path = __dirname + "/../templates/";
+const templates_path = () => __dirname + "/../templates/";
 
 function profile_file(sample) {
     assert.notStrictEqual(sample.file_path, undefined, "Invalid sample, could not find a file path attribute.");
@@ -64,7 +64,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder) {
         for(var pi in dataset_to_generate.patterns) {
             var pattern_to_generate = dataset_to_generate.patterns[pi];
             //ensure that the pattern requested is supported
-            var pattern_folder_path = path.resolve(templates_path + pattern_to_generate.name.toUpperCase() + "/");
+            var pattern_folder_path = path.resolve(templates_path() + pattern_to_generate.name.toUpperCase() + "/");
             assert.strictEqual(fs.existsSync(pattern_folder_path), true, `The pattern ${pattern_to_generate.name.toUpperCase()} is not one of the supported patterns. Please use one of the following: blah`);
             //now loop through the languages requested
             //pli = index of the language to implement for the pattern
