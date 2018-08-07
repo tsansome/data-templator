@@ -1,0 +1,36 @@
+{
+    "name": "{{source.database}}_{{source.tablename}}_R2M_DL4",
+    "properties": {
+        "activities": [
+            {
+                "name": "R2M_DL1_{{source.database}}_{{source.tablename}}",
+                "description": "description",
+                "type": "DatabricksNotebook",
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "notebookPath": "{{ properties.notebook_path }}",
+                    "baseParameters": {
+                        "filename": {
+                            "value": "@pipeline().parameters.filename",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "parameters": {
+            "filename": {
+                "type": "String"
+            }
+        }
+    }
+}
