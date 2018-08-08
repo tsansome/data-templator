@@ -15,7 +15,7 @@ This template does not require any extra target attributes to be provided.
 
 ### Properties attributes required
 
-This tempalte does not require any properties attributes to be provided.
+This template does not require any properties attributes to be provided.
 
 ### Json example
 
