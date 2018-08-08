@@ -30,7 +30,7 @@
         {
             "cell_type": "code",
             "source": [
-                "sdf = spark.sql(\"\"\"\nCREATE TABLE IF NOT EXISTS \n{{#source.date_columns}}\t`{{name}}_UTC` datetime{{^last}},\n {{/last}}{{ source.date_locale }}) AS `{{name}}_UTC,\n{{/source.date_columns}}{{#source.columns}}\t`{{name}}` string{{^last}},\n {{/last}}{{/source.columns}},\n`run_date_utc` timestamp \nUSING CSV;\n\"\"\")"
+                "sdf = spark.sql(\"\"\"\nCREATE TABLE IF NOT EXISTS \n{{#source.date_columns}}\t`{{name}}_UTC` datetime{{^last}},\n {{/last}}{{ source.date_locale }},\n{{/source.date_columns}}{{#source.columns}}\t`{{name}}` string{{^last}},\n {{/last}}{{/source.columns}},\n`run_date_utc` timestamp \nUSING CSV;\n\"\"\")"
             ],
             "metadata": {},
             "outputs": [],

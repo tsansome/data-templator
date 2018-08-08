@@ -1,7 +1,9 @@
-# Raw To Master DL1 (Drop and Recreate) - Data Lake Store to DataBricks
+# Raw To Master DL1 (Drop and Recreate) - Data Lake Store Gen 1 to DataBricks
 ## Python Notebook - ipynb
 
 ### Source atttributes required
+
+Note that this template only needs to know the columns and date columns. Does not require the primary keys of the dataset.
 
 Attribute Name | Description of Attribute
 -------------- | ------------------------
