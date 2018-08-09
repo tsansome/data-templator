@@ -39,7 +39,7 @@
         {
             "cell_type": "code",
             "source": [
-                "%sql\n-- DROP TABLE {{target.database}}_master.{{ target.table}};\nCREATE TABLE IF NOT EXISTS {{target.database}}_master.{{ target.table}}(\n  {{#source.date_columns}}\t`{{name}}_UTC` datetime{{^last}},\n {{/last}}{{ source.date_locale }}) AS `{{name}}_UTC,\n{{/source.date_columns}}{{#source.columns}}\t`{{name}}` string{{^last}},\n {{/last}}{{/source.columns}},\n  `run_date_utc` timestamp,\n  `Data` string,\n isactive string,\n  validFrom string,\n validTo string\n)\n    USING CSV\n    ;"
+                "%sql\n-- DROP TABLE {{target.database}}_master.{{ target.table}};\nCREATE TABLE IF NOT EXISTS {{target.database}}_master.{{ target.table}}(\n  {{#source.date_columns}}\t`{{name}}_UTC` datetime{{^last}},\n {{/last}}{{ source.date_locale }}) AS `{{name}}_UTC,\n{{/source.date_columns}}{{#source.columns}}\t`{{name}}` string{{^last}},\n {{/last}}{{/source.columns}},\n  `run_date_utc` timestamp,\n  `Data` string,\n isactive string,\n  validFrom string,\n validTo string\n)\n    USING CSV\n    REFRESH TABLE {{target.database}}_master.{{target.table}};"
             ],
             "metadata": {},
             "outputs": [],
