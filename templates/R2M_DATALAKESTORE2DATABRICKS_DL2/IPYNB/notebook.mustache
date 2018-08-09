@@ -3,7 +3,7 @@
         {
             "cell_type": "code",
             "source": [
-                "dbutils.widgets.text(\"filename\", \"\",\"\")\ndbutils.widgets.get(\"filename\")\nfilename = getArgument(\"filename\")\nprint (\"Param -\\'input':\")\nprint (filename)\nspark.conf.set(\"dfs.adls.oauth2.access.token.provider.type\", \"ClientCredential\")\nspark.conf.set(\"dfs.adls.oauth2.client.id\", \"{{ source.client_id }}\")\nspark.conf.set(\"dfs.adls.oauth2.credential\", \"{{ source.credential }}\")\nspark.conf.set(\"dfs.adls.oauth2.refresh.url\", \"https://login.microsoftonline.com/ae5ab930-6b7b-4b0c-9a92-dcc7e8008cb9/oauth2/token \")"
+                "dbutils.widgets.text(\"filename\", \"\",\"\")\ndbutils.widgets.get(\"filename\")\nfilename = getArgument(\"filename\")\nprint (\"Param -\\'input':\")\nprint (filename)\nspark.conf.set(\"dfs.adls.oauth2.access.token.provider.type\", \"ClientCredential\")\nspark.conf.set(\"dfs.adls.oauth2.client.id\", \"{{ source.client_id }}\")\nspark.conf.set(\"dfs.adls.oauth2.credential\", \"{{ source.client_credential }}\")\nspark.conf.set(\"dfs.adls.oauth2.refresh.url\", \"https://login.microsoftonline.com/{{source.tenantid}}/oauth2/token \")"
             ],
             "metadata": {},
             "outputs": [],
@@ -30,7 +30,7 @@
         {
             "cell_type": "code",
             "source": [
-                "sdf = spark.sql(\"\"\"\nCREATE TABLE IF NOT EXISTS \n{{#source.date_columns}}\t`{{name}}_UTC` datetime{{^last}},\n {{/last}}{{ source.date_locale }}) AS `{{name}}_UTC,\n{{/source.date_columns}}{{#source.columns}}\t`{{name}}` string{{^last}},\n {{/last}}{{/source.columns}},\n`run_date_utc` timestamp \nUSING CSV;\n\"\"\")"
+                "sdf = spark.sql(\"\"\"\nCREATE TABLE IF NOT EXISTS \n{{#source.date_columns}}\t`{{name}}_UTC` datetime{{^last}},\n {{/last}}{{ source.date_locale }},\n{{/source.date_columns}}{{#source.columns}}\t`{{name}}` string{{^last}},\n {{/last}}{{/source.columns}},\n`run_date_utc` timestamp \nUSING CSV;\n\"\"\")"
             ],
             "metadata": {},
             "outputs": [],

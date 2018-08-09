@@ -18,7 +18,7 @@
                     "name": "0_HELLOWORLD",
                     "generate": [
                         {
-                            "language": "IPYNB",
+                            "language": "REL",
                             "target": {
                                 "database": "TargetDB",
                                 "table": "TargetTable",
