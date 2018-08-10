@@ -3,7 +3,7 @@
         {
             "cell_type": "code",
             "source": [
-                "dbutils.widgets.text(\"filename\", \"\",\"\")\ndbutils.widgets.get(\"filename\")\nfilename = getArgument(\"filename\")\nprint (\"Param -\\'input':\")\nprint (filename)\nspark.conf.set(\"dfs.adls.oauth2.access.token.provider.type\", \"ClientCredential\")\nspark.conf.set(\"dfs.adls.oauth2.client.id\", \"{{ source.client_id }}\")\nspark.conf.set(\"dfs.adls.oauth2.credential\", \"{{ source.client_credential }}\")\nspark.conf.set(\"dfs.adls.oauth2.refresh.url\", \"https://login.microsoftonline.com/{{source.tenantid}}/oauth2/token \")"
+                "dbutils.widgets.text(\"filename\", \"\",\"\")\ndbutils.widgets.get(\"filename\")\nfilename = getArgument(\"filename\")\nprint (\"Param -\\'input':\")\nprint (filename)\nspark.conf.set(\"dfs.adls.oauth2.access.token.provider.type\", \"ClientCredential\")\nspark.conf.set(\"dfs.adls.oauth2.client.id\", \"{{ source.client_id }}\")\nspark.conf.set(\"dfs.adls.oauth2.credential\", \"{{ source.client_credential }}\")\nspark.conf.set(\"dfs.adls.oauth2.refresh.url\", \"https://login.microsoftonline.com/{{source.tenant_id}}/oauth2/token \")"
             ],
             "metadata": {},
             "outputs": [],
@@ -21,7 +21,7 @@
         {
             "cell_type": "code",
             "source": [
-                "sdf = spark.sql(\"\"\"\nSELECT \n{{#source.date_columns}}to_utc_timestamp(TO_DATE(CAST(UNIX_TIMESTAMP(`{{name}}`, \\\{{ source.date_format }}\\\) AS TIMESTAMP)), {{ source.date_locale }}) AS `{{name}}_UTC,\n{{/source.date_columns}}{{#source.columns}}\tTRIM(m.`{{name}}`) as `{{name}}`{{^last}},\n {{/last}}{{/source.columns}}\n\tcurrent_timestamp() AS run_date_utc\n   FROM myRecords AS m\n\"\"\")\nsdf.createOrReplaceTempView(\"sdf\")"
+                "sdf = spark.sql(\"\"\"\nSELECT \n{{#source.date_columns}}to_utc_timestamp(TO_DATE(CAST(UNIX_TIMESTAMP(`{{name}}`, \"{{ source.date_format }}\") AS TIMESTAMP)), '{{&source.date_locale}}') AS `{{name}}_UTC`,\n{{/source.date_columns}}{{#source.columns}}\tTRIM(m.`{{name}}`) as `{{name}}`{{^last}},\n {{/last}}{{/source.columns}},\n\tcurrent_timestamp() AS run_date_utc\n   FROM myRecords AS m\n\"\"\")\nsdf.createOrReplaceTempView(\"sdf\")"
             ],
             "metadata": {},
             "outputs": [],
@@ -30,7 +30,7 @@
         {
             "cell_type": "code",
             "source": [
-                "%sql\nDROP TABLE IF EXISTS {{ target.database }}_master.{{ source.tablename }}_temp;\n\nCREATE TABLE {{ target.database }}master.{{ source.tablename }}_temp\n  USING CSV\n    AS\n    SELECT *\n      FROM sdf;"
+                "%sql\nDROP TABLE IF EXISTS {{ target.database }}_master.{{ source.tablename }}_temp;\n\nCREATE TABLE {{ target.database }}_master.{{ source.tablename }}_temp\n  USING CSV\n    AS\n    SELECT *\n      FROM sdf;"
             ],
             "metadata": {},
             "outputs": [],
@@ -39,7 +39,7 @@
         {
             "cell_type": "code",
             "source": [
-                "%sql\n\nDROP TABLE IF EXISTS {{ target.database }}_master.{{ source.tablename }};\n\nALTER TABLE {{ target.database }}master.{{ source.tablename }}_temp RENAME TO {{ target.database }}master.{{ source.tablename }};"
+                "%sql\n\nDROP TABLE IF EXISTS {{ target.database }}_master.{{ source.tablename }};\n\nALTER TABLE {{ target.database }}_master.{{ source.tablename }}_temp RENAME TO {{ target.database }}_master.{{ source.tablename }};"
             ],
             "metadata": {},
             "outputs": [],
