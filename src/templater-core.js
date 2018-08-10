@@ -20,6 +20,8 @@ function profile_file(sample) {
 }
 
 exports.process_config = function(configPath, generatedFolder, samplesFolder) {
+    Mustache.escape = function(text) {return text;};
+    
     console.log(`${configPath} requested for processing. Starting now.`);
     if (!fs.existsSync(generatedFolder)) fs.mkdirSync(generatedFolder);
     var templatorConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
