@@ -61,10 +61,10 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder) {
         assert.notStrictEqual(dataset_to_generate.source.columns, undefined, `Dataset ${dataset_to_generate.name} does not have it's columns defined either by passing a sample or defining in the config.`);
         //#TODO: Validation of config
         //now let's loop through the patterns requested
-        console.log(`${dataset_to_generate.patterns.length} patterns requested for generation.`);
+        console.log(`${dataset_to_generate.templates.length} patterns requested for generation.`);
         //pi = index of the pattern
-        for(var pi in dataset_to_generate.patterns) {
-            var pattern_to_generate = dataset_to_generate.patterns[pi];
+        for(var pi in dataset_to_generate.templates) {
+            var pattern_to_generate = dataset_to_generate.templates[pi];
             //ensure that the pattern requested is supported
             var pattern_folder_path = path.resolve(templates_path() + pattern_to_generate.name.toUpperCase() + "/");
             assert.strictEqual(fs.existsSync(pattern_folder_path), true, `The pattern ${pattern_to_generate.name.toUpperCase()} is not one of the supported patterns. Please use one of the following: blah`);

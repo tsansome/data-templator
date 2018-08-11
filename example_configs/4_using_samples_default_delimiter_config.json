@@ -10,7 +10,7 @@
                 "primary_key": [ { "name": "PersonID" }],
                 "date_columns": [ {"name": "Date_Created" }]
             },
-            "patterns": [
+            "templates": [
                 {
                     "name": "0_HELLOWORLD",
                     "generate": [

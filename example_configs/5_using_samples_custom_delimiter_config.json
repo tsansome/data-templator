@@ -13,7 +13,7 @@
             "sample": {
                 "delimiter": "|"
             },
-            "patterns": [
+            "templates": [
                 {
                     "name": "0_HELLOWORLD",
                     "generate": [

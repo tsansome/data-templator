@@ -13,7 +13,7 @@
                             { "name": "LastName" }],
                 "date_columns": [ {"name": "Date_Created" }]
             },
-            "patterns": [
+            "templates": [
                 {
                     "name": "0_HELLOWORLD",
                     "generate": [
