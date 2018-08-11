@@ -16,8 +16,11 @@ var configPath = path.resolve(program.config)
 var generatedFolder = path.resolve(program.generated);
 
 if (fs.lstatSync(configPath).isDirectory()) {
-    //pointing at a folder of configs
-    var configs = fs.readdirSync(configPath);
+    //pointing at a folder of configs, configs should be in mustache format and have _config at the end of the filename
+    var configs = fs.readdirSync(configPath)
+                    .filter(function(fp) {
+                        return (path.extname(fp) == ".mustache" || path.extname(fp) == ".json") && path.basename(fp, path.extname(fp)).indexOf("_config") > -1
+                    });
     console.log("Okay pointing at a folder of configs, found " + configs.length + " to process.");
     for(var ci in configs) {
         var configForProcessing = configs[ci];
