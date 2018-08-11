@@ -1,9 +1,9 @@
 {
-    "name": "{{source.database}}_{{source.tablename}}_R2M_DL1",
+    "name": "R2M_DL1_{{source.database}}_{{source.tablename}}",
     "properties": {
         "activities": [
             {
-                "name": "R2M_DL1_{{source.database}}_{{source.tablename}}",
+                "name": "R2M_DL1_{{target.database}}_{{source.database}}_{{source.tablename}}",
                 "description": "description",
                 "type": "DatabricksNotebook",
                 "policy": {
