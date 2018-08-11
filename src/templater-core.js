@@ -12,10 +12,10 @@ function profile_file(sample) {
     var ext = path.extname(fp);
     assert.strictEqual(ext, ".csv", "CSV is the only format supported for samples at this time.");
     //now profile
-    var delimeter = ",";
-    if (sample.delimeter != undefined) delimeter = sample.delimeter;
+    var delimiter = ",";
+    if (sample.delimiter != undefined) delimiter = sample.delimiter;
     var firstLine = fs.readFileSync(fp, 'utf-8').split('\n')[0];
-    var columns = firstLine.split(delimeter).map(function(x) { return { "name": x.replace('\r','').replace('\n','') }; });
+    var columns = firstLine.split(delimiter).map(function(x) { return { "name": x.replace('\r','').replace('\n','') }; });
     return columns;
 }
 
@@ -50,7 +50,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder) {
                     sample.file_path = dataset_to_generate.sample.file_path;
                 }
                 if (dataset_to_generate.sample.delimeter != undefined) {
-                    sample.delimeter = dataset_to_generate.sample.delimeter;
+                    sample.delimiter = dataset_to_generate.sample.delimiter;
                 }
             }
             if (fs.existsSync(sample.file_path)) {

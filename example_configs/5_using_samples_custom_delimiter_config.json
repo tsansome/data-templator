@@ -11,7 +11,7 @@
                 "date_columns": [ {"name": "Date_Created" }]
             },
             "sample": {
-                "delimeter": "|"
+                "delimiter": "|"
             },
             "patterns": [
                 {
