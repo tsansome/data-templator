@@ -13,7 +13,7 @@ program
   .parse(process.argv);
 
 var configPath = path.resolve(program.config)
-var generatedFolder = path.resolve(program.generated);
+var generatedFolder = path.resolve(program.outputs);
 
 if (fs.lstatSync(configPath).isDirectory()) {
     //pointing at a folder of configs, configs should be in mustache format and have _config at the end of the filename

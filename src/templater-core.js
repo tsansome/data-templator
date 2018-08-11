@@ -110,12 +110,19 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder) {
                 //read in the scripts config file for the template files
                 var scriptsConfigPath = languageFolderPath + "/scripts_config.json"
                 assert.strictEqual(fs.existsSync(scriptsConfigPath), true, `A scripts config file is not present for the language ${pattern_language_implementation_config.language.toUpperCase()} for the pattern ${pattern_to_generate.name.toUpperCase()}`);
-                var scriptConfigs = JSON.parse(fs.readFileSync(scriptsConfigPath, 'utf8'));
+                //okay let's get the script configs, also resolve any mustaching used, then attach it as an outputs array to the dataset
+                var scriptConfigs = JSON.parse(fs.readFileSync(scriptsConfigPath, 'utf8'))
+                                        .map(function(config) {
+                                            if (config.output_file.sub_folder != undefined) config.output_file.sub_folder = Mustache.render(config.output_file.sub_folder, dataSetFinalConfig);
+                                            config.output_file.name = Mustache.render(config.output_file.name, dataSetFinalConfig);
+                                            return config;
+                                        });
+                dataSetFinalConfig.outputs = scriptConfigs;
                 //now loop and generate
                 for (var fi in templateFiles) {
                     var fp = languageFolderPath + "/" + templateFiles[fi];
                     //look for a valid config
-                    var scriptConf = scriptConfigs.filter(function(conf) { return conf.script_name + ".mustache" == templateFiles[fi] });
+                    var scriptConf = dataSetFinalConfig.outputs.filter(function(conf) { return conf.script_name + ".mustache" == templateFiles[fi] });
                     assert.strictEqual(scriptConf.length, 1, `1 config should be defined for ${templateFiles[fi]} in the folder ${languageFolderPath}`);                        
                     //so template it
                     var template_str = fs.readFileSync(fp, 'utf8');
@@ -123,14 +130,14 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder) {
                     //prepare the output folder if not present
                     var output_filedir = generatedFolder + "/" + dataSetFinalConfig.language; 
                     if (!fs.existsSync(output_filedir)) fs.mkdirSync(output_filedir);
-                    if (scriptConf[0].output.sub_folder != null) {
-                        output_filedir += "/" + Mustache.render(scriptConf[0].output.sub_folder, dataSetFinalConfig);
+                    if (scriptConf[0].output_file.sub_folder != null) {
+                        output_filedir += "/" + scriptConf[0].output_file.sub_folder;
                         if (!fs.existsSync(output_filedir)) {
                             fs.ensureDirSync(output_filedir);
                         }
                     }
                     //write out the file
-                    var outputFileNameWithExt = Mustache.render(scriptConf[0].output.filename, dataSetFinalConfig) + "." + scriptConf[0].output.extension;                        
+                    var outputFileNameWithExt = scriptConf[0].output_file.name + "." + scriptConf[0].output_file.extension;                        
                     var outputFilePath = output_filedir + "/" + outputFileNameWithExt;
                     fs.writeFileSync(outputFilePath, output);
                     outputtedFilesCount++;

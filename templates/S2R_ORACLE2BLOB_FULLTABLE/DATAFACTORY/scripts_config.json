@@ -1,23 +1,23 @@
 [
     {
         "script_name": "BlobDataSource",
-        "output": {
+        "output_file": {
             "extension": "json",
-            "filename": "ADFDataSet_{{ source.schema }}_{{ source.tablename }}_BlobSource"
+            "name": "ADFDataSet_{{ source.schema }}_{{ source.tablename }}_BlobSource"
         }
     },
     {
         "script_name": "OracleDataSource",
-        "output": {
+        "output_file": {
             "extension": "json",
-            "filename": "ADFDataSet_{{ source.schema }}_{{ source.tablename }}_OracleSource"
+            "name": "ADFDataSet_{{ source.schema }}_{{ source.tablename }}_OracleSource"
         }
     },
     {
         "script_name": "S2RFULLTABLE",
-        "output": {
+        "output_file": {
             "extension": "json",
-            "filename": "ADFPipelineS2R_FullTable_{{ source.schema }}_{{ source.tablename }}"
+            "name": "ADFPipelineS2R_FullTable_{{ source.schema }}_{{ source.tablename }}"
         }
     }
 ]

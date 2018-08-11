@@ -1,18 +1,18 @@
 [
     {
         "script_name": "notebook",
-        "output": {
+        "output_file": {
             "extension": "ipynb",
             "sub_folder": "ipynb/{{target.database}}/Master", 
-            "filename": "R2M_DL3_{{source.database}}_{{source.schema}}_{{source.tablename}}"
+            "name": "R2M_DL3_{{source.database}}_{{source.schema}}_{{source.tablename}}"
         }
     },
     {
         "script_name": "datafactory",
-        "output": {
+        "output_file": {
             "extension": "json",
             "sub_folder": "adf/pipelines",
-            "filename": "R2M_DL3_{{source.database}}_{{source.schema}}_{{source.tablename}}"
+            "name": "R2M_DL3_{{source.database}}_{{source.schema}}_{{source.tablename}}"
         }
     }
 ]
