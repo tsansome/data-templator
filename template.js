@@ -8,7 +8,7 @@ const assert = require("assert");
 program
   .version('0.1.0')
   .option('-c, --config <filepath/folderpath>', 'File / Folder Path to a single or collection of config files to use.')
-  .option('-g, --generated <folderpath>', 'Folder Path to location to put generated folders.')
+  .option('-o, --outputs <folderpath>', 'Folder Path to location to put outputted folders / files.')
   .option('-s, --samples [folderpath]', 'Folder Path to location of samples. (Optional)')
   .parse(process.argv);
 
