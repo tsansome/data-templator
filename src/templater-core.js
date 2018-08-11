@@ -4,6 +4,12 @@ var fs = require("fs-extra");
 const path = require("path");
 const assert = require("assert");
 
+const uuid = require('uuid')
+const id = uuid.v1()
+
+var log4js = require('log4js');
+var logger = log4js.getLogger();
+
 const templates_path = () => __dirname + "/../templates/";
 
 function profile_file(sample) {
@@ -22,11 +28,11 @@ function profile_file(sample) {
 exports.process_config = function(configPath, generatedFolder, samplesFolder) {
     Mustache.escape = function(text) {return text;};
     
-    console.log(`${configPath} requested for processing. Starting now.`);
+    logger.info(`${configPath} requested for processing. Starting now.`);
     if (!fs.existsSync(generatedFolder)) fs.mkdirSync(generatedFolder);
     var templatorConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     var outputtedFilesCount = 0;
-    console.log(`Found ${templatorConfig.datasets.length} datasets to generate code for.`);
+    logger.info(`Found ${templatorConfig.datasets.length} datasets to generate code for.`);
     //di = dataset index
     for(var di in templatorConfig.datasets) {
         //now that we have the dataset
@@ -61,7 +67,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder) {
         assert.notStrictEqual(dataset_to_generate.source.columns, undefined, `Dataset ${dataset_to_generate.name} does not have it's columns defined either by passing a sample or defining in the config.`);
         //#TODO: Validation of config
         //now let's loop through the patterns requested
-        console.log(`${dataset_to_generate.templates.length} patterns requested for generation.`);
+        logger.info(`${dataset_to_generate.templates.length} patterns requested for generation.`);
         //pi = index of the pattern
         for(var pi in dataset_to_generate.templates) {
             var pattern_to_generate = dataset_to_generate.templates[pi];
@@ -126,7 +132,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder) {
                     assert.strictEqual(scriptConf.length, 1, `1 config should be defined for ${templateFiles[fi]} in the folder ${languageFolderPath}`);                        
                     //so template it
                     var template_str = fs.readFileSync(fp, 'utf8');
-                    var output = Mustache.render(template_str, dataSetFinalConfig);                        
+                    var outputContent = Mustache.render(template_str, dataSetFinalConfig);                        
                     //prepare the output folder if not present
                     var output_filedir = generatedFolder + "/" + dataSetFinalConfig.language; 
                     if (!fs.existsSync(output_filedir)) fs.mkdirSync(output_filedir);
@@ -139,7 +145,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder) {
                     //write out the file
                     var outputFileNameWithExt = scriptConf[0].output_file.name + "." + scriptConf[0].output_file.extension;                        
                     var outputFilePath = output_filedir + "/" + outputFileNameWithExt;
-                    fs.writeFileSync(outputFilePath, output);
+                    fs.writeFileSync(outputFilePath, outputContent);
                     outputtedFilesCount++;
                 }
             }
