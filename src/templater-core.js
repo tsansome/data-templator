@@ -9,7 +9,6 @@ const corrid = uuid.v1()
 
 var log4js = require('log4js');
 var logger = log4js.getLogger();
-logger.level = 'debug';
 
 const templates_path = () => __dirname + "/../templates/";
 
@@ -26,10 +25,19 @@ function profile_file(sample) {
     return columns;
 }
 
-exports.process_config = function(configPath, generatedFolder, samplesFolder) {
+exports.process_config = function(configPath, generatedFolder, samplesFolder, logLevel) {
     Mustache.escape = function(text) {return text;};
-    
+
+    if (logLevel != undefined)  {
+        logger.level = logLevel;
+    } else {
+        logger.level = 'info';
+    }
+
+    logger.info("==================================================================================");
     logger.info(`${path.basename(configPath)} requested for processing. Starting now. | ${corrid}`);
+    logger.info("==================================================================================");
+
     logger.debug(`Exact path: ${path.resolve(configPath)} | ${corrid}`);
     if (!fs.existsSync(generatedFolder)) fs.mkdirSync(generatedFolder);
     var templatorConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));

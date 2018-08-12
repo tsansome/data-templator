@@ -10,6 +10,7 @@ program
   .option('-c, --config <filepath/folderpath>', 'File / Folder Path to a single or collection of config files to use.')
   .option('-o, --outputs <folderpath>', 'Folder Path to location to put outputted folders / files.')
   .option('-s, --samples [folderpath]', 'Folder Path to location of samples. (Optional)')
+  .option('-l, --log [logLevel]', 'Log level to output (INFO, WARN, DEBUG, ERROR)')
   .parse(process.argv);
 
 var configPath = path.resolve(program.config)
@@ -25,9 +26,9 @@ if (fs.lstatSync(configPath).isDirectory()) {
     for(var ci in configs) {
         var configForProcessing = configs[ci];
         var configForProcessingPath = configPath + "/" + configForProcessing;
-        templater.process_config(configForProcessingPath, generatedFolder, program.samples);
+        templater.process_config(configForProcessingPath, generatedFolder, program.samples, program.logLevel);
     }
 } else {
     //pointing at a specific config
-    templater.process_config(configPath, generatedFolder);
+    templater.process_config(configPath, generatedFolder, program.samples, program.log);
 }
