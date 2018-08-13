@@ -4,14 +4,13 @@
         {
             "name": "MyTable",
             "source": {
-                "database": "SourceDB",
+                "database": "{{ global.source_database }}",
                 "schema": "SourceSchema",
-                "tablename": "SourceTableName",    
-                "raw_folder": "test",
+                "tablename": "SourceTableName",                
                 "primary_key": [ { "name": "PersonID" }],
-                "columns": [{ "name": "PersonID" },
-                            { "name": "FirstName" },
-                            { "name": "LastName" }],
+                "columns": [{ "name": "OrderID" },
+                    { "name": "ProductName" },
+                    { "name": "Quantity" }],
                 "date_columns": [ {"name": "Date_Created" }]
             },
             "patterns": [
@@ -23,12 +22,45 @@
                             "target": {
                                 "database": "TargetDB",
                                 "table": "{{source.database}}_{{ source.tablename}}",
-                                "date_format": "yyyy-MM-dd"
+                                "default_date_format": "{{ global.date_format }}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "MySecondTable",
+            "source": {
+                "database": "{{ global.source_database }}",
+                "schema": "SourceSchema",
+                "tablename": "SourceSecondTableName",                
+                "primary_key": [ { "name": "OrderID" }],
+                "columns": [{ "name": "OrderID" },
+                            { "name": "ProductName" },
+                            { "name": "Quantity" }],
+                "date_columns": [ {"name": "Date_Created" }]
+            },
+            "patterns": [
+                {
+                    "name": "R2M_DATALAKESTORE2DATABRICKS_DL4",
+                    "generate": [
+                        {
+                            "language": "IPYNB",
+                            "target": {
+                                "database": "TargetDB",
+                                "table": "{{source.database}}_{{ source.tablename}}",
+                                "default_date_format": "{{ global.date_format }}"
                             }
                         }
                     ]
                 }
             ]
         }
-    ]
+    ],
+    "global": {
+        "restore_notebook_path": "yyyy-MM-dd",
+        "reconcilliation_notebook_path": "SourceDB",
+        "backup_notebook_path": "blah"
+    }
 }
