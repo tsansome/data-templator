@@ -1,18 +1,10 @@
 {
-<<<<<<< HEAD:templates/R2M_DATALAKESTORE2DATABRICKS_DL3/IPYNB/datafactory.mustache
-    "name": "{{target.table}}_R2M_DL3",
-    "properties": {
-        "activities": [
-            {
-                "name": "R2M_{{target.table}}",
-=======
     "name": "R2M_DL2_{{source.database}}_{{source.tablename}}",
     "properties": {
         "activities": [
             {
                 "name": "R2M_DL2_{{target.database}}_{{source.database}}_{{source.tablename}}",
                 "description": "description",
->>>>>>> f738dd05e31faf3803c787887cfe381ea0a486ae:templates/R2M_DATALAKESTOREGEN12DATABRICKS_DL2/IPYNB/datafactory.mustache
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
@@ -170,6 +162,58 @@
                 "linkedServiceName": {
                     "referenceName": "AzureDatabricks",
                     "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Alert on R2M Fail",
+                "type": "WebActivity",
+                "dependsOn": [
+                    {
+                        "activity": "R2M",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "url": "https://prod-11.australiaeast.logic.azure.com:443/workflows/81aa8883a52945abba04289b9035b92c/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ig4jJ1uCudaaltTY37EBY7tF3HTgRdqvM1Zd9V4fOdo",
+                    "method": "POST",
+                    "body": {
+                        "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\"\n}",
+                        "type": "Expression"
+                    }
+                }
+            },
+            {
+                "name": "Alert on Reconcilliation Fail",
+                "type": "WebActivity",
+                "dependsOn": [
+                    {
+                        "activity": "Reconcilliation",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "url": "https://prod-11.australiaeast.logic.azure.com:443/workflows/81aa8883a52945abba04289b9035b92c/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ig4jJ1uCudaaltTY37EBY7tF3HTgRdqvM1Zd9V4fOdo",
+                    "method": "POST",
+                    "body": {
+                        "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\"\n}",
+                        "type": "Expression"
+                    }
                 }
             }
         ],

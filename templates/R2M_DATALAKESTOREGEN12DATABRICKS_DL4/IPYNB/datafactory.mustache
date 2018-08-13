@@ -162,6 +162,58 @@
                     "referenceName": "AzureDatabricks",
                     "type": "LinkedServiceReference"
                 }
+            },
+            {
+                "name": "Alert on R2M Fail",
+                "type": "WebActivity",
+                "dependsOn": [
+                    {
+                        "activity": "R2M",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "url": "https://prod-11.australiaeast.logic.azure.com:443/workflows/81aa8883a52945abba04289b9035b92c/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ig4jJ1uCudaaltTY37EBY7tF3HTgRdqvM1Zd9V4fOdo",
+                    "method": "POST",
+                    "body": {
+                        "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\"\n}",
+                        "type": "Expression"
+                    }
+                }
+            },
+            {
+                "name": "Alert on Reconcilliation Fail",
+                "type": "WebActivity",
+                "dependsOn": [
+                    {
+                        "activity": "Reconcilliation",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "url": "https://prod-11.australiaeast.logic.azure.com:443/workflows/81aa8883a52945abba04289b9035b92c/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ig4jJ1uCudaaltTY37EBY7tF3HTgRdqvM1Zd9V4fOdo",
+                    "method": "POST",
+                    "body": {
+                        "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\"\n}",
+                        "type": "Expression"
+                    }
+                }
             }
         ],
         "parameters": {
