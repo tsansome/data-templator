@@ -4,11 +4,10 @@
         "activities": [
             {
                 "name": "R2M_DL3_{{target.database}}_{{source.database}}_{{source.tablename}}",
-                "description": "description",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "Backup_{{target.table}}",
+                        "activity": "Backup_{{target.database}}_{{source.database}}_{{source.tablename}}",
                         "dependencyConditions": [
                             "Succeeded"
                         ]
@@ -21,7 +20,7 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "notebookPath": "{{ properties.notebook_path }}",
+                    "notebookPath": "/Shared/Operational/{{target.database}}/Master/R2M_DL4_{{source.database}}_{{source.schema}}_{{source.tablename}}",
                     "baseParameters": {
                         "filename": {
                             "value": "@pipeline().parameters.filename",
@@ -35,7 +34,7 @@
                 }
             },
             {
-                "name": "Backup_{{target.table}}",
+                "name": "Backup_{{target.database}}_{{source.database}}_{{source.tablename}}",
                 "type": "DatabricksNotebook",
                 "policy": {
                     "timeout": "7.00:00:00",
@@ -44,7 +43,7 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "notebookPath": "{{ global.backup_notebook_path}}",
+                    "notebookPath": "{{ properties.backup_notebook_path}}",
                     "baseParameters": {
                         "backup_folder": {
                             "value": "@pipeline().parameters.backup_folder",
@@ -62,11 +61,11 @@
                 }
             },
             {
-                "name": "Reconcilliation_Restore_{{target.table}}",
+                "name": "Reconcilliation_Restore_{{target.database}}_{{source.database}}_{{source.tablename}}",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "Reconcilliation_{{target.table}}",
+                        "activity": "Reconcilliation_{{target.database}}_{{source.database}}_{{source.tablename}}",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -79,7 +78,7 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "notebookPath": "{{ global.restore_notebook_path }}",
+                    "notebookPath": "{{ properties.restore_notebook_path }}",
                     "baseParameters": {
                         "backup_filename": {
                             "value": "@pipeline().parameters.backup_filename",
@@ -101,11 +100,11 @@
                 }
             },
             {
-                "name": "Reconcilliation_{{target.table}}",
+                "name": "Reconcilliation_{{target.database}}_{{source.database}}_{{source.tablename}}",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "R2M_{{target.table}}",
+                        "activity": "R2M_DL3_{{target.database}}_{{source.database}}_{{source.tablename}}",
                         "dependencyConditions": [
                             "Succeeded"
                         ]
@@ -118,7 +117,7 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "notebookPath": "{{ global.reconcilliation_notebook_path}}"
+                    "notebookPath": "{{ properties.reconcilliation_notebook_path}}"
                 },
                 "linkedServiceName": {
                     "referenceName": "AzureDatabricks",
@@ -126,11 +125,11 @@
                 }
             },
             {
-                "name": "R2M_Restore_{{target.table}}",
+                "name": "R2M_Restore_{{target.database}}_{{source.database}}_{{source.tablename}}",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "R2M_{{target.table}}",
+                        "activity": "R2M_DL3_{{target.database}}_{{source.database}}_{{source.tablename}}",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -143,7 +142,7 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "notebookPath": "{{global.restore_notebook_path}}",
+                    "notebookPath": "{{properties.restore_notebook_path}}",
                     "baseParameters": {
                         "backup_filename": {
                             "value": "@pipeline().parameters.backup_filename",
@@ -169,7 +168,7 @@
                 "type": "WebActivity",
                 "dependsOn": [
                     {
-                        "activity": "R2M",
+                        "activity": "R2M_DL3_{{target.database}}_{{source.database}}_{{source.tablename}}",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -182,7 +181,7 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "url": "https://prod-11.australiaeast.logic.azure.com:443/workflows/81aa8883a52945abba04289b9035b92c/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ig4jJ1uCudaaltTY37EBY7tF3HTgRdqvM1Zd9V4fOdo",
+                    "url": "{{properties.logic_app_url}}",
                     "method": "POST",
                     "body": {
                         "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\"\n}",
@@ -195,7 +194,7 @@
                 "type": "WebActivity",
                 "dependsOn": [
                     {
-                        "activity": "Reconcilliation",
+                        "activity": "Reconcilliation_{{target.database}}_{{source.database}}_{{source.tablename}}",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -208,7 +207,7 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "url": "https://prod-11.australiaeast.logic.azure.com:443/workflows/81aa8883a52945abba04289b9035b92c/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ig4jJ1uCudaaltTY37EBY7tF3HTgRdqvM1Zd9V4fOdo",
+                    "url": "{{properties.logic_app_url}}",
                     "method": "POST",
                     "body": {
                         "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\"\n}",
@@ -224,11 +223,11 @@
             },
             "backup_folder": {
                 "type": "String",
-                "defaultValue": "{{ backup_folder }}"
+                "defaultValue": "{{ properties.backup_folder }}"
             },
             "table": {
                 "type": "String",
-                "defaultValue": "{{ target.table }}"
+                "defaultValue": "{{target.database}}_master.{{source.database}}_{{source.tablename}}"
             },
             "filename": {
                 "type": "String"

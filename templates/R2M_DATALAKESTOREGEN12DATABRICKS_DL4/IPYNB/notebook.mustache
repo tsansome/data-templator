@@ -39,7 +39,7 @@
         {
             "cell_type": "code",
             "source": [
-                "%sql\n-- DROP TABLE {{target.database}}_master.{{ target.table}};\nCREATE TABLE IF NOT EXISTS {{ target.database }}_master.{{ source.database}}_{{ source.tablename }} = Table in master to update\n-- {{target.database}}_master.{{source.database}}_{{source.tablename}}(\n  {{#source.date_columns}}\t`{{name_without_spaces}}_UTC` datetime{{^last}},\n {{/last}}{{ source.date_locale }}) AS `{{name}}_UTC,\n{{/source.date_columns}}{{#source.columns}}\t`{{name_without_spaces}}` string{{^last}},\n {{/last}}{{/source.columns}},\n  `run_date_utc` timestamp,\n  `Data` string,\n isactive string,\n  validFrom string,\n validTo string\n)\n    USING PARQUET\n    REFRESH TABLE {{ target.database }}_master.{{ source.database}}_{{ source.tablename }} = Table in master to update\n-- {{target.database}}_master.{{source.database}}_{{source.tablename}};"
+                "%sql\n-- DROP TABLE {{target.database}}_master.{{ source.database}}_{{ source.tablename }};\nCREATE TABLE IF NOT EXISTS {{ target.database }}_master.{{ source.database}}_{{ source.tablename }} = Table in master to update\n-- {{target.database}}_master.{{source.database}}_{{source.tablename}}(\n  {{#source.date_columns}}\t`{{name_without_spaces}}_UTC` datetime{{^last}},\n {{/last}}{{ source.date_locale }}) AS `{{name}}_UTC,\n{{/source.date_columns}}{{#source.columns}}\t`{{name_without_spaces}}` string{{^last}},\n {{/last}}{{/source.columns}},\n  `run_date_utc` timestamp,\n  `Data` string,\n isactive string,\n  validFrom string,\n validTo string\n)\n    USING PARQUET\n    REFRESH TABLE {{ target.database }}_master.{{ source.database}}_{{ source.tablename }} = Table in master to update\n-- {{target.database}}_master.{{source.database}}_{{source.tablename}};"
             ],
             "metadata": {},
             "outputs": [],
@@ -75,7 +75,7 @@
         {
             "cell_type": "code",
             "source": [
-                "%sql\n\n--SELECT COUNT(*) FROM {{target.database}}_master.{{ target.table}}"
+                "%sql\n\n--SELECT COUNT(*) FROM {{target.database}}_master.{{ source.database}}_{{ source.tablename }}"
             ],
             "metadata": {},
             "outputs": [],
@@ -84,7 +84,7 @@
         {
             "cell_type": "code",
             "source": [
-                "%sql\n\n--SELECT * FROM {{target.database}}_master.{{ target.table}}"
+                "%sql\n\n--SELECT * FROM {{target.database}}_master.{{ source.database}}_{{ source.tablename }}"
             ],
             "metadata": {},
             "outputs": [],

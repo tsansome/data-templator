@@ -4,7 +4,7 @@
         {
             "name": "MyTable",
             "source": {
-                "database": "{{ global.source_database }}",
+                "database": "SourceDB",
                 "schema": "SourceSchema",
                 "tablename": "SourceTableName",                
                 "primary_key": [ { "name": "PersonID" }],
@@ -23,34 +23,13 @@
                                 "database": "TargetDB",
                                 "table": "{{source.database}}_{{ source.tablename}}",
                                 "default_date_format": "{{ global.date_format }}"
-                            }
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "MySecondTable",
-            "source": {
-                "database": "{{ global.source_database }}",
-                "schema": "SourceSchema",
-                "tablename": "SourceSecondTableName",                
-                "primary_key": [ { "name": "OrderID" }],
-                "columns": [{ "name": "OrderID" },
-                            { "name": "ProductName" },
-                            { "name": "Quantity" }],
-                "date_columns": [ {"name": "Date_Created" }]
-            },
-            "patterns": [
-                {
-                    "name": "R2M_DATALAKESTORE2DATABRICKS_DL4",
-                    "generate": [
-                        {
-                            "language": "IPYNB",
-                            "target": {
-                                "database": "TargetDB",
-                                "table": "{{source.database}}_{{ source.tablename}}",
-                                "default_date_format": "{{ global.date_format }}"
+                            },
+                            "properties": {
+                                "restore_notebook_path": "",
+                                "reconcilliation_notebook_path": "SourceDB",
+                                "backup_notebook_path": "blah",
+                                "backup_folder": "s",
+                                "logic_app_url": "https://prod-11.australiaeast.logic.azure.com:443/workflows/81aa8883a52945abba04289b9035b92c/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ig4jJ1uCudaaltTY37EBY7tF3HTgRdqvM1Zd9V4fOdo"
                             }
                         }
                     ]
