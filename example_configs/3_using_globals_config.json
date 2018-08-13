@@ -1,0 +1,62 @@
+{
+    "config_file": "Templator",
+    "datasets": [
+        {
+            "name": "MyTable",
+            "source": {
+                "database": "{{ global.source_database }}",
+                "schema": "SourceSchema",
+                "tablename": "SourceTableName",                
+                "primary_key": [ { "name": "PersonID" }],
+                "date_columns": [ {"name": "Date_Created" }]
+            },
+            "templates": [
+                {
+                    "name": "0_HELLOWORLD",
+                    "generate": [
+                        {
+                            "language": "REL",
+                            "target": {
+                                "database": "TargetDB",
+                                "table": "{{source.database}}_{{ source.tablename}}",
+                                "default_date_format": "{{ global.date_format }}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "MySecondTable",
+            "source": {
+                "database": "{{ global.source_database }}",
+                "schema": "SourceSchema",
+                "tablename": "SourceSecondTableName",                
+                "primary_key": [ { "name": "OrderID" }],
+                "columns": [{ "name": "OrderID" },
+                            { "name": "ProductName" },
+                            { "name": "Quantity" }],
+                "date_columns": [ {"name": "Date_Created" }]
+            },
+            "patterns": [
+                {
+                    "name": "0_HELLOWORLD",
+                    "generate": [
+                        {
+                            "language": "IPYNB",
+                            "target": {
+                                "database": "TargetDB",
+                                "table": "{{source.database}}_{{ source.tablename}}",
+                                "default_date_format": "{{ global.date_format }}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "global": {
+        "date_format": "yyyy-MM-dd",
+        "source_database": "SourceDB"
+    }
+}

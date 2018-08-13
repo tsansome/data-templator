@@ -1,0 +1,185 @@
+{
+    "name": "R2M_DL4_{{source.database}}_{{source.tablename}}",
+    "properties": {
+        "activities": [
+            {
+                "name": "R2M_DL4_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Backup_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "notebookPath": "{{ properties.notebook_path }}",
+                    "baseParameters": {
+                        "filename": {
+                            "value": "@pipeline().parameters.filename",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Backup_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                "type": "DatabricksNotebook",
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "notebookPath": "{{ properties.backup_notebook_path}}",
+                    "baseParameters": {
+                        "backup_folder": {
+                            "value": "@pipeline().parameters.backup_folder",
+                            "type": "Expression"
+                        },
+                        "table": {
+                            "value": "@pipeline().parameters.table",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Reconcilliation_Restore_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Reconcilliation_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "notebookPath": "{{ properties.restore_notebook_path }}",
+                    "baseParameters": {
+                        "backup_filename": {
+                            "value": "@pipeline().parameters.backup_filename",
+                            "type": "Expression"
+                        },
+                        "backup_folder": {
+                            "value": "@pipeline().parameters.backup_folder",
+                            "type": "Expression"
+                        },
+                        "table": {
+                            "value": "@pipeline().parameters.table",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Reconcilliation_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "R2M_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "notebookPath": "{{ properties.reconcilliation_notebook_path}}"
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "R2M_Restore_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "R2M_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "notebookPath": "{{properties.restore_notebook_path}}",
+                    "baseParameters": {
+                        "backup_filename": {
+                            "value": "@pipeline().parameters.backup_filename",
+                            "type": "Expression"
+                        },
+                        "backup_folder": {
+                            "value": "@pipeline().parameters.backup_folder",
+                            "type": "Expression"
+                        },
+                        "table": {
+                            "value": "@pipeline().parameters.table",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "parameters": {
+            "backup_filename": {
+                "type": "String",
+                "defaultValue": "LATEST"
+            },
+            "backup_folder": {
+                "type": "String",
+                "defaultValue": "{{ properties.backup_folder }}"
+            },
+            "table": {
+                "type": "String",
+                "defaultValue": "{{target.database}}_{{source.database}}_{{source.tablename}}"
+            },
+            "filename": {
+                "type": "String"
+            }
+        }
+    }
+}

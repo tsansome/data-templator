@@ -1,0 +1,54 @@
+{
+    "cells": [
+        {
+            "cell_type": "code",
+            "source": [
+                "dbutils.widgets.text(\"filename\", \"\",\"\")\ndbutils.widgets.get(\"filename\")\nfilename = getArgument(\"filename\")\nprint (\"Param -\\'input':\")\nprint (filename)\nspark.conf.set(\"dfs.adls.oauth2.access.token.provider.type\", \"ClientCredential\")\nspark.conf.set(\"dfs.adls.oauth2.client.id\", \"{{ source.client_id }}\")\nspark.conf.set(\"dfs.adls.oauth2.credential\", \"{{ source.client_credential }}\")\nspark.conf.set(\"dfs.adls.oauth2.refresh.url\", \"https://login.microsoftonline.com/{{source.tenant_id}}/oauth2/token \")"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": null
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "raw_folder = \"{{ source.raw_folder }}\"\ninfile = \"/Raw/{{ source.raw_folder }}/\" + filename\n\nmyRecords = spark.read.option(\"delimiter\", \" {{ source.delimeter }}\").csv(\"adl://{{ source.datalakestore_accountname }}.azuredatalakestore.net/\" + infile, quote='\"', escape='\"', header=True)\nmyRecords.createOrReplaceTempView(\"myRecords\")"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": null
+        },
+       {
+            "cell_type": "code",
+            "source": [
+                "sdf = spark.sql(\"\"\"\nSELECT \n{{#source.date_columns}}to_utc_timestamp(TO_DATE(CAST(UNIX_TIMESTAMP(`{{name}}`, \"{{ source.date_format }}\") AS TIMESTAMP)), '{{source.date_locale}}') AS `{{name_without_spaces}}_UTC`,\n{{/source.date_columns}}{{#source.columns}}\tTRIM(m.`{{name}}`) as `{{name_without_spaces}}`{{^last}},\n {{/last}}{{/source.columns}}\n\tcurrent_timestamp() AS run_date_utc\n   FROM myRecords AS m\n\"\"\")\nsdf.createOrReplaceTempView(\"sdf\")"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": null
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "sdf = spark.sql(\"\"\"\nCREATE TABLE {{ target.database }}_master.{{ source.database}}_{{ source.tablename }} IF NOT EXISTS \n{{#source.date_columns}}\t`{{name_without_spaces}}_UTC` datetime{{^last}},\n {{/last}}{{ source.date_locale }},\n{{/source.date_columns}}{{#source.columns}}\t`{{name_without_spaces}}` string{{^last}},\n {{/last}}{{/source.columns}},\n`run_date_utc` timestamp \nUSING parquet;\n\"\"\")"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": null
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "%sql\nINSERT INTO TABLE {{ target.database }}_master.{{ source.database}}_{{ source.tablename }}\n    SELECT *\n      FROM sdf;"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": null
+        }
+    ],
+    "metadata": {
+        "name": "R2M_DL2_{{ source.tablename }}"
+    },
+    "nbformat": 4,
+    "nbformat_minor": 0
+}

@@ -19,9 +19,9 @@ An example config with two datasets. It also uses mustache to avoid repeating co
 With two datasets being defined they often have common code between them. This sample makes use of global variables to define two common attributes of source database and default date format.
 
 ## 4. Config using samples
-[4_config_using_samples_default_delimeter.json](4_config_using_samples_default_delimeter.json).
+[4_config_using_samples_default_delimiter.json](4_config_using_samples_default_delimiter.json).
 This example shows how a config should be declared that uses samples instead of defining the columns within the config.
 
 ## 5. Config using samples
-[5_config_using_samples_custom_delimeter.json](5_config_using_samples_custom_delimeter.json).
-With using samples sometimes there is a need to define a custom delimeter. 
+[5_config_using_samples_custom_delimiter.json](5_config_using_samples_custom_delimiter.json).
+With using samples sometimes there is a need to define a custom delimiter. 

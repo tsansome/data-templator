@@ -1,0 +1,33 @@
+{
+    "config_file": "Templator",
+    "datasets": [
+        {
+            "name": "MyTable",
+            "source": {
+                "database": "SourceDB",
+                "schema": "SourceSchema",
+                "tablename": "SourceTableName",                
+                "primary_key": [ { "name": "PersonID" }],
+                "date_columns": [ {"name": "Date_Created" }]
+            },
+            "sample": {
+                "delimiter": "|"
+            },
+            "templates": [
+                {
+                    "name": "0_HELLOWORLD",
+                    "generate": [
+                        {
+                            "language": "REL",
+                            "target": {
+                                "database": "TargetDB",
+                                "table": "{{source.database}}_{{ source.tablename}}",
+                                "date_format": "yyyy-MM-dd"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

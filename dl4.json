@@ -13,9 +13,9 @@
                     { "name": "Quantity" }],
                 "date_columns": [ {"name": "Date_Created" }]
             },
-            "patterns": [
+            "templates": [
                 {
-                    "name": "R2M_DATALAKESTORE2DATABRICKS_DL4",
+                    "name": "R2M_DATALAKESTOREGEN12DATABRICKS_DL4",
                     "generate": [
                         {
                             "language": "IPYNB",

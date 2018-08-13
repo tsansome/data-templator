@@ -4,6 +4,12 @@ var fs = require("fs-extra");
 const path = require("path");
 const assert = require("assert");
 
+const uuid = require('uuid')
+const corrid = uuid.v1()
+
+var log4js = require('log4js');
+var logger = log4js.getLogger();
+
 const templates_path = () => __dirname + "/../templates/";
 
 function profile_file(sample) {
@@ -12,27 +18,40 @@ function profile_file(sample) {
     var ext = path.extname(fp);
     assert.strictEqual(ext, ".csv", "CSV is the only format supported for samples at this time.");
     //now profile
-    var delimeter = ",";
-    if (sample.delimeter != undefined) delimeter = sample.delimeter;
+    var delimiter = ",";
+    if (sample.delimiter != undefined) delimiter = sample.delimiter;
     var firstLine = fs.readFileSync(fp, 'utf-8').split('\n')[0];
-    var columns = firstLine.split(delimeter).map(function(x) { return { "name": x.replace('\r','').replace('\n','') }; });
+    var columns = firstLine.split(delimiter).map(function(x) { return { "name": x.replace('\r','').replace('\n','') }; });
     return columns;
 }
 
-exports.process_config = function(configPath, generatedFolder, samplesFolder) {
-    console.log(`${configPath} requested for processing. Starting now.`);
+exports.process_config = function(configPath, generatedFolder, samplesFolder, logLevel) {
+    Mustache.escape = function(text) {return text;};
+
+    if (logLevel != undefined)  {
+        logger.level = logLevel;
+    } else {
+        logger.level = 'info';
+    }
+
+    logger.info("==================================================================================");
+    logger.info(`${path.basename(configPath)} requested for processing. Starting now. | ${corrid}`);
+    logger.info("==================================================================================");
+
+    logger.debug(`Exact path: ${path.resolve(configPath)} | ${corrid}`);
     if (!fs.existsSync(generatedFolder)) fs.mkdirSync(generatedFolder);
     var templatorConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    var outputtedFilesCount = 0;
-    console.log(`Found ${templatorConfig.datasets.length} datasets to generate code for.`);
+    logger.debug(`${templatorConfig.datasets.length} datasets to generate code for. | ${corrid}`);
     //di = dataset index
     for(var di in templatorConfig.datasets) {
         //now that we have the dataset
         dataset_to_generate = templatorConfig.datasets[di];
+        logger.info(`Templating ${dataset_to_generate.name} .. | ${corrid}`);
         //let's just apply mustache on the config so they can use anything in the dataset
         var template = JSON.stringify(dataset_to_generate);
         //apply the global config if defined
         if (templatorConfig.global != null) {
+            logger.debug(`Global properties are defined. | ${corrid}`);
             dataset_to_generate.global = templatorConfig.global;
         }
         var new_dataset_to_generate_string = Mustache.render(template, dataset_to_generate);
@@ -40,6 +59,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder) {
         //let's validate that they've deffined the dataset properly
         //firstly we ensure the columns are defined either through config or a sample
         if (samplesFolder != undefined && dataset_to_generate.source.columns == undefined) {
+            logger.debug(`Caller defined columns in sample mode. | ${corrid}`);
             var sample = {
                 file_path: path.resolve(`${samplesFolder}/${dataset_to_generate.name}.csv`)   
             };
@@ -48,21 +68,27 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder) {
                     sample.file_path = dataset_to_generate.sample.file_path;
                 }
                 if (dataset_to_generate.sample.delimeter != undefined) {
-                    sample.delimeter = dataset_to_generate.sample.delimeter;
+                    sample.delimiter = dataset_to_generate.sample.delimiter;
                 }
             }
             if (fs.existsSync(sample.file_path)) {
                 //run the profiler
+                logger.info(`Obtaining columns through profiling ${sample.file_path} | ${corrid}`);
                 dataset_to_generate.source.columns = profile_file(sample);
             }
         } 
+        else {
+            logger.debug(`Columns defined in config file mode. | ${corrid}`);
+        }
         assert.notStrictEqual(dataset_to_generate.source.columns, undefined, `Dataset ${dataset_to_generate.name} does not have it's columns defined either by passing a sample or defining in the config.`);
+        logger.debug(`Dataset ${dataset_to_generate.name} has ${dataset_to_generate.source.columns.length} columns | ${corrid}`);
         //#TODO: Validation of config
         //now let's loop through the patterns requested
-        console.log(`${dataset_to_generate.patterns.length} patterns requested for generation.`);
+        logger.debug(`${dataset_to_generate.templates.length} templates requested for generation. | ${corrid}`);
         //pi = index of the pattern
-        for(var pi in dataset_to_generate.patterns) {
-            var pattern_to_generate = dataset_to_generate.patterns[pi];
+        for(var pi in dataset_to_generate.templates) {
+            var pattern_to_generate = dataset_to_generate.templates[pi];
+            logger.info(`Template ${pattern_to_generate.name} selected for ${dataset_to_generate.name} | ${corrid}`);
             //ensure that the pattern requested is supported
             var pattern_folder_path = path.resolve(templates_path() + pattern_to_generate.name.toUpperCase() + "/");
             assert.strictEqual(fs.existsSync(pattern_folder_path), true, `The pattern ${pattern_to_generate.name.toUpperCase()} is not one of the supported patterns. Please use one of the following: blah`);
@@ -70,6 +96,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder) {
             //pli = index of the language to implement for the pattern
             for (var pli in pattern_to_generate.generate) {
                 var pattern_language_implementation_config = pattern_to_generate.generate[pli];
+                logger.info(`Templating ${pattern_language_implementation_config.language} implementation. | ${corrid}`);
                 //now prepare the final config for the mustache template
                 var dataSetFinalConfig = dataset_to_generate;
                 //first let's flatten the source and target defined 
@@ -88,14 +115,14 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder) {
                 assert.notStrictEqual(dataSetFinalConfig.source.columns.length, 0, `You cannot have 0 columns in a dataset.`);
                 if (dataSetFinalConfig.source.date_columns != null && dataSetFinalConfig.source.date_columns.length > 0) {
                     dataSetFinalConfig.source.date_columns[dataSetFinalConfig.source.date_columns.length - 1].last = true;
-                    dataSetFinalConfig.source.date_columns = dataSetFinalConfig.source.date_columns.map(function(v) { v.name = v.name.replace(" ","_"); return v; });
+                    dataSetFinalConfig.source.date_columns = dataSetFinalConfig.source.date_columns.map(function(v) { v.name_without_spaces = v.name.replace(" ","_"); return v; });
                 }
                 if (dataSetFinalConfig.source.primary_key != null) {
                     dataSetFinalConfig.source.primary_key[dataSetFinalConfig.source.primary_key.length - 1].last = true;
-                    dataSetFinalConfig.source.primary_key = dataSetFinalConfig.source.primary_key.map(function(v) { v.name = v.name.replace(" ","_"); return v; });
+                    dataSetFinalConfig.source.primary_key = dataSetFinalConfig.source.primary_key.map(function(v) { v.name_without_spaces = v.name.replace(" ","_"); return v; });
                 }
                 dataSetFinalConfig.source.columns[dataSetFinalConfig.source.columns.length - 1].last = true;     
-                dataSetFinalConfig.source.columns = dataSetFinalConfig.source.columns.map(function(v) { v.name = v.name.replace(" ","_"); return v; });   
+                dataSetFinalConfig.source.columns = dataSetFinalConfig.source.columns.map(function(v) { v.name_without_spaces = v.name.replace(" ","_"); return v; });   
                 //remove the spaces in column names
                 //now let's render
                 //we need to choose the right template
@@ -108,34 +135,43 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder) {
                 //read in the scripts config file for the template files
                 var scriptsConfigPath = languageFolderPath + "/scripts_config.json"
                 assert.strictEqual(fs.existsSync(scriptsConfigPath), true, `A scripts config file is not present for the language ${pattern_language_implementation_config.language.toUpperCase()} for the pattern ${pattern_to_generate.name.toUpperCase()}`);
-                var scriptConfigs = JSON.parse(fs.readFileSync(scriptsConfigPath, 'utf8'));
+                //okay let's get the script configs, also resolve any mustaching used, then attach it as an outputs array to the dataset
+                var scriptConfigs = JSON.parse(fs.readFileSync(scriptsConfigPath, 'utf8'))
+                                        .map(function(config) {
+                                            if (config.output_file.sub_folder != undefined) config.output_file.sub_folder = Mustache.render(config.output_file.sub_folder, dataSetFinalConfig);
+                                            config.output_file.name = Mustache.render(config.output_file.name, dataSetFinalConfig);
+                                            return config;
+                                        });
+                dataSetFinalConfig.outputs = scriptConfigs;
                 //now loop and generate
                 for (var fi in templateFiles) {
                     var fp = languageFolderPath + "/" + templateFiles[fi];
                     //look for a valid config
-                    var scriptConf = scriptConfigs.filter(function(conf) { return conf.script_name + ".mustache" == templateFiles[fi] });
+                    var scriptConf = dataSetFinalConfig.outputs.filter(function(conf) { return conf.script_name + ".mustache" == templateFiles[fi] });
                     assert.strictEqual(scriptConf.length, 1, `1 config should be defined for ${templateFiles[fi]} in the folder ${languageFolderPath}`);                        
                     //so template it
                     var template_str = fs.readFileSync(fp, 'utf8');
-                    var output = Mustache.render(template_str, dataSetFinalConfig);                        
+                    var outputContent = Mustache.render(template_str, dataSetFinalConfig);                        
                     //prepare the output folder if not present
                     var output_filedir = generatedFolder + "/" + dataSetFinalConfig.language; 
                     if (!fs.existsSync(output_filedir)) fs.mkdirSync(output_filedir);
-                    if (scriptConf[0].output.sub_folder != null) {
-                        output_filedir += "/" + Mustache.render(scriptConf[0].output.sub_folder, dataSetFinalConfig);
+                    if (scriptConf[0].output_file.sub_folder != null) {
+                        output_filedir += "/" + scriptConf[0].output_file.sub_folder;
                         if (!fs.existsSync(output_filedir)) {
                             fs.ensureDirSync(output_filedir);
                         }
                     }
                     //write out the file
-                    var outputFileNameWithExt = Mustache.render(scriptConf[0].output.filename, dataSetFinalConfig) + "." + scriptConf[0].output.extension;                        
+                    var outputFileNameWithExt = scriptConf[0].output_file.name + "." + scriptConf[0].output_file.extension;                        
                     var outputFilePath = output_filedir + "/" + outputFileNameWithExt;
-                    fs.writeFileSync(outputFilePath, output);
-                    outputtedFilesCount++;
-                }
+                    fs.writeFileSync(outputFilePath, outputContent);
+                    logger.info(`Outputted ${scriptConf[0].script_name} code to file ${outputFileNameWithExt} for implmentation. | ${corrid}`);
+                    logger.debug(`Exact path: ${path.resolve(outputFilePath)}. | ${corrid}`)
+                   }
             }
 
         }
+        logger.info(`Templating finished for ${dataset_to_generate.name} | ${corrid}`);
     }
-    console.log(`Successfully generated ${outputtedFilesCount} files for deployment.`);
+    logger.info(`All finished up, thanks for using the templator :). | ${corrid}`);
 }

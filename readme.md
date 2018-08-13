@@ -65,11 +65,11 @@ With your config defined, you can run the templator.
 
 from outside the repository run below:
 ```console
-node .\data-templator\template.js -c [path_to_config_file_or_folder] -g [path_to_output_directory]
+node .\data-templator\template.js -c [path_to_config_file_or_folder] -o [path_to_output_directory]
 ```
 
 if you want to provide CSV samples instead of defining columns in config it would look like this
 ```console
-node .\data-templator\template.js -c [path_to_config_file_or_folder] -g [path_to_output_directory] -s [path_to_sample_folder]
+node .\data-templator\template.js -c [path_to_config_file_or_folder] -o [path_to_output_directory] -s [path_to_sample_folder]
 ```
 

@@ -7,10 +7,10 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "No Samples",
             "program": "${workspaceFolder}/template.js",
             "args": [
-                "-c", "./samples/sample_templator_config.json", "-g", "../generated", "-s", "../sample_files"
+                "-c", "./example_configs/0_config.json", "-o", "../tmp"
             ]
         }
     ]

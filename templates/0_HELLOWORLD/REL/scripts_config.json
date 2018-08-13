@@ -1,17 +1,17 @@
 [
     {
         "script_name": "notebook",
-        "output": {
+        "output_file": {
             "extension": "ipynb",            
-            "filename": "R2M_DL1_{{source.database}}_{{source.schema}}_{{source.tablename}}"
+            "name": "R2M_DL1_{{source.database}}_{{source.schema}}_{{source.tablename}}"
         }
     },
     {
         "script_name": "factory",
-        "output": {
+        "output_file": {
             "extension": "json",
             "sub_folder": "adf/pipelines",
-            "filename": "R2M_DL1_{{source.database}}_{{source.schema}}_{{source.tablename}}"
+            "name": "R2M_DL1_{{source.database}}_{{source.schema}}_{{source.tablename}}"
         }
     }
 ]
