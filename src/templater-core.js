@@ -26,6 +26,7 @@ function profile_file(sample) {
 }
 
 exports.process_config = function(configPath, generatedFolder, samplesFolder, logLevel) {
+    // TODO: remove this and find a way to escape '/' only
     Mustache.escape = function(text) {return text;};
 
     if (logLevel != undefined)  {
@@ -111,7 +112,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 if (pattern_language_implementation_config.properties == null) pattern_language_implementation_config.properties = {};
                 dataSetFinalConfig.properties = pattern_language_implementation_config.properties;         
                 //now for the arrays like columns and date_columns we need to add a last boolean to help with string generation
-                assert.notStrictEqual(dataSetFinalConfig.source.columns, null, `It seems you did not define any columns for the dataset. This is not allowed. Please provide either through samples or the config.`);
+                assert.notStrictEqual(dataSetFinalConfig.source.columns, null, `It seems like you did not define any columns for the dataset. This is not allowed. Please provide either through samples or the config.`);
                 assert.notStrictEqual(dataSetFinalConfig.source.columns.length, 0, `You cannot have 0 columns in a dataset.`);
                 if (dataSetFinalConfig.source.date_columns != null && dataSetFinalConfig.source.date_columns.length > 0) {
                     dataSetFinalConfig.source.date_columns[dataSetFinalConfig.source.date_columns.length - 1].last = true;
