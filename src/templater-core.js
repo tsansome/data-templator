@@ -144,34 +144,49 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                                         });
                 dataSetFinalConfig.outputs = scriptConfigs;
                 //now loop and generate
-                for (var fi in templateFiles) {
-                    var fp = languageFolderPath + "/" + templateFiles[fi];
-                    //look for a valid config
-                    var scriptConf = dataSetFinalConfig.outputs.filter(function(conf) { return conf.script_name + ".mustache" == templateFiles[fi] });
-                    assert.strictEqual(scriptConf.length, 1, `1 config should be defined for ${templateFiles[fi]} in the folder ${languageFolderPath}`);                        
-                    //so template it
-                    var template_str = fs.readFileSync(fp, 'utf8');
-                    var outputContent = Mustache.render(template_str, dataSetFinalConfig);                        
-                    //prepare the output folder if not present
-                    var output_filedir = generatedFolder + "/" + dataSetFinalConfig.language; 
-                    if (!fs.existsSync(output_filedir)) fs.mkdirSync(output_filedir);
-                    if (scriptConf[0].output_file.sub_folder != null) {
-                        output_filedir += "/" + scriptConf[0].output_file.sub_folder;
-                        if (!fs.existsSync(output_filedir)) {
-                            fs.ensureDirSync(output_filedir);
-                        }
-                    }
-                    //write out the file
-                    var outputFileNameWithExt = scriptConf[0].output_file.name + "." + scriptConf[0].output_file.extension;                        
-                    var outputFilePath = output_filedir + "/" + outputFileNameWithExt;
-                    fs.writeFileSync(outputFilePath, outputContent);
-                    logger.info(`Outputted ${scriptConf[0].script_name} code to file ${outputFileNameWithExt} for implmentation. | ${corrid}`);
-                    logger.debug(`Exact path: ${path.resolve(outputFilePath)}. | ${corrid}`)
-                   }
+                generate_files(templateFiles, dataSetFinalConfig, languageFolderPath, generatedFolder)
             }
 
         }
         logger.info(`Templating finished for ${dataset_to_generate.name} | ${corrid}`);
     }
     logger.info(`All finished up, thanks for using the templator :). | ${corrid}`);
+}
+
+/**
+ * Renders the files specified in the config to the file path specified in scripts_config.json
+ * 
+ * @param {string[]} templateFiles List of templates to generate for the type of file to load and the language chosen in the config. 
+ * @param {Object} finalConfig Flattened config generated from the original config specified by the user.
+ * @param {string} languageFolderPath Path to the templates to generate
+ * @param {string} generatedFolder ???
+ */
+function generate_files(templateFiles, finalConfig, languageFolderPath, generatedFolder){
+    for (var template in templateFiles) {
+        var templatePath = languageFolderPath + "/" + templateFiles[template];
+        //look for a valid config
+        var scriptConf = finalConfig.outputs.filter(function(conf) { return conf.script_name + ".mustache" == templateFiles[template] });
+        assert.strictEqual(scriptConf.length, 1, `1 config should be defined for ${templateFiles[template]} in the folder ${languageFolderPath}`);
+
+        //so template it
+        var template_str = fs.readFileSync(templatePath, 'utf8');
+        var outputContent = Mustache.render(template_str, finalConfig);  
+
+        //prepare the output folder if not present
+        var outputFileDir = generatedFolder + "/" + finalConfig.language; 
+        if (!fs.existsSync(outputFileDir)) fs.mkdirSync(outputFileDir);
+
+        if (scriptConf[0].output_file.sub_folder != null) {
+            outputFileDir += "/" + scriptConf[0].output_file.sub_folder;
+            if (!fs.existsSync(outputFileDir)) {
+                fs.ensureDirSync(outputFileDir);
+            }
+        }
+        //write out the file
+        var outputFileNameWithExt = scriptConf[0].output_file.name + "." + scriptConf[0].output_file.extension;                        
+        var outputFilePath = outputFileDir + "/" + outputFileNameWithExt;
+        fs.writeFileSync(outputFilePath, outputContent);
+        logger.info(`Outputted ${scriptConf[0].script_name} code to file ${outputFileNameWithExt} for implmentation. | ${corrid}`);
+        logger.debug(`Exact path: ${path.resolve(outputFilePath)}. | ${corrid}`)
+    }
 }
