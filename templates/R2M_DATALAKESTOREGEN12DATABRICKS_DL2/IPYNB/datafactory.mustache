@@ -3,11 +3,11 @@
     "properties": {
         "activities": [
             {
-                "name": "R2M_DL2_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                "name": "R2M_DL2_{{source.tablename}}",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "Backup_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                        "activity": "Backup_{{source.tablename}}",
                         "dependencyConditions": [
                             "Succeeded"
                         ]
@@ -20,7 +20,7 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "notebookPath": "/Shared/Operational/{{target.database}}/Master/R2M_DL4_{{source.database}}_{{source.schema}}_{{source.tablename}}",
+                    "notebookPath": "/Shared/Operational/{{target.database}}/Master/R2M_DL2_{{source.database}}_{{source.schema}}_{{source.tablename}}",
                     "baseParameters": {
                         "filename": {
                             "value": "@pipeline().parameters.filename",
@@ -34,7 +34,7 @@
                 }
             },
             {
-                "name": "Backup_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                "name": "Backup_{{source.tablename}}",
                 "type": "DatabricksNotebook",
                 "policy": {
                     "timeout": "7.00:00:00",
@@ -61,11 +61,11 @@
                 }
             },
             {
-                "name": "Reconcilliation_Restore_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                "name": "Reconcilliation_Restore_{{source.tablename}}",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "Reconcilliation_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                        "activity": "Reconcilliation_{{source.tablename}}",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -100,11 +100,11 @@
                 }
             },
             {
-                "name": "Reconcilliation_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                "name": "Reconcilliation_{{source.tablename}}",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL2_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                        "activity": "R2M_DL2_{{source.tablename}}",
                         "dependencyConditions": [
                             "Succeeded"
                         ]
@@ -125,11 +125,11 @@
                 }
             },
             {
-                "name": "R2M_Restore_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                "name": "R2M_Restore_{{source.tablename}}",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL2_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                        "activity": "R2M_DL2_{{source.tablename}}",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -168,7 +168,7 @@
                 "type": "WebActivity",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL2_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                        "activity": "R2M_DL2_{{source.tablename}}",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -194,7 +194,7 @@
                 "type": "WebActivity",
                 "dependsOn": [
                     {
-                        "activity": "Reconcilliation_{{target.database}}_{{source.database}}_{{source.tablename}}",
+                        "activity": "Reconcilliation_{{source.tablename}}",
                         "dependencyConditions": [
                             "Failed"
                         ]
