@@ -3,11 +3,11 @@
     "properties": {
         "activities": [
             {
-                "name": "R2M_DL1_{{source.tablename}}",
+                "name": "R2M_DL1",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "Backup_{{source.tablename}}",
+                        "activity": "Backup",
                         "dependencyConditions": [
                             "Succeeded"
                         ]
@@ -34,7 +34,7 @@
                 }
             },
             {
-                "name": "Backup_{{source.tablename}}",
+                "name": "Backup",
                 "type": "DatabricksNotebook",
                 "policy": {
                     "timeout": "7.00:00:00",
@@ -61,11 +61,11 @@
                 }
             },
             {
-                "name": "Reconcilliation_Restore_{{source.tablename}}",
+                "name": "Reconcilliation_Restore",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "Reconcilliation_{{source.tablename}}",
+                        "activity": "Reconcilliation_and_Capture_Run_Data",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -100,11 +100,11 @@
                 }
             },
             {
-                "name": "Reconcilliation_{{source.tablename}}",
+                "name": "Reconcilliation_and_Capture_Run_Data",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL1_{{source.tablename}}",
+                        "activity": "R2M_DL1",
                         "dependencyConditions": [
                             "Succeeded"
                         ]
@@ -117,7 +117,33 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "notebookPath": "{{ properties.reconcilliation_notebook_path}}"
+                    "notebookPath": "{{ properties.reconcilliation_notebook_path}}",
+                    "baseParameters": {
+                        "business_function_group": {
+                            "value": "@pipeline().parameters.business_function_group",
+                            "type": "Expression"
+                        },
+                        "filename": {
+                            "value": "@pipeline().parameters.filename",
+                            "type": "Expression"
+                        },
+                        "full_table_name": {
+                            "value": "@pipeline().parameters.table",
+                            "type": "Expression"
+                        },
+                        "load_pattern": {
+                            "value": "@pipeline().parameters.load_pattern",
+                            "type": "Expression"
+                        },
+                        "raw_folder": {
+                            "value": "@pipeline().parameters.raw_folder",
+                            "type": "Expression"
+                        },
+                        "source_database": {
+                            "value": "@pipeline().parameters.source_database",
+                            "type": "Expression"
+                        }
+                    }
                 },
                 "linkedServiceName": {
                     "referenceName": "AzureDatabricks",
@@ -125,11 +151,11 @@
                 }
             },
             {
-                "name": "R2M_Restore_{{source.tablename}}",
+                "name": "R2M_Restore",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL1_{{source.tablename}}",
+                        "activity": "R2M_DL1",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -168,7 +194,7 @@
                 "type": "WebActivity",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL1_{{source.tablename}}",
+                        "activity": "R2M_DL1",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -194,7 +220,7 @@
                 "type": "WebActivity",
                 "dependsOn": [
                     {
-                        "activity": "Reconcilliation_{{source.tablename}}",
+                        "activity": "Reconcilliation_and_Capture_Run_Data",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -227,7 +253,7 @@
             },
             "table": {
                 "type": "String",
-                "defaultValue": "{{target.database}}_master.{{source.database}}_{{source.tablename}}"
+                "defaultValue": "{{target.database}}_master.{{source.database}}"
             },
             "filename": {
                 "type": "String"
