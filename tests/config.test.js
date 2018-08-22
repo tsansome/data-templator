@@ -32,6 +32,10 @@ test('Able to refer to dictionary defined in global', () => {
     expect(1+2).toBe(3);
 });
 
+test('Able to override date formats', () => {
+    expect(1+2).toBe(3);
+});
+
 //Output script testing
 
 test('Able to override output script names and paths', () => {
