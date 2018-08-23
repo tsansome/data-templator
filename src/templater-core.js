@@ -42,16 +42,9 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
     for(var di in templatorConfig.datasets) {
         //now that we have the dataset
         dataset_to_generate = templatorConfig.datasets[di];
-        logger.info(`Templating ${dataset_to_generate.name} .. | ${corrid}`);
-        //let's just apply mustache on the config so they can use anything in the dataset
-        var template = JSON.stringify(dataset_to_generate);
+        logger.info(`Templating ${dataset_to_generate.name} .. | ${corrid}`);        
         //apply the global config if defined
-        if (templatorConfig.global != null) {
-            logger.debug(`Global properties are defined. | ${corrid}`);
-            dataset_to_generate.global = templatorConfig.global;
-        }
-        var new_dataset_to_generate_string = Mustache.render(template, dataset_to_generate);
-        dataset_to_generate = JSON.parse(new_dataset_to_generate_string);
+        dataset_to_generate = exports.resolve_global(templatorConfig.global, dataset_to_generate);
         //let's validate that they've deffined the dataset properly
         //firstly we ensure the columns are defined either through config or a sample
         if (samplesFolder != undefined && dataset_to_generate.source.columns == undefined) {
@@ -132,6 +125,17 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         logger.info(`Templating finished for ${dataset_to_generate.name} | ${corrid}`);
     }
     logger.info(`All finished up, thanks for using the templator :). | ${corrid}`);
+}
+
+exports.resolve_global = function(global, dataset_to_generate) {
+    //let's just apply mustache on the config so they can use anything in the dataset
+    var template = JSON.stringify(dataset_to_generate);
+    if (global != null) {
+        logger.debug(`Global properties are defined. | ${corrid}`);
+        dataset_to_generate.global = global;
+    }
+    var new_dataset_to_generate_string = Mustache.render(template, dataset_to_generate);
+    return JSON.parse(new_dataset_to_generate_string);
 }
 
 /**
