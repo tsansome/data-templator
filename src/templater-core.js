@@ -204,6 +204,12 @@ exports.generate_file_content_from_template = function(template_definition, conf
     return Mustache.render(template_definition, config_definition);     
 }
 
+/**
+ * Output the content out to a script file
+ * 
+ * @param {*} output_content 
+ * @param {*} script_conf 
+ */
 exports.write_output = function(output_content, script_conf) {
      //prepare the output folder if not present
      var outputFileDir = output_folder + "/" + config_definition.language; 
@@ -218,7 +224,7 @@ exports.write_output = function(output_content, script_conf) {
      //write out the file
      var outputFileNameWithExt = script_conf.output_file.name + "." + scriptConf.output_file.extension;                        
      var outputFilePath = outputFileDir + "/" + outputFileNameWithExt;
-     fs.writeFileSync(outputFilePath, outputContent);
+     fs.writeFileSync(outputFilePath, output_content);
      logger.info(`Outputted ${script_conf.script_name} code to file ${outputFileNameWithExt} for implmentation. | ${corrid}`);
      logger.debug(`Exact path: ${path.resolve(outputFilePath)}. | ${corrid}`)
 }
