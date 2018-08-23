@@ -118,7 +118,8 @@
                 },
                 "typeProperties": {
                     "notebookPath": "{{ properties.reconcilliation_notebook_path}}",
-                    "business_function_group": {
+                    "baseParameters": {
+                        "business_function_group": {
                             "value": "@pipeline().parameters.business_function_group",
                             "type": "Expression"
                         },
