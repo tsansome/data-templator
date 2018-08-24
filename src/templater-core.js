@@ -110,6 +110,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 dataSetFinalConfig.outputs = scriptConfigs;
                 //now loop and generate                
                 for (var template in templateFiles) {
+                    var templateFile = templateFiles[template];
                     //look for a valid config
                     var scriptConf = dataSetFinalConfig.outputs.filter(function(conf) { return conf.script_name + ".mustache" == templateFiles[template] });
                     assert.strictEqual(scriptConf.length, 1, `1 config should be defined for ${templateFiles[template]} in the folder ${languageFolderPath}`);
