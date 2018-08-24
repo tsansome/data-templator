@@ -117,8 +117,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                     //now let's generate it
                     var templatePath = languageFolderPath + "/" + templateFile;
                     var template_str = fs.readFileSync(templatePath, 'utf8');
-                    var fc = generate_file_content_from_template(template_str, dataSetFinalConfig, generatedFolder)
-                    write_output(fc, scriptConfigs[0]);
+                    var fc = exports.generate_file_content_from_template(template_str, dataSetFinalConfig, generatedFolder)
+                    exports.write_output(fc, scriptConfigs[0]);
                 }
             }
 
