@@ -118,7 +118,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                     var templatePath = languageFolderPath + "/" + templateFile;
                     var template_str = fs.readFileSync(templatePath, 'utf8');
                     var fc = exports.generate_file_content_from_template(template_str, dataSetFinalConfig, generatedFolder)
-                    exports.write_output(fc, scriptConfigs[0]);
+                    exports.write_output(generatedFolder, fc, scriptConfigs[0]);
                 }
             }
 
@@ -215,7 +215,7 @@ exports.generate_file_content_from_template = function(template_definition, conf
  * @param {*} output_content 
  * @param {*} script_conf 
  */
-exports.write_output = function(output_content, script_conf) {
+exports.write_output = function(output_folder, output_content, script_conf) {
      //prepare the output folder if not present
      var outputFileDir = output_folder + "/" + config_definition.language; 
      if (!fs.existsSync(outputFileDir)) fs.mkdirSync(outputFileDir);
