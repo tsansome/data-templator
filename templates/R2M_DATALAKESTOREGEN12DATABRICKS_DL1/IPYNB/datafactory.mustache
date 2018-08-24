@@ -253,22 +253,26 @@
             },
             "table": {
                 "type": "String",
-                "defaultValue": "{{target.database}}_master.{{source.database}}"
+                "defaultValue": "{{target.database}}_master.{{ source.database}}_{{ source.tablename }}"
             },
             "filename": {
                 "type": "String"
             },
             "business_function_group": {
-                "type": "{{ properties.business_function_group}}"
+                "type": "String",
+                "defaultValue": "{{ target.database }}"
             },
             "load_pattern": {
-                "type": "{{ properties.load_pattern }}"
+                "type": "String",
+                "defaultValue": "DL1"
             },
             "raw_folder": {
-                "type": "{{ properties.raw_folder }}"
+                "type": "String",
+                "defaultValue": "{{ source.raw_folder }}"
             },
             "source_database": {
-                "type": "{{ properties.source_database }}"
+                "type": "String",
+                "defaultValue": "{{ source.database }}"
             }
         }
     }
