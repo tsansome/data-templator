@@ -229,7 +229,7 @@ exports.write_output = function(output_folder, output_content, script_conf) {
          }
      }
      //write out the file
-     var outputFileNameWithExt = script_conf.output_file.name + "." + scriptConf.output_file.extension;                        
+     var outputFileNameWithExt = script_conf.output_file.name + "." + script_conf.output_file.extension;                        
      var outputFilePath = output_folder + "/" + outputFileNameWithExt;
      fs.writeFileSync(outputFilePath, output_content);
      logger.info(`Outputted ${script_conf.script_name} code to file ${outputFileNameWithExt} for implmentation. | ${corrid}`);
