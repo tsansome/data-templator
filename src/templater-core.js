@@ -87,7 +87,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 var pattern_language_implementation_config = pattern_to_generate.generate[pli];
                 logger.info(`Templating ${pattern_language_implementation_config.language} implementation. | ${corrid}`);
                 //finalise the config
-                var dataSetFinalConfig = prepare_final_config(dataset_to_generate, pattern_language_implementation_config, pattern_to_generate);
+                var dataSetFinalConfig = exports.prepare_final_config(dataset_to_generate, pattern_language_implementation_config, pattern_to_generate);
                 //remove the spaces in column names
                 //now let's render
                 //we need to choose the right template
@@ -188,7 +188,7 @@ exports.prepare_final_config = function(dataset_to_generate, pattern_language_im
         dataSetFinalConfig.source.date_columns[dataSetFinalConfig.source.date_columns.length - 1].last = true;
         dataSetFinalConfig.source.date_columns = dataSetFinalConfig.source.date_columns.map(function(v) { v.name_without_spaces = v.name.replace(" ","_"); return v; });
     }
-    if (dataSetFinalConfig.source.primary_key != null) {
+    if (dataSetFinalConfig.source.primary_key != null && dataSetFinalConfig.source.primary_key.length > 0) {
         dataSetFinalConfig.source.primary_key[dataSetFinalConfig.source.primary_key.length - 1].last = true;
         dataSetFinalConfig.source.primary_key = dataSetFinalConfig.source.primary_key.map(function(v) { v.name_without_spaces = v.name.replace(" ","_"); return v; });
     }
