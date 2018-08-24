@@ -12,19 +12,14 @@ var logger = log4js.getLogger();
 
 const templates_path = () => __dirname + "/../templates/";
 
-function profile_file(sample) {
-    assert.notStrictEqual(sample.file_path, undefined, "Invalid sample, could not find a file path attribute.");
-    var fp = path.resolve(sample.file_path);
-    var ext = path.extname(fp);
-    assert.strictEqual(ext, ".csv", "CSV is the only format supported for samples at this time.");
-    //now profile
-    var delimiter = ",";
-    if (sample.delimiter != undefined) delimiter = sample.delimiter;
-    var firstLine = fs.readFileSync(fp, 'utf-8').split('\n')[0];
-    var columns = firstLine.split(delimiter).map(function(x) { return { "name": x.replace('\r','').replace('\n','') }; });
-    return columns;
-}
-
+/**
+ * Process the config file given.
+ * 
+ * @param {string} configPath The path to the config file to process.
+ * @param {string} generatedFolder The output folder path.
+ * @param {string} samplesFolder The folder path to the samples. 
+ * @param {string} logLevel The level to log out to.  
+*/
 exports.process_config = function(configPath, generatedFolder, samplesFolder, logLevel) {
     // TODO: remove this and find a way to escape '/' only
     Mustache.escape = function(text) {return text;};
@@ -47,16 +42,9 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
     for(var di in templatorConfig.datasets) {
         //now that we have the dataset
         dataset_to_generate = templatorConfig.datasets[di];
-        logger.info(`Templating ${dataset_to_generate.name} .. | ${corrid}`);
-        //let's just apply mustache on the config so they can use anything in the dataset
-        var template = JSON.stringify(dataset_to_generate);
+        logger.info(`Templating ${dataset_to_generate.name} .. | ${corrid}`);        
         //apply the global config if defined
-        if (templatorConfig.global != null) {
-            logger.debug(`Global properties are defined. | ${corrid}`);
-            dataset_to_generate.global = templatorConfig.global;
-        }
-        var new_dataset_to_generate_string = Mustache.render(template, dataset_to_generate);
-        dataset_to_generate = JSON.parse(new_dataset_to_generate_string);
+        dataset_to_generate = exports.resolve_global(templatorConfig.global, dataset_to_generate);
         //let's validate that they've deffined the dataset properly
         //firstly we ensure the columns are defined either through config or a sample
         if (samplesFolder != undefined && dataset_to_generate.source.columns == undefined) {
@@ -98,32 +86,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
             for (var pli in pattern_to_generate.generate) {
                 var pattern_language_implementation_config = pattern_to_generate.generate[pli];
                 logger.info(`Templating ${pattern_language_implementation_config.language} implementation. | ${corrid}`);
-                //now prepare the final config for the mustache template
-                var dataSetFinalConfig = dataset_to_generate;
-                //first let's flatten the source and target defined 
-                if (dataset_to_generate.source == null) dataset_to_generate.source = {};
-                if (pattern_language_implementation_config.source == null) pattern_language_implementation_config.source = {};
-                if (dataset_to_generate.target == null) dataset_to_generate.target = {};
-                if (pattern_language_implementation_config.target == null) pattern_language_implementation_config.target = {};
-                dataSetFinalConfig.source = Object.assign(dataset_to_generate.source, pattern_language_implementation_config.source);
-                dataSetFinalConfig.target = Object.assign(dataset_to_generate.target, pattern_language_implementation_config.target);
-                dataSetFinalConfig.language = pattern_language_implementation_config.language;
-                dataSetFinalConfig.pattern = pattern_to_generate.name;     
-                if (pattern_language_implementation_config.properties == null) pattern_language_implementation_config.properties = {};
-                dataSetFinalConfig.properties = pattern_language_implementation_config.properties;         
-                //now for the arrays like columns and date_columns we need to add a last boolean to help with string generation
-                assert.notStrictEqual(dataSetFinalConfig.source.columns, null, `It seems like you did not define any columns for the dataset. This is not allowed. Please provide either through samples or the config.`);
-                assert.notStrictEqual(dataSetFinalConfig.source.columns.length, 0, `You cannot have 0 columns in a dataset.`);
-                if (dataSetFinalConfig.source.date_columns != null && dataSetFinalConfig.source.date_columns.length > 0) {
-                    dataSetFinalConfig.source.date_columns[dataSetFinalConfig.source.date_columns.length - 1].last = true;
-                    dataSetFinalConfig.source.date_columns = dataSetFinalConfig.source.date_columns.map(function(v) { v.name_without_spaces = v.name.replace(" ","_"); return v; });
-                }
-                if (dataSetFinalConfig.source.primary_key != null) {
-                    dataSetFinalConfig.source.primary_key[dataSetFinalConfig.source.primary_key.length - 1].last = true;
-                    dataSetFinalConfig.source.primary_key = dataSetFinalConfig.source.primary_key.map(function(v) { v.name_without_spaces = v.name.replace(" ","_"); return v; });
-                }
-                dataSetFinalConfig.source.columns[dataSetFinalConfig.source.columns.length - 1].last = true;     
-                dataSetFinalConfig.source.columns = dataSetFinalConfig.source.columns.map(function(v) { v.name_without_spaces = v.name.replace(" ","_"); return v; });   
+                //finalise the config
+                var dataSetFinalConfig = prepare_final_config(dataset_to_generate, pattern_language_implementation_config, pattern_to_generate);
                 //remove the spaces in column names
                 //now let's render
                 //we need to choose the right template
@@ -144,8 +108,17 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                                             return config;
                                         });
                 dataSetFinalConfig.outputs = scriptConfigs;
-                //now loop and generate
-                generate_files(templateFiles, dataSetFinalConfig, languageFolderPath, generatedFolder)
+                //now loop and generate                
+                for (var template in templateFiles) {
+                    //look for a valid config
+                    var scriptConf = finalConfig.outputs.filter(function(conf) { return conf.script_name + ".mustache" == templateFiles[template] });
+                    assert.strictEqual(scriptConf.length, 1, `1 config should be defined for ${templateFiles[template]} in the folder ${languageFolderPath}`);
+                    //now let's generate it
+                    var templatePath = languageFolderPath + "/" + templateFile;
+                    var template_str = fs.readFileSync(templatePath, 'utf8');
+                    var fc = generate_file_content_from_template(template_str, dataSetFinalConfig, generatedFolder)
+                    write_output(fc, scriptConfigs[0]);
+                }
             }
 
         }
@@ -154,40 +127,108 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
     logger.info(`All finished up, thanks for using the templator :). | ${corrid}`);
 }
 
-/**
- * Renders the files specified in the config to the file path specified in scripts_config.json
- * 
- * @param {string[]} templateFiles List of templates to generate for the type of file to load and the language chosen in the config. 
- * @param {Object} finalConfig Flattened config generated from the original config specified by the user.
- * @param {string} languageFolderPath Path to the templates to generate
- * @param {string} generatedFolder ???
- */
-function generate_files(templateFiles, finalConfig, languageFolderPath, generatedFolder){
-    for (var template in templateFiles) {
-        var templatePath = languageFolderPath + "/" + templateFiles[template];
-        //look for a valid config
-        var scriptConf = finalConfig.outputs.filter(function(conf) { return conf.script_name + ".mustache" == templateFiles[template] });
-        assert.strictEqual(scriptConf.length, 1, `1 config should be defined for ${templateFiles[template]} in the folder ${languageFolderPath}`);
-
-        //so template it
-        var template_str = fs.readFileSync(templatePath, 'utf8');
-        var outputContent = Mustache.render(template_str, finalConfig);  
-
-        //prepare the output folder if not present
-        var outputFileDir = generatedFolder + "/" + finalConfig.language; 
-        if (!fs.existsSync(outputFileDir)) fs.mkdirSync(outputFileDir);
-
-        if (scriptConf[0].output_file.sub_folder != null) {
-            outputFileDir += "/" + scriptConf[0].output_file.sub_folder;
-            if (!fs.existsSync(outputFileDir)) {
-                fs.ensureDirSync(outputFileDir);
-            }
-        }
-        //write out the file
-        var outputFileNameWithExt = scriptConf[0].output_file.name + "." + scriptConf[0].output_file.extension;                        
-        var outputFilePath = outputFileDir + "/" + outputFileNameWithExt;
-        fs.writeFileSync(outputFilePath, outputContent);
-        logger.info(`Outputted ${scriptConf[0].script_name} code to file ${outputFileNameWithExt} for implmentation. | ${corrid}`);
-        logger.debug(`Exact path: ${path.resolve(outputFilePath)}. | ${corrid}`)
+exports.resolve_global = function(global, dataset_to_generate) {
+    //let's just apply mustache on the config so they can use anything in the dataset
+    var template = JSON.stringify(dataset_to_generate);
+    if (global != null) {
+        logger.debug(`Global properties are defined. | ${corrid}`);
+        dataset_to_generate.global = global;
     }
+    var new_dataset_to_generate_string = Mustache.render(template, dataset_to_generate);
+    return JSON.parse(new_dataset_to_generate_string);
+}
+
+/**
+ * Profile a sample and return the columns in the file. 
+ * No Column type support (23/08/2018)
+ * 
+ * @param {Object} sample The definition for the sample to use for profiling
+*/
+exports.profile_file = function(sample) {
+    assert.notStrictEqual(sample.file_path, undefined, "Invalid sample, could not find a file path attribute.");
+    var fp = path.resolve(sample.file_path);
+    var ext = path.extname(fp);
+    assert.strictEqual(ext, ".csv", "CSV is the only format supported for samples at this time.");
+    //now profile
+    var delimiter = ",";
+    if (sample.delimiter != undefined) delimiter = sample.delimiter;
+    var firstLine = fs.readFileSync(fp, 'utf-8').split('\n')[0];
+    var columns = firstLine.split(delimiter).map(function(x) { return { "name": x.replace('\r','').replace('\n','') }; });
+    return columns;
+}
+
+/**
+ * Take the dataset and resolve the final config:
+ * 1. Combine Source and Target between parent and pattern implementation
+ * 2. Append last property for columns, primary_keys, date_columns to help with generating strings in mustache
+ * 3. Append property of column without spaces for systems which do not like spaces in column names
+ * 
+ * @param {Object} dataset_to_generate The definition supplied for the dataset
+ * @param {Object} pattern_language_implementation_config The definition for the pattern chosen for the dataset
+ * @param {string} pattern_name The name of the pattern chosen to implement
+*/
+exports.prepare_final_config = function(dataset_to_generate, pattern_language_implementation_config, pattern_name) {
+    //now prepare the final config for the mustache template
+    var dataSetFinalConfig = dataset_to_generate;
+    //first let's flatten the source and target defined 
+    if (dataset_to_generate.source == null) dataset_to_generate.source = {};
+    if (pattern_language_implementation_config.source == null) pattern_language_implementation_config.source = {};
+    if (dataset_to_generate.target == null) dataset_to_generate.target = {};
+    if (pattern_language_implementation_config.target == null) pattern_language_implementation_config.target = {};
+    dataSetFinalConfig.source = Object.assign(dataset_to_generate.source, pattern_language_implementation_config.source);
+    dataSetFinalConfig.target = Object.assign(dataset_to_generate.target, pattern_language_implementation_config.target);
+    dataSetFinalConfig.language = pattern_language_implementation_config.language;
+    dataSetFinalConfig.pattern = pattern_name;     
+    if (pattern_language_implementation_config.properties == null) pattern_language_implementation_config.properties = {};
+    dataSetFinalConfig.properties = pattern_language_implementation_config.properties;         
+    //now for the arrays like columns and date_columns we need to add a last boolean to help with string generation
+    assert.notStrictEqual(dataSetFinalConfig.source.columns, null, `It seems like you did not define any columns for the dataset. This is not allowed. Please provide either through samples or the config.`);
+    assert.notStrictEqual(dataSetFinalConfig.source.columns.length, 0, `You cannot have 0 columns in a dataset.`);
+    if (dataSetFinalConfig.source.date_columns != null && dataSetFinalConfig.source.date_columns.length > 0) {
+        dataSetFinalConfig.source.date_columns[dataSetFinalConfig.source.date_columns.length - 1].last = true;
+        dataSetFinalConfig.source.date_columns = dataSetFinalConfig.source.date_columns.map(function(v) { v.name_without_spaces = v.name.replace(" ","_"); return v; });
+    }
+    if (dataSetFinalConfig.source.primary_key != null) {
+        dataSetFinalConfig.source.primary_key[dataSetFinalConfig.source.primary_key.length - 1].last = true;
+        dataSetFinalConfig.source.primary_key = dataSetFinalConfig.source.primary_key.map(function(v) { v.name_without_spaces = v.name.replace(" ","_"); return v; });
+    }
+    dataSetFinalConfig.source.columns[dataSetFinalConfig.source.columns.length - 1].last = true;     
+    dataSetFinalConfig.source.columns = dataSetFinalConfig.source.columns.map(function(v) { v.name_without_spaces = v.name.replace(" ","_"); return v; });   
+    return dataSetFinalConfig;
+}
+
+/**
+ * Renders the files specified in the config to the file path specified in scripts_config.json.
+ * 
+ * @param {string} template_definition A string representation of the mustache content to put with the config.
+ * @param {Object} config_definition Flattened config generated from the original config specified by the user.
+ */
+exports.generate_file_content_from_template = function(template_definition, config_definition){
+    //so template it
+    return Mustache.render(template_definition, config_definition);     
+}
+
+/**
+ * Output the content out to a script file
+ * 
+ * @param {*} output_content 
+ * @param {*} script_conf 
+ */
+exports.write_output = function(output_content, script_conf) {
+     //prepare the output folder if not present
+     var outputFileDir = output_folder + "/" + config_definition.language; 
+     if (!fs.existsSync(outputFileDir)) fs.mkdirSync(outputFileDir);
+ 
+     if (script_conf.output_file.sub_folder != null) {
+         outputFileDir += "/" + script_conf.output_file.sub_folder;
+         if (!fs.existsSync(outputFileDir)) {
+             fs.ensureDirSync(outputFileDir);
+         }
+     }
+     //write out the file
+     var outputFileNameWithExt = script_conf.output_file.name + "." + scriptConf.output_file.extension;                        
+     var outputFilePath = outputFileDir + "/" + outputFileNameWithExt;
+     fs.writeFileSync(outputFilePath, output_content);
+     logger.info(`Outputted ${script_conf.script_name} code to file ${outputFileNameWithExt} for implmentation. | ${corrid}`);
+     logger.debug(`Exact path: ${path.resolve(outputFilePath)}. | ${corrid}`)
 }

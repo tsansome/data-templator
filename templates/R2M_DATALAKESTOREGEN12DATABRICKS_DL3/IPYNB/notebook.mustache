@@ -3,7 +3,7 @@
         {
             "cell_type": "code",
             "source": [
-                "dbutils.widgets.text(\"filename\", \"\",\"\")\ndbutils.widgets.get(\"filename\")\nfilename = getArgument(\"filename\")\nprint (\"Param -\\'input':\")\nprint (filename)\nspark.conf.set(\"dfs.adls.oauth2.access.token.provider.type\", \"ClientCredential\")\nspark.conf.set(\"dfs.adls.oauth2.client.id\", \"{{ source.client_id }}\")\nspark.conf.set(\"dfs.adls.oauth2.credential\", \"{{ source.client_credential }}\")\nspark.conf.set(\"dfs.adls.oauth2.refresh.url\", \"https://login.microsoftonline.com/{{source.tenantid}}/oauth2/token \")"
+                "dbutils.widgets.text(\"filename\", \"\",\"\")\ndbutils.widgets.get(\"filename\")\nfilename = getArgument(\"filename\")\nprint (\"Param -\\'input':\")\nprint (filename)\nspark.conf.set(\"dfs.adls.oauth2.access.token.provider.type\", \"ClientCredential\")\nspark.conf.set(\"dfs.adls.oauth2.client.id\", \"{{ source.client_id }}\")\nspark.conf.set(\"dfs.adls.oauth2.credential\", \"{{ source.client_credential }}\")\nspark.conf.set(\"dfs.adls.oauth2.refresh.url\", \"https://login.microsoftonline.com/{{source.tenant_id}}/oauth2/token \")"
             ],
             "metadata": {},
             "outputs": [],
@@ -12,7 +12,7 @@
         {
             "cell_type": "code",
             "source": [
-                "raw_folder = \"{{ source.raw_folder }}\"\ninfile = \"/Raw/{{ source.raw_folder }}/\" + filename\n\nsdf = spark.read.option(\"delimiter\", \" {{ source.delimeter }}\").csv(\"adl://{{ source.datalakestore_accountname }}.azuredatalakestore.net/\" + infile, quote='\"', escape='\"', header=True)\nsdf.createOrReplaceTempView(\"myRecords\")"
+                "raw_folder = \"{{ source.raw_folder }}\"\ninfile = \"/Raw/{{ source.raw_folder }}/\" + filename\n\nsdf = spark.read.option(\"delimiter\", \" {{ source.delimiter }}\").csv(\"adl://{{ source.datalakestore_accountname }}.azuredatalakestore.net/\" + infile, quote='\"', escape='\"', header=True)\nsdf.createOrReplaceTempView(\"myRecords\")"
             ],
             "metadata": {},
             "outputs": [],
