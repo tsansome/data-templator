@@ -1,5 +1,5 @@
 {
-    "name": "{{ outputs.0.output_file.name }}",
+    "name": "{{ template_config.outputs.0.output_file.name }}",
     "properties": {
         "activities": [
             {
@@ -20,7 +20,7 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "notebookPath": "/Shared/Operational/{{target.database}}/Master/{{ outputs.1.output_file.name }}",
+                    "notebookPath": "/Shared/Operational/{{target.database}}/Master/{{ template_config.outputs.1.output_file.name }}",
                     "baseParameters": {
                         "filename": {
                             "value": "@pipeline().parameters.filename",
@@ -264,7 +264,7 @@
             },
             "load_pattern": {
                 "type": "String",
-                "defaultValue": "DL4"
+                "defaultValue": "{{template_config.properties.pattern}}"
             },
             "raw_folder": {
                 "type": "String",
