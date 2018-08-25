@@ -18,7 +18,7 @@
         }
     ],
     "properties": {
-        "area_prefix": "R2M",
+        "dam_prefix": "R2M",
         "pattern": "DL2"
     }
 }
