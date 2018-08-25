@@ -20,7 +20,7 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "notebookPath": "/Shared/Operational/{{target.database}}/Master/R2M_DL4_{{source.database}}_{{source.schema}}_{{source.tablename}}",
+                    "notebookPath": "/Shared/Operational/{{target.database}}/Master/{{ outputs.1.output_file.name }}",
                     "baseParameters": {
                         "filename": {
                             "value": "@pipeline().parameters.filename",

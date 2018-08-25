@@ -1,6 +1,90 @@
 //Mustaching content inside config
 const templator = require('../src/templater-core.js');
 
+test('Able to handle a dataset with no primary keys provided', () => {
+    
+    var config = {
+        "name": "MyTable",
+        "source": {
+            "database": "SourceDB",
+            "schema": "SourceSchema",
+            "tablename": "SourceTableName",                
+            "primary_key": [],
+            "columns": [{ "name": "PersonID" },
+                        { "name": "FirstName" },
+                        { "name": "LastName" }],
+            "date_columns": [ {"name": "Date_Created" }]
+        },
+        "templates": [
+            {
+                "name": "0_HELLOWORLD",
+                "generate": [
+                    {
+                        "language": "REL",
+                        "target": {
+                            "database": "TargetDB",
+                            "table": "{{source.database}}_{{ source.tablename}}",
+                            "date_format": "yyyy-MM-dd"
+                        }
+                    }
+                ]
+            }
+        ]
+    };    
+
+    var pattern_to_template = config.templates[0].generate[0];
+    
+    var final_config = templator.prepare_final_config(config, pattern_to_template, "DL1");
+
+    var template_definition = "{{source.tablename}}";
+    
+    var output = templator.generate_file_content_from_template(template_definition, final_config)
+
+    expect(output).toBe(config.source.tablename);
+});
+
+test('Able to handle a dataset with no date columns provided', () => {
+    
+    var config = {
+        "name": "MyTable",
+        "source": {
+            "database": "SourceDB",
+            "schema": "SourceSchema",
+            "tablename": "SourceTableName",                
+            "primary_key": [],
+            "columns": [{ "name": "PersonID" },
+                        { "name": "FirstName" },
+                        { "name": "LastName" }],
+            "date_columns": []
+        },
+        "templates": [
+            {
+                "name": "0_HELLOWORLD",
+                "generate": [
+                    {
+                        "language": "REL",
+                        "target": {
+                            "database": "TargetDB",
+                            "table": "{{source.database}}_{{ source.tablename}}",
+                            "date_format": "yyyy-MM-dd"
+                        }
+                    }
+                ]
+            }
+        ]
+    };    
+
+    var pattern_to_template = config.templates[0].generate[0];
+    
+    var final_config = templator.prepare_final_config(config, pattern_to_template, "DL1");
+
+    var template_definition = "{{source.tablename}}";
+    
+    var output = templator.generate_file_content_from_template(template_definition, final_config)
+
+    expect(output).toBe(config.source.tablename);
+});
+
 test('Able to refer to a source variable in a config from parent', () => {
     
     var config = {
