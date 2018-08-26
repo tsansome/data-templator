@@ -98,21 +98,28 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 //get the template files under that language
                 var templateFiles = fs.readdirSync(languageFolderPath).filter(function(file) { return file.substr(-9) == ".mustache" });
                 //read in the scripts config file for the template files
-                var scriptsConfigPath = languageFolderPath + "/scripts_config.json"
-                assert.strictEqual(fs.existsSync(scriptsConfigPath), true, `A scripts config file is not present for the language ${pattern_language_implementation_config.language.toUpperCase()} for the pattern ${pattern_to_generate.name.toUpperCase()}`);
+                var scriptsConfigPath = languageFolderPath + "/template_config.json"
+                assert.strictEqual(fs.existsSync(scriptsConfigPath), true, `A template config file is not present for the language ${pattern_language_implementation_config.language.toUpperCase()} for the pattern ${pattern_to_generate.name.toUpperCase()}`);
                 //okay let's get the script configs, also resolve any mustaching used, then attach it as an outputs array to the dataset
-                var scriptConfigs = JSON.parse(fs.readFileSync(scriptsConfigPath, 'utf8'))
+                var templateConfigObj = JSON.parse(fs.readFileSync(scriptsConfigPath, 'utf8'));
+                dataSetFinalConfig.template_config = templateConfigObj;
+                //process the script configs
+                var scriptConfigs = templateConfigObj
+                                        .scripts
                                         .map(function(config) {
                                             if (config.output_file.sub_folder != undefined) config.output_file.sub_folder = Mustache.render(config.output_file.sub_folder, dataSetFinalConfig);
                                             config.output_file.name = Mustache.render(config.output_file.name, dataSetFinalConfig);
                                             return config;
                                         });
-                dataSetFinalConfig.outputs = scriptConfigs;
+                //now attach back as the outputs
+                templateConfigObj.outputs = scriptConfigs;
+                templateConfigObj.scripts = null;
+                dataSetFinalConfig.template_config = templateConfigObj;
                 //now loop and generate                
                 for (var template in templateFiles) {
                     var templateFile = templateFiles[template];
                     //look for a valid config
-                    var scriptConf = dataSetFinalConfig.outputs.filter(function(conf) { return conf.script_name + ".mustache" == templateFiles[template] });
+                    var scriptConf = dataSetFinalConfig.template_config.outputs.filter(function(conf) { return conf.script_name + ".mustache" == templateFiles[template] });
                     assert.strictEqual(scriptConf.length, 1, `1 config should be defined for ${templateFiles[template]} in the folder ${languageFolderPath}`);
                     //now let's generate it
                     var templatePath = languageFolderPath + "/" + templateFile;
@@ -122,7 +129,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                     var outputFileDir = generatedFolder + "/" + pattern_language_implementation_config.language; 
                     if (!fs.existsSync(outputFileDir)) fs.mkdirSync(outputFileDir);               
                     
-                    exports.write_output(outputFileDir, fc, scriptConfigs[0]);
+                    exports.write_output(outputFileDir, fc, scriptConf[0]);
                 }
             }
 
