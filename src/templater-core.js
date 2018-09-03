@@ -198,14 +198,14 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
     assert.notStrictEqual(dataSetFinalConfig.source.columns.length, 0, `You cannot have 0 columns in a dataset.`);
     if (dataSetFinalConfig.source.date_columns != null && dataSetFinalConfig.source.date_columns.length > 0) {
         dataSetFinalConfig.source.date_columns[dataSetFinalConfig.source.date_columns.length - 1].last = true;
-        dataSetFinalConfig.source.date_columns = dataSetFinalConfig.source.date_columns.map(function(v) { v.name_without_spaces = v.name.replace(" ","_"); return v; });
+        dataSetFinalConfig.source.date_columns = dataSetFinalConfig.source.date_columns.map(function(v) { v.name_without_spaces = v.name.replace(/ /g,"_"); return v; });
     }
     if (dataSetFinalConfig.source.primary_key != null && dataSetFinalConfig.source.primary_key.length > 0) {
         dataSetFinalConfig.source.primary_key[dataSetFinalConfig.source.primary_key.length - 1].last = true;
-        dataSetFinalConfig.source.primary_key = dataSetFinalConfig.source.primary_key.map(function(v) { v.name_without_spaces = v.name.replace(" ","_"); return v; });
+        dataSetFinalConfig.source.primary_key = dataSetFinalConfig.source.primary_key.map(function(v) { v.name_without_spaces = v.name.replace(/ /g,"_"); return v; });
     }
     dataSetFinalConfig.source.columns[dataSetFinalConfig.source.columns.length - 1].last = true;     
-    dataSetFinalConfig.source.columns = dataSetFinalConfig.source.columns.map(function(v) { v.name_without_spaces = v.name.replace(" ","_"); return v; });   
+    dataSetFinalConfig.source.columns = dataSetFinalConfig.source.columns.map(function(v) { v.name_without_spaces = v.name.replace(/ /g,"_"); return v; });   
     return dataSetFinalConfig;
 }
 
