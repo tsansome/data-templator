@@ -21,7 +21,7 @@
        {
             "cell_type": "code",
             "source": [
-                "sdf = spark.sql(\"\"\"\nSELECT \n{{#source.date_columns}}to_utc_timestamp(TO_DATE(CAST(UNIX_TIMESTAMP(`{{name}}`, \"{{ source.date_format }}\") AS TIMESTAMP)), '{{source.date_locale}}') AS `{{name_without_spaces}}_UTC`,\n{{/source.date_columns}}{{#source.columns}}\tTRIM(m.`{{name}}`) as `{{name_without_spaces}}`{{^last}},\n {{/last}}{{/source.columns}}\n\tcurrent_timestamp() AS run_date_utc\n   FROM myRecords AS m\n\"\"\")\nsdf.createOrReplaceTempView(\"sdf\")"
+                "sdf = spark.sql(\"\"\"\nSELECT \n{{#source.date_columns}}to_utc_timestamp(TO_DATE(CAST(UNIX_TIMESTAMP(`{{name}}`, \"{{ source.date_format }}\") AS TIMESTAMP)), '{{source.date_locale}}') AS `{{name_without_spaces}}_UTC`,\n{{/source.date_columns}}{{#source.columns}}\tTRIM(m.`{{name}}`) as `{{name_without_spaces}}`,\n {{/source.columns}}\tcurrent_timestamp() AS run_date_utc\n   FROM myRecords AS m\n\"\"\")\nsdf.createOrReplaceTempView(\"sdf\")"
             ],
             "metadata": {},
             "outputs": [],
@@ -30,7 +30,7 @@
         {
             "cell_type": "code",
             "source": [
-                "sdf = spark.sql(\"\"\"\nCREATE TABLE {{ target.database }}_master.{{ source.database}}_{{ source.tablename }} IF NOT EXISTS \n{{#source.date_columns}}\t`{{name_without_spaces}}_UTC` datetime{{^last}},\n {{/last}}{{ source.date_locale }},\n{{/source.date_columns}}{{#source.columns}}\t`{{name_without_spaces}}` string{{^last}},\n {{/last}}{{/source.columns}},\n`run_date_utc` timestamp \nUSING parquet;\n\"\"\")"
+                "sdf = spark.sql(\"\"\"\nCREATE TABLE {{ target.database }}_master.{{ source.database}}_{{ source.tablename }} IF NOT EXISTS \n{{#source.date_columns}}\t`{{name_without_spaces}}_UTC` datetime{{^last}},\n {{/last}},\n{{/source.date_columns}}{{#source.columns}}\t`{{name_without_spaces}}` string{{^last}},\n {{/last}}{{/source.columns}},\n`run_date_utc` timestamp \nUSING parquet;\n\"\"\")"
             ],
             "metadata": {},
             "outputs": [],
