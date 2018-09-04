@@ -12,7 +12,7 @@
         {
             "cell_type": "code",
             "source": [
-                "raw_folder = \"{{ source.raw_folder }}\"\ninfile = \"/Raw/{{ source.raw_folder }}/\" + filename\n\nmyRecords = spark.read.option(\"delimiter\", \" {{ source.delimeter }}\").csv(\"adl://{{ source.datalakestore_accountname }}.azuredatalakestore.net/\" + infile, quote='\"', escape='\"', header=True)\nmyRecords.createOrReplaceTempView(\"myRecords\")"
+                "raw_folder = \"{{ source.raw_folder }}\"\ninfile = \"/Raw/{{ source.raw_folder }}/\" + filename\n\nmyRecords = spark.read.option(\"delimiter\", \"{{ source.delimiter }}\").csv(\"adl://{{ source.datalakestore_accountname }}.azuredatalakestore.net/\" + infile, quote='\"', escape='\"', header=True)\nmyRecords.createOrReplaceTempView(\"myRecords\")"
             ],
             "metadata": {},
             "outputs": [],
