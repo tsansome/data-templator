@@ -1,0 +1,35 @@
+CREATE PROCEDURE {{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}
+    @BLOBPATH VARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @RowsInserted INT,
+
+    /* Declare an external table that points to the folder for files to input */
+    CREATE EXTERNAL TABLE #ext_{{source.database}}_{{source.schema}}_{{source.tablename}} (
+        {{#source.columns}}'{{name}}' as '{{name_without_spaces}}'{{^last}},{{/last}}{{/source.columns}}
+    )
+    WITH ( LOCATION = @BLOBPATH,   
+        DATA_SOURCE = {{properties.data_source}},  
+        FILE_FORMAT = {{properties.file_format}},
+        REJECT_TYPE = VALUE,
+        REJECT_VALUE = 0
+    );
+
+    /* Drop our final table if it exists already */
+    DROP TABLE IF EXISTS [{{source.database}}-main].[{{source.schema}}_{{source.tablename}}];
+
+    /* Now create the final table using a CTAS */
+    CREATE TABLE [{{source.database}}-main].[{{source.schema}}_{{source.tablename}}]
+    WITH
+    ( 
+        DISTRIBUTION = {{properties.distribution}},
+        CLUSTERED COLUMNSTORE INDEX
+    )
+    AS
+    SELECT * FROM #ext_{{source.database}}_{{source.schema}}_{{source.tablename}}
+    OPTION (LABEL = 'CTAS : Load {{source.database}}_{{source.schema}}_{{source.tablename}}');
+
+    SELECT @RowsInserted AS RowsInserted;
+END
