@@ -4,7 +4,15 @@
             "script_name": "sql",
             "output_file": {
                 "extension": "sql", 
-                "sub_folder": "sql/{{target.database}}/Master",           
+                "sub_folder": "sql/storedprocedures",           
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}"
+            }
+        },
+        {
+            "script_name": "factory",
+            "output_file": {
+                "extension": "json", 
+                "sub_folder": "adf/pipelines",           
                 "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}"
             }
         }
