@@ -33,8 +33,8 @@ BEGIN
     ';
 
     SET @LoadString = '
-              if object_id (''Main.{{source.database}}_{{source.schema}}_{{source.tablename}}'',''U'') is not null drop table [Main].[{{source.database}}_{{source.schema}}_{{source.tablename}}];
-        CREATE TABLE [Main].[{{source.database}}_{{source.schema}}_{{source.tablename}}]
+              if object_id (''main.{{source.database}}_{{source.schema}}_{{source.tablename}}'',''U'') is not null drop table [main].[{{source.database}}_{{source.schema}}_{{source.tablename}}];
+        CREATE TABLE [main].[{{source.database}}_{{source.schema}}_{{source.tablename}}]
         WITH
         ( 
             DISTRIBUTION = {{properties.distribution}},
