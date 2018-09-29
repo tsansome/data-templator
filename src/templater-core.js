@@ -221,9 +221,9 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
             name: x.name,
             name_without_spaces: x.name.replace(/ /g,"_"),
             source: scd,
-            hasSourceDefinition: scd == null ? true : false,
+            hasSourceDefinition: scd != null ? true : false,
             target: tcd,
-            hasTargetDefinition: tcd == null ? true : false
+            hasTargetDefinition: tcd != null ? true : false
         }        
     });
     dataSetFinalConfig.columns[dataSetFinalConfig.columns.length - 1].last = true;    
