@@ -87,7 +87,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 var templateLanguageConfig = templateToGenerate.generate[pli];
                 logger.info(`Templating ${templateLanguageConfig.language} implementation. | ${corrid}`);
                 //finalise the config
-                var dataSetFinalConfig = exports.prepare_final_config(datasetToGenerate, templateLanguageConfig, templateToGenerate);
+                var dataSetFinalConfig = exports.prepare_final_config(datasetToGenerate, templateLanguageConfig, templateToGenerate, templatorConfig.global);
                 //remove the spaces in column names
                 //now let's render
                 //we need to choose the right template
@@ -179,7 +179,7 @@ exports.profile_file = function(sample) {
  * @param {Object} templateLanguageConfig The definition for the pattern chosen for the dataset
  * @param {string} patternName The name of the pattern chosen to implement
 */
-exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfig, patternName) {
+exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfig, patternName, global) {
     //now prepare the final config for the mustache template
     var dataSetFinalConfig = datasetToGenerate;
     //first let's flatten the source and target defined 
@@ -209,6 +209,14 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
     dataSetFinalConfig.columns = dataSetFinalConfig.source.columns.map(x => { 
         var scd = dataSetFinalConfig.source.columns.filter(y => y.name == x.name)[0];
         var tcd = templateLanguageConfig.target.columns.filter(y => y.name == x.name)[0];
+        //apply global datatype mapping if it has been set in global
+        if ((scd != null && scd.datatype) && (tcd == null || tcd.datatype == null)) {
+            if (tcd == null) tcd = {};
+            if (global != null && global.datatype_mapping != null) {
+                var targetType = global.datatype_mapping.filter(x => x.source == scd.datatype)[0];
+                tcd = targetType == null ? tcd : {...tcd, ...{ datatype: targetType.target }};
+            }
+        }
         return {
             name: x.name,
             name_without_spaces: x.name.replace(/ /g,"_"),
