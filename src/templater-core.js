@@ -192,14 +192,6 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
     //now for the arrays like columns and date_columns we need to add a last boolean to help with string generation
     assert.notStrictEqual(dataSetFinalConfig.source.columns, null, `It seems like you did not define any columns for the dataset. This is not allowed. Please provide either through samples or the config.`);
     assert.notStrictEqual(dataSetFinalConfig.source.columns.length, 0, `You cannot have 0 columns in a dataset.`);
-    if (dataSetFinalConfig.source.date_columns != null && dataSetFinalConfig.source.date_columns.length > 0) {
-        dataSetFinalConfig.source.date_columns[dataSetFinalConfig.source.date_columns.length - 1].last = true;
-        dataSetFinalConfig.source.date_columns = dataSetFinalConfig.source.date_columns.map(function(v) { v.name_without_spaces = v.name.replace(/ /g,"_"); return v; });
-    }
-    if (dataSetFinalConfig.source.primary_key != null && dataSetFinalConfig.source.primary_key.length > 0) {
-        dataSetFinalConfig.source.primary_key[dataSetFinalConfig.source.primary_key.length - 1].last = true;
-        dataSetFinalConfig.source.primary_key = dataSetFinalConfig.source.primary_key.map(function(v) { v.name_without_spaces = v.name.replace(/ /g,"_"); return v; });
-    }
     //Set the columns by unifying them into one defined set
     if (templateLanguageConfig.target.columns == null) templateLanguageConfig.target.columns = [];
     dataSetFinalConfig.columns = dataSetFinalConfig.source.columns.map(x => { 
@@ -215,19 +207,28 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
         }
         return {
             name: x.name,
-            name_without_spaces: x.name.replace(/ /g,"_"),
             source: scd,
             hasSourceDefinition: scd != null ? true : false,
             target: tcd,
             hasTargetDefinition: tcd != null ? true : false
         }        
     });
-    dataSetFinalConfig.columns[dataSetFinalConfig.columns.length - 1].last = true;    
     //now remove the column definitions from the source/target
     dataSetFinalConfig.source.columns = null;
     templateLanguageConfig.target.columns = null;
+    //remove the spaces from the name and fix the last for all the arrays
+    dataSetFinalConfig.source.date_columns = remove_spaces_and_fix_last(dataSetFinalConfig.source.date_columns);
+    dataSetFinalConfig.source.primary_key = remove_spaces_and_fix_last(dataSetFinalConfig.source.primary_key);
+    dataSetFinalConfig.source.columns = remove_spaces_and_fix_last(dataSetFinalConfig.source.columns);    
     //now return it
     return dataSetFinalConfig;
+}
+
+exports.remove_spaces_and_fix_last = function(arr) {
+    if (arr == null || arr.length == 0) return arr;
+    arr[arr.length - 1].last = true;
+    arr = arr.map(function(v) { v.name_without_spaces = v.name.replace(/ /g,"_"); return v; });
+    return arr;
 }
 
 /**
