@@ -171,13 +171,14 @@ exports.profile_file = function(sample) {
 
 /**
  * Take the dataset and resolve the final config:
- * 1. Combine Source and Target between parent and pattern implementation
- * 2. Append last property for columns, primary_keys, date_columns to help with generating strings in mustache
- * 3. Append property of column without spaces for systems which do not like spaces in column names
+ * 1. Combine Source and Target between parent and pattern implementation.
+ * 2. Unify the source and target definitions for columns.
+ * 3. Append last property and name without spaces property for columns, primary_keys, date_columns to help with generating strings in mustache.
  * 
  * @param {Object} datasetToGenerate The definition supplied for the dataset
  * @param {Object} templateLanguageConfig The definition for the pattern chosen for the dataset
  * @param {string} patternName The name of the pattern chosen to implement
+ * @param {Object} global The global property set for all configs.
 */
 exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfig, patternName, global) {
     //now prepare the final config for the mustache template
