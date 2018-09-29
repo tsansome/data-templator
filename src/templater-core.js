@@ -204,8 +204,25 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
         dataSetFinalConfig.source.primary_key[dataSetFinalConfig.source.primary_key.length - 1].last = true;
         dataSetFinalConfig.source.primary_key = dataSetFinalConfig.source.primary_key.map(function(v) { v.name_without_spaces = v.name.replace(/ /g,"_"); return v; });
     }
-    dataSetFinalConfig.source.columns[dataSetFinalConfig.source.columns.length - 1].last = true;     
-    dataSetFinalConfig.source.columns = dataSetFinalConfig.source.columns.map(function(v) { v.name_without_spaces = v.name.replace(/ /g,"_"); return v; });   
+    //Set the columns by unifying them into one defined set
+    if (templateLanguageConfig.target.columns == null) templateLanguageConfig.target.columns = [];
+    dataSetFinalConfig.columns = dataSetFinalConfig.source.columns.map(x => { 
+        var scd = dataSetFinalConfig.source.columns.filter(y => y.name == x.name)[0];
+        var tcd = templateLanguageConfig.target.columns.filter(y => y.name == x.name)[0];
+        return {
+            name: x.name,
+            name_without_spaces: x.name.replace(/ /g,"_"),
+            source: scd,
+            hasSourceDefinition: scd == null ? true : false,
+            target: tcd,
+            hasTargetDefinition: tcd == null ? true : false
+        }        
+    });
+    dataSetFinalConfig.columns[dataSetFinalConfig.columns.length - 1].last = true;    
+    //now remove the column definitions from the source/target
+    dataSetFinalConfig.source.columns = null;
+    templateLanguageConfig.target.columns = null;
+    //now return it
     return dataSetFinalConfig;
 }
 
