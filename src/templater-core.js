@@ -199,10 +199,14 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
         var scd = dataSetFinalConfig.source.columns.filter(y => y.name == x.name)[0];
         var tcd = templateLanguageConfig.target.columns.filter(y => y.name == x.name)[0];
         //apply global datatype mapping if it has been set in global
-        if ((scd != null && scd.datatype) && (tcd == null || tcd.datatype == null)) {
+        if ((scd != null && scd.datatype) && (tcd == null || tcd.datatype == null) && (templateLanguageConfig.type_mapping != null)) {
             if (tcd == null) tcd = {};
-            if (global != null && global.datatype_mapping != null) {
-                var targetType = global.datatype_mapping.filter(x => x.source == scd.datatype)[0];
+            if (global != null && global.type_mappings != null) {
+                var tm = global.type_mappings.filter(tmObj => tmObj.name == templateLanguageConfig.type_mapping)[0];
+                assert.notStrictEqual(tm, null, `There was no type_mapping with the name ${templateLanguageConfig.type_mapping} found in the global definition.`);
+                var tmDef = tm.definition;
+                assert.notStrictEqual(tmDef, null, `There is no definition property defined for the type_mapping ${templateLanguageConfig.type_mapping}`);
+                var targetType = global.type_mappings.filter(x => x.source == scd.datatype)[0];
                 tcd = targetType == null ? tcd : {...tcd, ...{ datatype: targetType.target }};
             }
         }
@@ -218,9 +222,9 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
     dataSetFinalConfig.source.columns = null;
     templateLanguageConfig.target.columns = null;
     //remove the spaces from the name and fix the last for all the arrays
-    dataSetFinalConfig.source.date_columns = remove_spaces_and_fix_last(dataSetFinalConfig.source.date_columns);
-    dataSetFinalConfig.source.primary_key = remove_spaces_and_fix_last(dataSetFinalConfig.source.primary_key);
-    dataSetFinalConfig.source.columns = remove_spaces_and_fix_last(dataSetFinalConfig.source.columns);    
+    dataSetFinalConfig.source.date_columns = exports.remove_spaces_and_fix_last(dataSetFinalConfig.source.date_columns);
+    dataSetFinalConfig.source.primary_key = exports.remove_spaces_and_fix_last(dataSetFinalConfig.source.primary_key);
+    dataSetFinalConfig.source.columns = exports.remove_spaces_and_fix_last(dataSetFinalConfig.source.columns);    
     //now return it
     return dataSetFinalConfig;
 }
