@@ -182,13 +182,9 @@ exports.profile_file = function(sample) {
 exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfig, patternName, global) {
     //now prepare the final config for the mustache template
     var dataSetFinalConfig = datasetToGenerate;
-    //first let's flatten the source and target defined 
-    if (datasetToGenerate.source == null) datasetToGenerate.source = {};
-    if (templateLanguageConfig.source == null) templateLanguageConfig.source = {};
-    if (datasetToGenerate.target == null) datasetToGenerate.target = {};
-    if (templateLanguageConfig.target == null) templateLanguageConfig.target = {};
-    dataSetFinalConfig.source = Object.assign(datasetToGenerate.source, templateLanguageConfig.source);
-    dataSetFinalConfig.target = Object.assign(datasetToGenerate.target, templateLanguageConfig.target);
+    //first let's flatten the source and target defined
+    dataSetFinalConfig.source = {...datasetToGenerate.source, ...templateLanguageConfig.source};
+    dataSetFinalConfig.target = {...datasetToGenerate.target, ...templateLanguageConfig.target};
     dataSetFinalConfig.language = templateLanguageConfig.language;
     dataSetFinalConfig.pattern = patternName;     
     if (templateLanguageConfig.properties == null) templateLanguageConfig.properties = {};
