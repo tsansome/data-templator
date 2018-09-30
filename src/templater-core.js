@@ -41,7 +41,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
     var builtInTypeMappings = fs.readdirSync(path.resolve(type_mappings_path))
                                 .map(f => {
                                     return {
-                                        name: path.basename(f),
+                                        name: "builtin/" + path.basename(f),
                                         definition: JSON.parse(fs.readFileSync(f))
                                     }
                                 });                 
