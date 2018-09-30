@@ -11,6 +11,7 @@ var log4js = require('log4js');
 var logger = log4js.getLogger();
 
 const templates_path = () => __dirname + "/../templates/";
+const type_mappings_path = () => __dirname + "/../type_mappings/";
 
 /**
  * Process the config file given.
@@ -33,6 +34,18 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
     logger.info("==================================================================================");
     logger.info(`${path.basename(configPath)} requested for processing. Starting now. | ${corrid}`);
     logger.info("==================================================================================");
+
+    //let's add the type_mappings to global
+    if (templatorConfig.global == null) templatorConfig.global = {};
+    if (templatorConfig.global.type_mappings) templatorConfig.global.type_mappings = [];
+    var builtInTypeMappings = fs.readdirSync(path.resolve(type_mappings_path))
+                                .map(f => {
+                                    return {
+                                        ...{ name: path.basename(f) },
+                                        ...JSON.parse(fs.readFileSync(f))
+                                    }
+                                });
+    templatorConfig.global.type_mappings.push(builtInTypeMappings);
 
     logger.debug(`Exact path: ${path.resolve(configPath)} | ${corrid}`);
     if (!fs.existsSync(generatedFolder)) fs.mkdirSync(generatedFolder);
