@@ -35,7 +35,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
     logger.info(`${path.basename(configPath)} requested for processing. Starting now. | ${corrid}`);
     logger.info("==================================================================================");
 
-    //let's add the type_mappings to global
+    //let's add the built in type_mappings to global
     if (templatorConfig.global == null) templatorConfig.global = {};
     if (templatorConfig.global.type_mappings) templatorConfig.global.type_mappings = [];
     var builtInTypeMappings = fs.readdirSync(path.resolve(type_mappings_path))
