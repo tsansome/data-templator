@@ -229,6 +229,12 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
     return dataSetFinalConfig;
 }
 
+/**
+ * Configuring the array
+ * 1. add a preprty with the names having spaces removed
+ * 2. add a properry on the last item to indicate its the last
+ * @param {Array} arr The array to be processed 
+ */
 exports.remove_spaces_and_fix_last = function(arr) {
     if (arr == null || arr.length == 0) return arr;
     arr[arr.length - 1].last = true;
