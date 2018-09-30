@@ -41,10 +41,10 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
     var builtInTypeMappings = fs.readdirSync(path.resolve(type_mappings_path))
                                 .map(f => {
                                     return {
-                                        ...{ name: path.basename(f) },
-                                        ...JSON.parse(fs.readFileSync(f))
+                                        name: path.basename(f),
+                                        definition: JSON.parse(fs.readFileSync(f))
                                     }
-                                });
+                                });                 
     templatorConfig.global.type_mappings.push(builtInTypeMappings);
 
     logger.debug(`Exact path: ${path.resolve(configPath)} | ${corrid}`);
