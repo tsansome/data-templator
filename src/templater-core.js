@@ -139,10 +139,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                     var templatePath = languageFolderPath + "/" + templateFile;
                     var template_str = fs.readFileSync(templatePath, 'utf8');
                     var fc = exports.generate_file_content_from_template(template_str, dataSetFinalConfig, generatedFolder)
-                    
                     var outputFileDir = generatedFolder + "/" + templateLanguageConfig.language; 
-                    if (!fs.existsSync(outputFileDir)) fs.mkdirSync(outputFileDir);               
-                    
+                    if (!fs.existsSync(outputFileDir)) fs.mkdirSync(outputFileDir);                                   
                     exports.write_output(outputFileDir, fc, scriptConf[0]);
                 }
             }
