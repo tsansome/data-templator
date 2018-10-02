@@ -17,7 +17,7 @@ BEGIN
 
     SET @CreateExternalTableString = '
         CREATE EXTERNAL TABLE [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] (
-            {{#source.columns}}{{name}} nvarchar(100){{^last}},{{/last}}{{/source.columns}}
+            {{#columns}}{{name}} {{#hasTargetDefinition}}{{target.datatype}}{{/hasTargetDefinition}}{{^hasTargetDefinition}}nvarchar(100){{/hasTargetDefinition}}{{^last}},{{/last}}{{/columns}}
         )
         WITH ( 
             LOCATION = ''' + @BLOBPATH + ''',   

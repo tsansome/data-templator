@@ -11,6 +11,7 @@ var log4js = require('log4js');
 var logger = log4js.getLogger();
 
 const templates_path = () => __dirname + "/../templates/";
+const type_mappings_path = () => __dirname + "/../type_mappings/";
 
 /**
  * Process the config file given.
@@ -32,12 +33,25 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
 
     logger.info("==================================================================================");
     logger.info(`${path.basename(configPath)} requested for processing. Starting now. | ${corrid}`);
-    logger.info("==================================================================================");
+    logger.info("==================================================================================");    
 
     logger.debug(`Exact path: ${path.resolve(configPath)} | ${corrid}`);
     if (!fs.existsSync(generatedFolder)) fs.mkdirSync(generatedFolder);
     var templatorConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     logger.debug(`${templatorConfig.datasets.length} datasets to generate code for. | ${corrid}`);
+
+    //let's add the built in type_mappings to global
+    if (templatorConfig.global == null) templatorConfig.global = {};
+    if (templatorConfig.global.type_mappings == null) templatorConfig.global.type_mappings = [];
+    var builtInTypeMappings = fs.readdirSync(path.resolve(type_mappings_path()))
+                                .map(f => {
+                                    return {
+                                        name: "builtin/" + path.basename(f),
+                                        definition: JSON.parse(fs.readFileSync(f))
+                                    }
+                                });                 
+    templatorConfig.global.type_mappings.push(builtInTypeMappings);
+
     //di = dataset index
     for(var di in templatorConfig.datasets) {
         //now that we have the dataset
@@ -87,7 +101,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 var templateLanguageConfig = templateToGenerate.generate[pli];
                 logger.info(`Templating ${templateLanguageConfig.language} implementation. | ${corrid}`);
                 //finalise the config
-                var dataSetFinalConfig = exports.prepare_final_config(datasetToGenerate, templateLanguageConfig, templateToGenerate);
+                var dataSetFinalConfig = exports.prepare_final_config(datasetToGenerate, templateLanguageConfig, templateToGenerate, templatorConfig.global);
                 //remove the spaces in column names
                 //now let's render
                 //we need to choose the right template
@@ -171,24 +185,21 @@ exports.profile_file = function(sample) {
 
 /**
  * Take the dataset and resolve the final config:
- * 1. Combine Source and Target between parent and pattern implementation
- * 2. Append last property for columns, primary_keys, date_columns to help with generating strings in mustache
- * 3. Append property of column without spaces for systems which do not like spaces in column names
+ * 1. Combine Source and Target between parent and pattern implementation.
+ * 2. Unify the source and target definitions for columns.
+ * 3. Append last property and name without spaces property for columns, primary_keys, date_columns to help with generating strings in mustache.
  * 
  * @param {Object} datasetToGenerate The definition supplied for the dataset
  * @param {Object} templateLanguageConfig The definition for the pattern chosen for the dataset
  * @param {string} patternName The name of the pattern chosen to implement
+ * @param {Object} global The global property set for all configs.
 */
-exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfig, patternName) {
+exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfig, patternName, global) {
     //now prepare the final config for the mustache template
     var dataSetFinalConfig = datasetToGenerate;
-    //first let's flatten the source and target defined 
-    if (datasetToGenerate.source == null) datasetToGenerate.source = {};
-    if (templateLanguageConfig.source == null) templateLanguageConfig.source = {};
-    if (datasetToGenerate.target == null) datasetToGenerate.target = {};
-    if (templateLanguageConfig.target == null) templateLanguageConfig.target = {};
-    dataSetFinalConfig.source = Object.assign(datasetToGenerate.source, templateLanguageConfig.source);
-    dataSetFinalConfig.target = Object.assign(datasetToGenerate.target, templateLanguageConfig.target);
+    //first let's flatten the source and target defined
+    dataSetFinalConfig.source = {...datasetToGenerate.source, ...templateLanguageConfig.source};
+    dataSetFinalConfig.target = {...datasetToGenerate.target, ...templateLanguageConfig.target};
     dataSetFinalConfig.language = templateLanguageConfig.language;
     dataSetFinalConfig.pattern = patternName;     
     if (templateLanguageConfig.properties == null) templateLanguageConfig.properties = {};
@@ -196,17 +207,53 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
     //now for the arrays like columns and date_columns we need to add a last boolean to help with string generation
     assert.notStrictEqual(dataSetFinalConfig.source.columns, null, `It seems like you did not define any columns for the dataset. This is not allowed. Please provide either through samples or the config.`);
     assert.notStrictEqual(dataSetFinalConfig.source.columns.length, 0, `You cannot have 0 columns in a dataset.`);
-    if (dataSetFinalConfig.source.date_columns != null && dataSetFinalConfig.source.date_columns.length > 0) {
-        dataSetFinalConfig.source.date_columns[dataSetFinalConfig.source.date_columns.length - 1].last = true;
-        dataSetFinalConfig.source.date_columns = dataSetFinalConfig.source.date_columns.map(function(v) { v.name_without_spaces = v.name.replace(/ /g,"_"); return v; });
-    }
-    if (dataSetFinalConfig.source.primary_key != null && dataSetFinalConfig.source.primary_key.length > 0) {
-        dataSetFinalConfig.source.primary_key[dataSetFinalConfig.source.primary_key.length - 1].last = true;
-        dataSetFinalConfig.source.primary_key = dataSetFinalConfig.source.primary_key.map(function(v) { v.name_without_spaces = v.name.replace(/ /g,"_"); return v; });
-    }
-    dataSetFinalConfig.source.columns[dataSetFinalConfig.source.columns.length - 1].last = true;     
-    dataSetFinalConfig.source.columns = dataSetFinalConfig.source.columns.map(function(v) { v.name_without_spaces = v.name.replace(/ /g,"_"); return v; });   
+    //Set the columns by unifying them into one defined set
+    if (templateLanguageConfig.target.columns == null) templateLanguageConfig.target.columns = [];
+    dataSetFinalConfig.columns = dataSetFinalConfig.source.columns.map(x => { 
+        var scd = dataSetFinalConfig.source.columns.filter(y => y.name == x.name)[0];
+        var tcd = templateLanguageConfig.target.columns.filter(y => y.name == x.name)[0];
+        //apply global datatype mapping if it has been set in global
+        if ((scd != null && scd.datatype) && (tcd == null || tcd.datatype == null) && (templateLanguageConfig.type_mapping != null)) {
+            if (tcd == null) tcd = {};
+            if (global != null && global.type_mappings != null) {
+                var tm = global.type_mappings.filter(tmObj => tmObj.name == templateLanguageConfig.type_mapping)[0];
+                assert.notStrictEqual(tm, null, `There was no type_mapping with the name ${templateLanguageConfig.type_mapping} found in the global definition.`);
+                var tmDef = tm.definition;
+                assert.notStrictEqual(tmDef, null, `There is no definition property defined for the type_mapping ${templateLanguageConfig.type_mapping}`);
+                var targetType = global.type_mappings.filter(x => x.source == scd.datatype)[0];
+                tcd = targetType == null ? tcd : {...tcd, ...{ datatype: targetType.target }};
+            }
+        }
+        return {
+            name: x.name,
+            source: scd,
+            hasSourceDefinition: scd != null ? true : false,
+            target: tcd,
+            hasTargetDefinition: tcd != null ? true : false
+        }        
+    });
+    //now remove the column definitions from the source/target
+    dataSetFinalConfig.source.columns = null;
+    templateLanguageConfig.target.columns = null;
+    //remove the spaces from the name and fix the last for all the arrays
+    dataSetFinalConfig.source.date_columns = exports.remove_spaces_and_fix_last(dataSetFinalConfig.source.date_columns);
+    dataSetFinalConfig.source.primary_key = exports.remove_spaces_and_fix_last(dataSetFinalConfig.source.primary_key);
+    dataSetFinalConfig.source.columns = exports.remove_spaces_and_fix_last(dataSetFinalConfig.source.columns);    
+    //now return it
     return dataSetFinalConfig;
+}
+
+/**
+ * Configuring the array
+ * 1. add a preprty with the names having spaces removed
+ * 2. add a properry on the last item to indicate its the last
+ * @param {Array} arr The array to be processed 
+ */
+exports.remove_spaces_and_fix_last = function(arr) {
+    if (arr == null || arr.length == 0) return arr;
+    arr[arr.length - 1].last = true;
+    arr = arr.map(function(v) { v.name_without_spaces = v.name.replace(/ /g,"_"); return v; });
+    return arr;
 }
 
 /**
