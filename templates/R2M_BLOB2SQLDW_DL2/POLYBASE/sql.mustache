@@ -1,25 +1,65 @@
-CREATE PROCEDURE {{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}
-    @BLOBPATH VARCHAR(100)
+IF EXISTS(SELECT * FROM sys.objects WHERE type = 'P' AND name = '{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}') DROP PROCEDURE R2M_DL1_TMS_WMS_EQDET;
+GO
+CREATE PROCEDURE dbo.{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}
+    @BLOBPATH NVARCHAR(200)
 AS
 BEGIN
     SET NOCOUNT ON;
+    DECLARE @RowsInserted INT;
+    DECLARE @CreateExternalTableString nvarchar(500)
+    DECLARE @CreateMainTableIfNotExistsString nvarchar(500)
+    DECLARE @DropExternalTableString nvarchar(500)
+    DECLARE @FindRowCountsString nvarchar(500)
+    DECLARE @LoadString nvarchar(500)
+    DECLARE @myid uniqueidentifier  
+    SET @myid = NEWID()  
 
-    DECLARE @RowsInserted INT,
+    DECLARE @counts {{properties.datatypeforcounttable}};
 
-    /* Declare an external table that points to the folder for files to input */
-    CREATE EXTERNAL TABLE #ext_{{source.database}}_{{source.schema}}_{{source.tablename}} (
-        {{#source.columns}}'{{name}}' as '{{name_without_spaces}}'{{^last}},{{/last}}{{/source.columns}}
-    )
-    WITH ( LOCATION = @BLOBPATH,   
-        DATA_SOURCE = {{properties.data_source}},  
-        FILE_FORMAT = {{properties.file_format}},
-        REJECT_TYPE = VALUE,
-        REJECT_VALUE = 0
-    );
+    SET @CreateExternalTableString = '
+        CREATE EXTERNAL TABLE [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] (
+            {{#source.columns}}{{name}} nvarchar(100){{^last}},{{/last}}{{/source.columns}}
+        )
+        WITH ( 
+            LOCATION = ''' + @BLOBPATH + ''',   
+            DATA_SOURCE = [{{properties.datasource}}],  
+            FILE_FORMAT = [{{properties.fileformat}}],
+            REJECT_TYPE = VALUE,
+            REJECT_VALUE = 0
+        );
+    ';
 
-    /* Now insert into the table */
-    INSERT INTO [{{source.database}}-main].[{{source.schema}}_{{source.tablename}}]
-    SELECT * FROM #ext_{{source.database}}_{{source.schema}}_{{source.tablename}};
+    SET @CreateMainTableIfNotExistsString = '
+        if object_id (''main.{{source.database}}_{{source.schema}}_{{source.tablename}}'',''U'') is null
+        CREATE TABLE [Main].[{{source.database}}_{{source.schema}}_{{source.tablename}}] (
+            {{#source.columns}}{{name}} nvarchar(100){{^last}},{{/last}}{{/source.columns}}
+        );
+    ';
 
-    SELECT @RowsInserted AS RowsInserted;
+    SET @DropExternalTableString = '
+        DROP EXTERNAL TABLE [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'];
+    ';
+
+    SET @LoadString = '
+              if object_id (''main.{{source.database}}_{{source.schema}}_{{source.tablename}}'',''U'') is not null drop table [main].[{{source.database}}_{{source.schema}}_{{source.tablename}}];
+        INSERT INTO [main].[{{source.database}}_{{source.schema}}_{{source.tablename}}]
+        SELECT * FROM [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +']
+        OPTION(LABEL = ''' + CONVERT(varchar(255), @myid) + ''');
+    ';
+
+       
+       SET @FindRowCountsString = '
+              SELECT @RowsInserted = max(row_count) 
+                     FROM sys.dm_pdw_request_steps rs
+                     JOIN sys.dm_pdw_exec_requests r ON rs.request_id = r.request_id 
+                     WHERE r.[label] = ''' + CONVERT(varchar(255), @myid) + '''
+       ';
+
+    EXEC sp_executesql @CreateExternalTableString;
+    EXEC sp_executesql @CreateMainTableIfNotExistsString;
+    EXEC sp_executesql @LoadString;
+    EXEC sp_executesql @DropExternalTableString;
+    EXEC sp_executesql @FindRowCountsString, N'@RowsInserted int OUTPUT', @RowsInserted = @counts OUTPUT;
+   
+    SELECT @counts as 'Rows Inserted';
 END
