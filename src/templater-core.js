@@ -33,12 +33,17 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
 
     logger.info("==================================================================================");
     logger.info(`${path.basename(configPath)} requested for processing. Starting now. | ${corrid}`);
-    logger.info("==================================================================================");
+    logger.info("==================================================================================");    
+
+    logger.debug(`Exact path: ${path.resolve(configPath)} | ${corrid}`);
+    if (!fs.existsSync(generatedFolder)) fs.mkdirSync(generatedFolder);
+    var templatorConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    logger.debug(`${templatorConfig.datasets.length} datasets to generate code for. | ${corrid}`);
 
     //let's add the built in type_mappings to global
     if (templatorConfig.global == null) templatorConfig.global = {};
-    if (templatorConfig.global.type_mappings) templatorConfig.global.type_mappings = [];
-    var builtInTypeMappings = fs.readdirSync(path.resolve(type_mappings_path))
+    if (templatorConfig.global.type_mappings == null) templatorConfig.global.type_mappings = [];
+    var builtInTypeMappings = fs.readdirSync(path.resolve(type_mappings_path()))
                                 .map(f => {
                                     return {
                                         name: "builtin/" + path.basename(f),
@@ -47,10 +52,6 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                                 });                 
     templatorConfig.global.type_mappings.push(builtInTypeMappings);
 
-    logger.debug(`Exact path: ${path.resolve(configPath)} | ${corrid}`);
-    if (!fs.existsSync(generatedFolder)) fs.mkdirSync(generatedFolder);
-    var templatorConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    logger.debug(`${templatorConfig.datasets.length} datasets to generate code for. | ${corrid}`);
     //di = dataset index
     for(var di in templatorConfig.datasets) {
         //now that we have the dataset
