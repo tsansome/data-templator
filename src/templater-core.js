@@ -31,6 +31,11 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         logger.level = 'info';
     }
 
+    var packageJson = JSON.parse(__dirname + "/..package.json");
+    var templator_info = {
+        version : packageJson.version
+    };
+    logger.info(`============== Templator v${templator_info.version} ==============================`);
     logger.info("==================================================================================");
     logger.info(`${path.basename(configPath)} requested for processing. Starting now. | ${corrid}`);
     logger.info("==================================================================================");    
@@ -59,6 +64,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         logger.info(`Templating ${datasetToGenerate.name} .. | ${corrid}`);        
         //apply the global config if defined
         datasetToGenerate = exports.resolve_global(templatorConfig.global, datasetToGenerate);
+        //now we'll just attach some versioning around the templator being used        
+        dataSetToGenerate.templator_info = templator_info;
         //let's validate that they've deffined the dataset properly
         //firstly we ensure the columns are defined either through config or a sample
         if (samplesFolder != undefined && datasetToGenerate.source.columns == undefined) {

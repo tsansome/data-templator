@@ -38,6 +38,11 @@
                 "type": "String",
                 "defaultValue": "~~~~"
             }
-        }
+        },
+        "annotations": [
+            "DAM: {{ template_config.properties.dam_prefix }}",
+            "Load Pattern: {{ template_config.properties.pattern }}",
+            "Templator: v{{templator_info.version}}"
+        ]
     }
 }
