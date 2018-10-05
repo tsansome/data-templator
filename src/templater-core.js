@@ -31,7 +31,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         logger.level = 'info';
     }
 
-    var packageJson = JSON.parse(__dirname + "/..package.json");
+    var packageJson = JSON.parse(fs.readFileSync(path.resolve(__dirname + "/../package.json"), 'utf-8'));
     var templator_info = {
         version : packageJson.version
     };
@@ -65,7 +65,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         //apply the global config if defined
         datasetToGenerate = exports.resolve_global(templatorConfig.global, datasetToGenerate);
         //now we'll just attach some versioning around the templator being used        
-        dataSetToGenerate.templator_info = templator_info;
+        //TODO: FIX
+        // dataSetToGenerate.templator_info = templator_info;
         //let's validate that they've deffined the dataset properly
         //firstly we ensure the columns are defined either through config or a sample
         if (samplesFolder != undefined && datasetToGenerate.source.columns == undefined) {
