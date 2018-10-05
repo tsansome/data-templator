@@ -117,10 +117,6 @@
                             "value": "@pipeline().parameters.business_function_group",
                             "type": "Expression"
                         },
-                        "filename": {
-                            "value": "@pipeline().parameters.filename",
-                            "type": "Expression"
-                        },
                         "full_table_name": {
                             "value": "@pipeline().parameters.table",
                             "type": "Expression"
@@ -204,7 +200,7 @@
                     "url": "{{properties.logic_app_url}}",
                     "method": "POST",
                     "body": {
-                        "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\"\n}",
+                        "value": "{\n    \"filename\": \"@{pipeline().parameters.table}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\"\n}",
                         "type": "Expression"
                     }
                 }
@@ -230,7 +226,7 @@
                     "url": "{{properties.logic_app_url}}",
                     "method": "POST",
                     "body": {
-                        "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\"\n}",
+                        "value": "{\n    \"filename\": \"@{pipeline().parameters.table}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\"\n}",
                         "type": "Expression"
                     }
                 }
