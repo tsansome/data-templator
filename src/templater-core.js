@@ -32,10 +32,10 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
     }
 
     var packageJson = JSON.parse(fs.readFileSync(path.resolve(__dirname + "/../package.json"), 'utf-8'));
-    var templator_info = {
+    var templator_info_obj = {
         version : packageJson.version
     };
-    logger.info(`============== Templator v${templator_info.version} ==============================`);
+    logger.info(`============== Templator v${templator_info_obj.version} ==============================`);
     logger.info("==================================================================================");
     logger.info(`${path.basename(configPath)} requested for processing. Starting now. | ${corrid}`);
     logger.info("==================================================================================");    
@@ -63,10 +63,9 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         datasetToGenerate = templatorConfig.datasets[di];
         logger.info(`Templating ${datasetToGenerate.name} .. | ${corrid}`);        
         //apply the global config if defined
-        datasetToGenerate = exports.resolve_global(templatorConfig.global, datasetToGenerate);
+        dataSetToGenerate = exports.resolve_global(templatorConfig.global, datasetToGenerate);
         //now we'll just attach some versioning around the templator being used        
-        //TODO: FIX
-        // dataSetToGenerate.templator_info = templator_info;
+        dataSetToGenerate.templator_info = templator_info_obj;
         //let's validate that they've deffined the dataset properly
         //firstly we ensure the columns are defined either through config or a sample
         if (samplesFolder != undefined && datasetToGenerate.source.columns == undefined) {
@@ -129,8 +128,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 var scriptConfigs = templateConfigObj
                                         .scripts
                                         .map(function(config) {
-                                            if (config.output_file.sub_folder != undefined) config.output_file.sub_folder = Mustache.render(config.output_file.sub_folder, dataSetFinalConfig);
-                                            config.output_file.name = Mustache.render(config.output_file.name, dataSetFinalConfig);
+                                            if (config.output_file.sub_folder != undefined) config.output_file.sub_folder = exports.mustache_recursive(config.output_file.sub_folder, dataSetFinalConfig);
+                                            config.output_file.name = exports.mustache_recursive(config.output_file.name, dataSetFinalConfig);
                                             return config;
                                         });
                 //now attach back as the outputs
@@ -157,6 +156,17 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         logger.info(`Templating finished for ${datasetToGenerate.name} | ${corrid}`);
     }
     logger.info(`All finished up, thanks for using the templator :). | ${corrid}`);
+}
+
+exports.mustache_recursive = function(TemplateStr, objectToApplyToTemplate, max_iter) {
+    var templateString = TemplateStr;
+    var i = 0;
+    if (max_iter == null) max_iter = 5
+    while (i <= max_iter || templateString.includes("{{")) {
+        templateString = Mustache.render(templateString, objectToApplyToTemplate)
+        i++;
+    }
+    return templateString;
 }
 
 exports.resolve_global = function(global, datasetToGenerate) {
@@ -270,7 +280,7 @@ exports.remove_spaces_and_fix_last = function(arr) {
  */
 exports.generate_file_content_from_template = function(templateDefinition, configDefinition){
     //so template it
-    return Mustache.render(templateDefinition, configDefinition);     
+    return exports.mustache_recursive(templateDefinition, configDefinition);     
 }
 
 /**
