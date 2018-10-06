@@ -1,6 +1,6 @@
 {
   "name": "templator",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "",
   "main": "template.js",
   "scripts": {
