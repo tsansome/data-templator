@@ -1,0 +1,89 @@
+IF EXISTS(SELECT * FROM sys.objects WHERE type = 'P' AND name = '{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}') DROP PROCEDURE {{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}};
+GO
+CREATE PROC {{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}} AS
+    @BLOBPATH NVARCHAR(200)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @RowsInserted INT;
+    DECLARE @CreateExternalTableString nvarchar(500)
+    DECLARE @CreateMainTableIfNotExistsString nvarchar(500)
+    DECLARE @InsertNewRowsString nvarchar(500)
+    DECLARE @UpdateExistingRecordsString nvarchar(500)
+    DECLARE @DropExternalTableString nvarchar(500)
+    DECLARE @FindRowCountsString nvarchar(500)
+    DECLARE @myid uniqueidentifier  
+    SET @myid = NEWID()  
+
+    DECLARE @counts {{properties.datatypeforcounttable}};
+
+    SET @CreateExternalTableString = '
+        CREATE EXTERNAL TABLE [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] (
+            {{#source.columns}}{{name}} nvarchar(100){{^last}},{{/last}}{{/source.columns}}
+        )
+        WITH ( 
+            LOCATION = ''' + @BLOBPATH + ''',   
+            DATA_SOURCE = [{{properties.datasource}}],  
+            FILE_FORMAT = [{{properties.fileformat}}],
+            REJECT_TYPE = VALUE,
+            REJECT_VALUE = 0
+        );
+    ';
+
+    SET @CreateMainTableIfNotExistsString = '
+        if object_id (''main.{{source.database}}_{{source.schema}}_{{source.tablename}}'',''U'') is null
+        CREATE TABLE [Main].[{{source.database}}_{{source.schema}}_{{source.tablename}}] (
+            {{#source.columns}}{{name}} nvarchar(100){{^last}},{{/last}}{{/source.columns}}
+        );
+    ';
+
+    SET @InsertNewRowsString = '
+        INSERT INTO [main].[{{source.database}}_{{source.schema}}_{{source.tablename}}]
+        SELECT *
+        FROM [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] Tmp
+        WHERE NOT EXISTS(SELECT 1
+                         FROM [main].[{{source.database}}_{{source.schema}}_{{source.tablename}}] C
+                         WHERE {{#source.primary_keys}}C.{{name}} = Tmp.{{name}}{{/source.primary_keys}}) 
+        OPTION(LABEL = ''InsertNewRows_' + CONVERT(varchar(255), @myid) + ''');   
+    ';
+
+    SET @UpdateExistingRecordsString = '
+        UPDATE  [main].[{{source.database}}_{{source.schema}}_{{source.tablename}}]
+        SET
+            {{#source.columns}}[{{name}}] = Tmp.[{{name}}]{{^last}},{{/last}}{{/source.columns}}
+        From [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] Tmp 
+        WHERE {{#source.primary_keys}}[main].[{{source.database}}_{{source.schema}}_{{source.tablename}}].{{name}} = Tmp.{{name}}{{/source.primary_keys}} 
+        OPTION(LABEL = ''UpdateRows_' + CONVERT(varchar(255), @myid) + '''); 
+    ';
+
+    SET @DropExternalTableString = '
+        DROP EXTERNAL TABLE [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'];
+    ';
+
+    SET @FindRowCountsString = '
+            SELECT @RowsAffected = [NumInserts] + [NumUpdates]
+            FROM
+            (SELECT  max(row_count) as [NumInserts]
+                    FROM sys.dm_pdw_request_steps rs
+                    JOIN sys.dm_pdw_exec_requests r ON rs.request_id = r.request_id 
+                    WHERE r.[label] = ''InsertNewRows_' + CONVERT(varchar(255), @myid) + '')
+            UNION 
+            (
+                SELECT  max(row_count) as [NumInserts]
+                    FROM sys.dm_pdw_request_steps rs
+                    JOIN sys.dm_pdw_exec_requests r ON rs.request_id = r.request_id 
+                    WHERE r.[label] = ''UpdateRows_' + CONVERT(varchar(255), @myid) + ''
+            )
+    ';
+
+    EXEC sp_executesql @CreateExternalTableString;
+    EXEC sp_executesql @CreateMainTableIfNotExistsString;
+    EXEC sp_executesql @InsertNewRowsString;
+    EXEC sp_executesql @UpdateExistingRecordsString;
+    EXEC sp_executesql @DropExternalTableString;
+    EXEC sp_executesql @FindRowCountsString, N'@RowsAffected int OUTPUT', @RowsAffected = @counts OUTPUT;
+   
+    SELECT @counts as 'Rows affected';
+
+End 
+GO

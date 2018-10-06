@@ -1,4 +1,4 @@
-IF EXISTS(SELECT * FROM sys.objects WHERE type = 'P' AND name = '{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}') DROP PROCEDURE R2M_DL1_TMS_WMS_EQDET;
+IF EXISTS(SELECT * FROM sys.objects WHERE type = 'P' AND name = '{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}') DROP PROCEDURE {{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}};
 GO
 CREATE PROCEDURE dbo.{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}
     @BLOBPATH NVARCHAR(200)
@@ -48,12 +48,12 @@ BEGIN
     ';
 
        
-       SET @FindRowCountsString = '
-              SELECT @RowsInserted = max(row_count) 
-                     FROM sys.dm_pdw_request_steps rs
-                     JOIN sys.dm_pdw_exec_requests r ON rs.request_id = r.request_id 
-                     WHERE r.[label] = ''' + CONVERT(varchar(255), @myid) + '''
-       ';
+    SET @FindRowCountsString = '
+            SELECT @RowsInserted = max(row_count) 
+                    FROM sys.dm_pdw_request_steps rs
+                    JOIN sys.dm_pdw_exec_requests r ON rs.request_id = r.request_id 
+                    WHERE r.[label] = ''' + CONVERT(varchar(255), @myid) + '''
+    ';
 
     EXEC sp_executesql @CreateExternalTableString;
     EXEC sp_executesql @CreateMainTableIfNotExistsString;
