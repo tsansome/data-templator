@@ -162,7 +162,7 @@ exports.mustache_recursive = function(TemplateStr, objectToApplyToTemplate, max_
     var templateString = TemplateStr;
     var i = 0;
     if (max_iter == null) max_iter = 5
-    while (i <= max_iter || templateString.includes("{{")) {
+    while (i <= max_iter || templateString.indexOf("{{") != -1) {
         templateString = Mustache.render(templateString, objectToApplyToTemplate)
         i++;
     }
