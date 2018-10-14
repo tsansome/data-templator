@@ -15,7 +15,7 @@
             },
             "templates": [
                 {
-                    "name": "0_HELLOWORLD",
+                    "name": "0_HELLOWORLD/templateA",
                     "generate": [
                         {
                             "language": "REL",
