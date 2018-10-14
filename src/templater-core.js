@@ -57,6 +57,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                                 });                 
     templatorConfig.global.type_mappings.push(builtInTypeMappings);
 
+    var selectedTemplates = new Set();
+
     //di = dataset index
     for(var di in templatorConfig.datasets) {
         //now that we have the dataset
@@ -107,6 +109,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
             for (var pli in templateToGenerate.generate) {
                 var templateLanguageConfig = templateToGenerate.generate[pli];
                 logger.info(`Templating ${templateLanguageConfig.language} implementation. | ${corrid}`);
+                //now split off the template family
+                selectedTemplates.add(templateToGenerate.name + "/" + templateLanguageConfig.language);
                 //finalise the config
                 var dataSetFinalConfig = exports.prepare_final_config(datasetToGenerate, templateLanguageConfig, templateToGenerate, templatorConfig.global);
                 //remove the spaces in column names
@@ -155,6 +159,18 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         }
         logger.info(`Templating finished for ${datasetToGenerate.name} | ${corrid}`);
     }
+
+    //now we do the utility folder
+    for(let template of selectedTemplates) {
+        let family = template.split("/")[0];
+        let templateName = template.split("/")[1];
+        let language = template.split("/")[2];
+        var utilPath = path.resolve(templates_path() + "/" + family + "/0_Utility");
+        if (fs.existsSync(utilPath)) {
+            fs.copySync(utilPath, generatedFolder + "/0_Utility/");
+        }
+    }
+
     logger.info(`All finished up, thanks for using the templator :). | ${corrid}`);
 }
 
