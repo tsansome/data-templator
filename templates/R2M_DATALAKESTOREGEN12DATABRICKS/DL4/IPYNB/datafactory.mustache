@@ -3,13 +3,13 @@
     "properties": {
         "activities": [
             {
-                "name": "R2M_DL3",
+                "name": "R2M_DL4",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
                         "activity": "Backup",
                         "dependencyConditions": [
-                            "Succeeded"
+                            "Completed"
                         ]
                     }
                 ],
@@ -104,7 +104,7 @@
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL3",
+                        "activity": "R2M_DL4",
                         "dependencyConditions": [
                             "Succeeded"
                         ]
@@ -155,7 +155,7 @@
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL3",
+                        "activity": "R2M_DL4",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -194,7 +194,7 @@
                 "type": "WebActivity",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL3",
+                        "activity": "R2M_DL4",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -210,7 +210,7 @@
                     "url": "{{properties.logic_app_url}}",
                     "method": "POST",
                     "body": {
-                        "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\",\n     \"activity\": \"R2M_DL3\",\n     \"output\": \"@{activity('R2M_DL3').output.runPageUrl}\"\n}",
+                        "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\",\n     \"activity\": \"R2M_DL4\",\n     \"output\": \"@{activity('R2M_DL4').output.runPageUrl}\"\n}",
                         "type": "Expression"
                     }
                 }
