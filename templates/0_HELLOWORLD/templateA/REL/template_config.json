@@ -9,7 +9,7 @@
             }
         },
         {
-            "script_name": "datafactory",
+            "script_name": "factory",
             "output_file": {
                 "extension": "json",
                 "name": "{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}"

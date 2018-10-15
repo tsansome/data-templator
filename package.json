@@ -1,10 +1,13 @@
 {
   "name": "templator",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "",
   "main": "template.js",
   "scripts": {
     "test": "jest"
+  },
+  "bin": {
+    "templator": "./template.js"
   },
   "author": "",
   "license": "ISC",
