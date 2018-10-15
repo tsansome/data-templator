@@ -1,0 +1,49 @@
+{
+    "name": "{{ template_config.outputs.0.output_file.name }}",
+    "properties": {
+        "description": "pipeline description",
+        "activities": [
+            {
+                "name": "{{template_config.dam_prefix}}_{{template_config.load_pattern}}",
+                "type": "Copy",
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30
+                },
+                "typeProperties": {
+                    "source": {
+                        "type": "OracleSource",
+                        "oracleReaderQuery": "SELECT {{#columns}}REPLACE(REPLACE({{name}}, CHR(13), '    '), CHR(10), '    '){{^last}},{{/last}}{{/columns}}"
+                    },
+                    "sink": {
+                        "type": "BlobSink"
+                    },
+                    "enableStaging": false,
+                    "dataIntegrationUnits": 0
+                },
+                "inputs": [
+                    {
+                        "referenceName": "{{source.dataset}}",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "{{target.dataset}}",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "container": "{{target.Container}}",
+                            "table": "{{target.Table}}",
+                            "subdirectory": "",
+                            "filename": "out"
+                        }
+                    }
+                ]
+            }
+        ],
+        "folder": {
+            "name": "{{template_config.dam_prefix}}_{{template_config.load_pattern}}"
+        }
+    }
+}

@@ -17,7 +17,7 @@ test('Able to handle a dataset with no primary keys provided', () => {
         },
         "templates": [
             {
-                "name": "0_HELLOWORLD",
+                "name": "0_HELLOWORLD/templateA",
                 "generate": [
                     {
                         "language": "REL",
@@ -59,7 +59,7 @@ test('Able to handle a dataset with no date columns provided', () => {
         },
         "templates": [
             {
-                "name": "0_HELLOWORLD",
+                "name": "0_HELLOWORLD/templateA",
                 "generate": [
                     {
                         "language": "REL",
@@ -101,7 +101,7 @@ test('Able to refer to a source variable in a config from parent', () => {
         },
         "templates": [
             {
-                "name": "0_HELLOWORLD",
+                "name": "0_HELLOWORLD/templateA",
                 "generate": [
                     {
                         "language": "REL",
@@ -145,7 +145,7 @@ test('Able to refer to use a target variable in a config from parent', () => {
         },
         "templates": [
             {
-                "name": "0_HELLOWORLD",
+                "name": "0_HELLOWORLD/templateA",
                 "generate": [
                     {
                         "language": "REL",
@@ -189,7 +189,7 @@ test('Able to refer to a source variable in a config from dataset', () => {
         },
         "templates": [
             {
-                "name": "0_HELLOWORLD",
+                "name": "0_HELLOWORLD/templateA",
                 "generate": [
                     {
                         "language": "REL",
@@ -233,7 +233,7 @@ test('Able to refer to a target variable in a config from dataset', () => {
         },
         "templates": [
             {
-                "name": "0_HELLOWORLD",
+                "name": "0_HELLOWORLD/templateA",
                 "generate": [
                     {
                         "language": "REL",
@@ -278,7 +278,7 @@ test('Able to refer to a user defined variable from parent in config', () => {
         },
         "templates": [
             {
-                "name": "0_HELLOWORLD",
+                "name": "0_HELLOWORLD/templateA",
                 "generate": [
                     {
                         "language": "REL",
@@ -327,7 +327,7 @@ test('Able to refer to a global variable in config', () => {
                 },
                 "templates": [
                     {
-                        "name": "0_HELLOWORLD",
+                        "name": "0_HELLOWORLD/templateA",
                         "generate": [
                             {
                                 "language": "REL",
@@ -355,7 +355,7 @@ test('Able to refer to a global variable in config', () => {
                 },
                 "templates": [
                     {
-                        "name": "0_HELLOWORLD",
+                        "name": "0_HELLOWORLD/templateA",
                         "generate": [
                             {
                                 "language": "IPYNB",
