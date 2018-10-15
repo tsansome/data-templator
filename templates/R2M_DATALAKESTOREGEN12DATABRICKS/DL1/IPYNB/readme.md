@@ -1,4 +1,4 @@
-# Raw To Master DL2 (Append) - Data Lake Store Gen 1 to DataBricks
+# Raw To Master DL1 (Drop and Recreate) - Data Lake Store Gen 1 to DataBricks
 ## Python Notebook - ipynb
 
 ### Source atttributes required

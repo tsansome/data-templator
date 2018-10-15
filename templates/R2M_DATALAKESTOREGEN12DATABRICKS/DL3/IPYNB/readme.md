@@ -1,9 +1,9 @@
-# Raw To Master DL2 (Append) - Data Lake Store Gen 1 to DataBricks
+# Raw To Master DL3 (Insert & Update) - Data Lake Store Gen 1 to DataBricks
 ## Python Notebook - ipynb
 
 ### Source atttributes required
 
-Note that this template only needs to know the columns and date columns. Does not require the primary keys of the dataset.
+Note that this template requires that all the columns, date columns and primary keys are required for this template.
 
 Attribute Name | Description of Attribute
 -------------- | ------------------------
