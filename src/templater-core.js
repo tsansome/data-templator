@@ -74,8 +74,6 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         logger.info(`Processing request for dataset ${datasetToGenerate.name} .. | ${corrid}`);        
         //apply the global config if defined
         dataSetToGenerate = exports.resolve_global(templatorConfig.global, datasetToGenerate);
-        //now we'll just attach some versioning around the templator being used        
-        dataSetToGenerate.templator_info = templator_info_obj;
         //let's validate that they've deffined the dataset properly
         //firstly we ensure the columns are defined either through config or a sample
         if (samplesFolder != undefined && datasetToGenerate.source.columns == undefined) {
@@ -122,7 +120,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 selectedTemplates.add(templateToGenerate.name + "/" + templateLanguageConfig.language);
                 //finalise the config
                 var dataSetFinalConfig = exports.prepare_final_config(datasetToGenerate, templateLanguageConfig, templateToGenerate, templatorConfig.global);
-                //remove the spaces in column names
+                //now we'll just attach some versioning around the templator being used        
+                dataSetFinalConfig.templator_info = templator_info_obj;
                 //now let's render
                 //we need to choose the right template
                 //find the template folder
