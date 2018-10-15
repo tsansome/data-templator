@@ -10,8 +10,12 @@ const corrid = uuid.v1()
 var log4js = require('log4js');
 var logger = log4js.getLogger();
 
+var ProgressBar = require('progress');
+
 const templates_path = () => __dirname + "/../templates/";
 const type_mappings_path = () => __dirname + "/../type_mappings/";
+
+const pkg = require(__dirname + "/../package.json");
 
 /**
  * Process the config file given.
@@ -25,15 +29,14 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
     // TODO: remove this and find a way to escape '/' only
     Mustache.escape = function(text) {return text;};
 
-    if (logLevel != undefined)  {
+    if (logLevel == undefined) {
+        logger.level = 'silent';
+    } else {        
         logger.level = logLevel;
-    } else {
-        logger.level = 'info';
     }
 
-    var packageJson = JSON.parse(fs.readFileSync(path.resolve(__dirname + "/../package.json"), 'utf-8'));
     var templator_info_obj = {
-        version : packageJson.version
+        version : pkg.version
     };
     logger.info(`============== Templator v${templator_info_obj.version} ==============================`);
     logger.info("==================================================================================");
@@ -44,6 +47,9 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
     if (!fs.existsSync(generatedFolder)) fs.mkdirSync(generatedFolder);
     var templatorConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     logger.debug(`${templatorConfig.datasets.length} datasets to generate code for. | ${corrid}`);
+
+    var bar = null;
+    if (logLevel == undefined) bar = new ProgressBar('Converting :bar :percent', { total: templatorConfig.datasets.length });
 
     //let's add the built in type_mappings to global
     if (templatorConfig.global == null) templatorConfig.global = {};
@@ -60,10 +66,12 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
     var selectedTemplates = new Set();
 
     //di = dataset index
+    var counter = 0;
     for(var di in templatorConfig.datasets) {
         //now that we have the dataset
         datasetToGenerate = templatorConfig.datasets[di];
-        logger.info(`Templating ${datasetToGenerate.name} .. | ${corrid}`);        
+        logger.info('-------------------------------------------------------');
+        logger.info(`Processing request for dataset ${datasetToGenerate.name} .. | ${corrid}`);        
         //apply the global config if defined
         dataSetToGenerate = exports.resolve_global(templatorConfig.global, datasetToGenerate);
         //now we'll just attach some versioning around the templator being used        
@@ -85,7 +93,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
             }
             if (fs.existsSync(sample.file_path)) {
                 //run the profiler
-                logger.info(`Obtaining columns through profiling ${sample.file_path} | ${corrid}`);
+                logger.debug(`Obtaining columns through profiling ${sample.file_path} | ${corrid}`);
                 datasetToGenerate.source.columns = profile_file(sample);
             }
         } 
@@ -93,10 +101,10 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
             logger.debug(`Columns defined in config file mode. | ${corrid}`);
         }
         assert.notStrictEqual(datasetToGenerate.source.columns, undefined, `Dataset ${datasetToGenerate.name} does not have it's columns defined either by passing a sample or defining in the config.`);
-        logger.debug(`Dataset ${datasetToGenerate.name} has ${datasetToGenerate.source.columns.length} columns | ${corrid}`);
+        logger.info(`Dataset ${datasetToGenerate.name} has ${datasetToGenerate.source.columns.length} columns | ${corrid}`);
         //#TODO: Validation of config
         //now let's loop through the patterns requested
-        logger.debug(`${datasetToGenerate.templates.length} templates requested for generation. | ${corrid}`);
+        logger.info(`${datasetToGenerate.templates.length} templates requested for generation. | ${corrid}`);
         //pi = index of the pattern
         for(var pi in datasetToGenerate.templates) {
             var templateToGenerate = datasetToGenerate.templates[pi];
@@ -106,9 +114,10 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
             assert.strictEqual(fs.existsSync(pattern_folder_path), true, `The pattern ${templateToGenerate.name.toUpperCase()} is not one of the supported patterns. Please use one of the following: blah`);
             //now loop through the languages requested
             //pli = index of the language to implement for the pattern
+            logger.info(`${templateToGenerate.generate.length} implementations chosen to template.`)
             for (var pli in templateToGenerate.generate) {
                 var templateLanguageConfig = templateToGenerate.generate[pli];
-                logger.info(`Templating ${templateLanguageConfig.language} implementation. | ${corrid}`);
+                logger.info(`Code Generation for ${templateLanguageConfig.language} implementation commencing. | ${corrid}`);
                 //now split off the template family
                 selectedTemplates.add(templateToGenerate.name + "/" + templateLanguageConfig.language);
                 //finalise the config
@@ -154,10 +163,14 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                     if (!fs.existsSync(outputFileDir)) fs.mkdirSync(outputFileDir);                                   
                     exports.write_output(outputFileDir, fc, scriptConf[0]);
                 }
+                logger.info(`Finished Code Generation for implementation ${templateLanguageConfig.language} | ${corrid}`)
             }
-
+            logger.info(`Finished Templating all implementations for template ${templateToGenerate.name} | ${corrid}`);
         }
         logger.info(`Templating finished for ${datasetToGenerate.name} | ${corrid}`);
+        logger.info('-------------------------------------------------------');
+        counter++
+        if (bar != null) bar.tick(counter);
     }
 
     //now we do the utility folder
@@ -171,7 +184,10 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         }
     }
 
-    logger.info(`All finished up, thanks for using the templator :). | ${corrid}`);
+    logger.info("==================================================================================");
+    logger.info(`${path.basename(configPath)} is COMPLETE. | ${corrid}`);
+    logger.info("=================================================================================="); 
+
 }
 
 exports.mustache_recursive = function(TemplateStr, objectToApplyToTemplate, max_iter) {
@@ -318,6 +334,6 @@ exports.write_output = function(outputFolder, outputContent, scriptConf) {
      var outputFileNameWithExt = scriptConf.output_file.name + "." + scriptConf.output_file.extension;                        
      var outputFilePath = outputFolder + "/" + outputFileNameWithExt;
      fs.writeFileSync(outputFilePath, outputContent);
-     logger.info(`Outputted ${scriptConf.script_name} code to file ${outputFileNameWithExt} for implmentation. | ${corrid}`);
+     logger.debug(`Outputted ${scriptConf.script_name} code to file ${outputFileNameWithExt} for implmentation. | ${corrid}`);
      logger.debug(`Exact path: ${path.resolve(outputFilePath)}. | ${corrid}`)
 }
