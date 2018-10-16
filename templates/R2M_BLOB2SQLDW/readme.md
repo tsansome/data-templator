@@ -18,7 +18,6 @@ The templates included are:
 - DL1: Drop and Recreate the target table with the incoming data
 - DL2: Append the incoming data to the target table
 - DL3: Update and Insert the incoming data into the target table, not keeping history
-- DL4: Update and Insert the incoming data into the target table, preserve history in a history change table
 
 ### Family Requirements
 
