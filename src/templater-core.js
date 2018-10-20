@@ -49,7 +49,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
     logger.debug(`${templatorConfig.datasets.length} datasets to generate code for. | ${corrid}`);
 
     var bar = null;
-    if (logLevel == undefined) bar = new ProgressBar('Converting :bar :percent', { total: templatorConfig.datasets.length });
+    if (logLevel == undefined) bar = new ProgressBar(`Processsing config ${path.basename(configPath)} :bar :percent`, { total: templatorConfig.datasets.length });
 
     //let's add the built in type_mappings to global
     if (templatorConfig.global == null) templatorConfig.global = {};
@@ -66,7 +66,6 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
     var selectedTemplates = new Set();
 
     //di = dataset index
-    var counter = 0;
     for(var di in templatorConfig.datasets) {
         //now that we have the dataset
         datasetToGenerate = templatorConfig.datasets[di];
@@ -168,10 +167,11 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         }
         logger.info(`Templating finished for ${datasetToGenerate.name} | ${corrid}`);
         logger.info('-------------------------------------------------------');
-        counter++
-        if (bar != null) bar.tick(counter);
+        if (bar != null) bar.tick();
     }
 
+    var utilityProgressBar = null;
+    if (logLevel == undefined) utilityProgressBar = new ProgressBar('Producing any Utility folders :bar :percent', { total: selectedTemplates.size });
     //now we do the utility folder
     for(let template of selectedTemplates) {
         let family = template.split("/")[0];
@@ -181,6 +181,15 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         if (fs.existsSync(utilPath)) {
             fs.copySync(utilPath, generatedFolder + "/0_Utility/");
         }
+        utilPath = path.resolve(templates_path() + "/" + family + "/" + templateName + "/0_Utility");
+        if (fs.existsSync(utilPath)) {
+            fs.copySync(utilPath, generatedFolder + "/0_Utility/");
+        }
+        utilPath = path.resolve(templates_path() + "/" + family + "/" + templateName + "/" + language + "/0_Utility");
+        if (fs.existsSync(utilPath)) {
+            fs.copySync(utilPath, generatedFolder + "/0_Utility/");
+        }
+        if (utilityProgressBar != null) utilityProgressBar.tick();
     }
 
     logger.info("==================================================================================");
