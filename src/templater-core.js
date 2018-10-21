@@ -128,7 +128,9 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 //ensure that the language requested is supported
                 assert.strictEqual(fs.existsSync(languageFolderPath), true, `The pattern ${templateToGenerate.name.toUpperCase()} does not support ${templateLanguageConfig.language.toUpperCase()} as language, please use one of the following: blah ...`);
                 //get the template files under that language
-                var templateFiles = fs.readdirSync(languageFolderPath).filter(function(file) { return file.substr(-9) == ".mustache" });
+                var templateFiles = fs.readdirSync(languageFolderPath)
+                                      .filter(function(file) { return file.substr(-9) == ".mustache" })
+                                      .map(function(file) { return path.resolve(languageFolderPath + "/" + file); });
                 //read in the scripts config file for the template files
                 var templateConfigPath = languageFolderPath + "/template_config.json"
                 assert.strictEqual(fs.existsSync(templateConfigPath), true, `A template config file is not present for the language ${templateLanguageConfig.language.toUpperCase()} for the pattern ${templateToGenerate.name.toUpperCase()}`);
@@ -136,13 +138,29 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 var templateConfigObj = JSON.parse(fs.readFileSync(templateConfigPath, 'utf8'));
                 dataSetFinalConfig.template_config = templateConfigObj;
                 //process the script configs
+                //first push the linked templates onto the outputs
+                for (var lti in templateConfigObj.linked_templates) {
+                    var template_name = templateConfigObj.linked_templates[lti];
+                    var templatePath = path.resolve(templates_path() + "/" + template_name);
+                    var linkedTemplateFiles = fs.readdirSync(templatePath)
+                                                .filter(function(file) { return file.substr(-9) == ".mustache"})
+                                                .map(function(file) { return path.resolve(templatePath + "/" + file); });
+                    var templateConfPath = templatePath + "/template_config.json";
+                    assert.strictEqual(fs.existsSync(templateConfPath), true, `The script config could not be found for the linked template ${template_name}`);
+                    var templateConf = JSON.parse(fs.readFileSync(templateConfPath), 'utf8');
+                    templateConf.scripts.forEach(element => {
+                        templateConfigObj.scripts.push(element);
+                        templateFiles = templateFiles.concat(linkedTemplateFiles);
+                    });
+                }
+                //now process the outputs
                 var scriptConfigs = templateConfigObj
                                         .scripts
                                         .map(function(config) {
                                             if (config.output_file.sub_folder != undefined) config.output_file.sub_folder = exports.mustache_recursive(config.output_file.sub_folder, dataSetFinalConfig);
                                             config.output_file.name = exports.mustache_recursive(config.output_file.name, dataSetFinalConfig);
                                             return config;
-                                        });
+                                        });                
                 //now attach back as the outputs
                 templateConfigObj.outputs = scriptConfigs;
                 templateConfigObj.scripts = null;
@@ -151,16 +169,16 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 for (var template in templateFiles) {
                     var templateFile = templateFiles[template];
                     //look for a valid config
-                    var scriptConf = dataSetFinalConfig.template_config.outputs.filter(function(conf) { return conf.script_name + ".mustache" == templateFiles[template] });
+                    var scriptConf = dataSetFinalConfig.template_config.outputs.filter(function(conf) { return conf.script_name + ".mustache" == path.basename(templateFile) });
                     assert.strictEqual(scriptConf.length, 1, `1 config should be defined for ${templateFiles[template]} in the folder ${languageFolderPath}`);
                     //now let's generate it
-                    var templatePath = languageFolderPath + "/" + templateFile;
-                    var template_str = fs.readFileSync(templatePath, 'utf8');
+                    var template_str = fs.readFileSync(templateFile, 'utf8');
                     var fc = exports.generate_file_content_from_template(template_str, dataSetFinalConfig, generatedFolder)
                     var outputFileDir = generatedFolder + "/" + templateLanguageConfig.language; 
                     if (!fs.existsSync(outputFileDir)) fs.mkdirSync(outputFileDir);                                   
                     exports.write_output(outputFileDir, fc, scriptConf[0]);
                 }
+
                 logger.info(`Finished Code Generation for implementation ${templateLanguageConfig.language} | ${corrid}`)
             }
             logger.info(`Finished Templating all implementations for template ${templateToGenerate.name} | ${corrid}`);

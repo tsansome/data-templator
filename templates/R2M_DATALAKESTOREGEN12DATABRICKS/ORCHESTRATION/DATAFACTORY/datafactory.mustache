@@ -3,7 +3,7 @@
     "properties": {
         "activities": [
             {
-                "name": "R2M_DL4",
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
@@ -20,7 +20,7 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "notebookPath": "/Shared/Operational/{{target.database}}/Master/{{ template_config.outputs.1.output_file.name }}",
+                    "notebookPath": "{{properties.notebook_path}}",
                     "baseParameters": {
                         "filename": {
                             "value": "@pipeline().parameters.filename",
@@ -104,7 +104,7 @@
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL4",
+                        "activity": "R2M_DL1",
                         "dependencyConditions": [
                             "Succeeded"
                         ]
@@ -155,7 +155,7 @@
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL4",
+                        "activity": "R2M_DL1",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -194,7 +194,7 @@
                 "type": "WebActivity",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL4",
+                        "activity": "R2M_DL1",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -210,7 +210,7 @@
                     "url": "{{properties.logic_app_url}}",
                     "method": "POST",
                     "body": {
-                        "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\",\n     \"activity\": \"R2M_DL4\",\n     \"output\": \"@{activity('R2M_DL4').output.runPageUrl}\"\n}",
+                        "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\",\n     \"activity\": \"R2M_DL1\",\n     \"output\": \"@{activity('R2M_DL1').output.runPageUrl}\"\n}",
                         "type": "Expression"
                     }
                 }

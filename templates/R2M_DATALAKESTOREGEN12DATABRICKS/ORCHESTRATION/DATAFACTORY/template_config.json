@@ -1,0 +1,16 @@
+{
+    "scripts": [
+        {
+            "script_name": "datafactory",
+            "output_file": {
+                "extension": "json",
+                "sub_folder": "adf/pipelines",
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}"
+            }
+        }
+    ],
+    "properties": {
+        "dam_prefix": "__OVERRIDE__",
+        "pattern": "__OVERRIDE__"
+    }
+}
