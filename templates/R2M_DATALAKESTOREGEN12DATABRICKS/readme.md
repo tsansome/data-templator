@@ -3,8 +3,8 @@
 
 This template is for moving data between Data Lake Storage Gen 1 and Databricks. All templates generate two pieces of code.
 
-- An Azure Data Factory json pipeline
-- A .ipynb file for a Python notebook
+1. An Azure Data Factory json pipeline
+2. A .ipynb file for a Python notebook
 
 The templates are denoted with a prefix of R2M. It is mapped to an architecture that has 4 areas:
 - **R**AW
