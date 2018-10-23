@@ -20,7 +20,7 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "notebookPath": "{{properties.notebook_path}}",
+                    "notebookPath": "/Shared/Operational/{{target.database}}/Master/{{template_config.outputs.0.output_file.name}}",
                     "baseParameters": {
                         "filename": {
                             "value": "@pipeline().parameters.filename",
