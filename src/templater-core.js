@@ -70,9 +70,13 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         //now that we have the dataset
         datasetToGenerate = templatorConfig.datasets[di];
         logger.info('-------------------------------------------------------');
-        logger.info(`Processing request for dataset ${datasetToGenerate.name} .. | ${corrid}`);        
+        logger.info(`Processing request for dataset ${datasetToGenerate.name} .. | ${corrid}`);     
+        logger.trace(`Dataset definition before any substitution:`);
+        logger.trace(`${JSON.stringify(datasetToGenerate)}`);   
         //apply the global config if defined
         dataSetToGenerate = exports.resolve_global(templatorConfig.global, datasetToGenerate);
+        logger.trace(`Dataset definition after global substitutions:`);
+        logger.trace(`${JSON.stringify(datasetToGenerate)}`);   
         //let's validate that they've deffined the dataset properly
         //firstly we ensure the columns are defined either through config or a sample
         if (samplesFolder != undefined && datasetToGenerate.source.columns == undefined) {
@@ -119,6 +123,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 selectedTemplates.add(templateToGenerate.name + "/" + templateLanguageConfig.language);
                 //finalise the config
                 var dataSetFinalConfig = exports.prepare_final_config(datasetToGenerate, templateLanguageConfig, templateToGenerate, templatorConfig.global);
+                logger.trace(`Dataset definition after mustache resolution within dataset definition:`);
+                logger.trace(`${JSON.stringify(dataSetFinalConfig)}`);   
                 //now we'll just attach some versioning around the templator being used        
                 dataSetFinalConfig.templator_info = templator_info_obj;
                 //now let's render
@@ -137,6 +143,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 //okay let's get the script configs, also resolve any mustaching used, then attach it as an outputs array to the dataset
                 var templateConfigObj = JSON.parse(fs.readFileSync(templateConfigPath, 'utf8'));
                 dataSetFinalConfig.template_config = templateConfigObj;
+                logger.trace(`Dataset definition with attached template config:`);
+                logger.trace(`${JSON.stringify(dataSetFinalConfig)}`);   
                 //process the script configs
                 //first push the linked templates onto the outputs
                 for (var lti in templateConfigObj.linked_templates) {
@@ -165,6 +173,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 templateConfigObj.outputs = scriptConfigs;
                 templateConfigObj.scripts = null;
                 dataSetFinalConfig.template_config = templateConfigObj;
+                logger.trace(`Dataset definition with outputs variable:`);
+                logger.trace(`${JSON.stringify(dataSetFinalConfig)}`);   
                 //now loop and generate                
                 for (var template in templateFiles) {
                     var templateFile = templateFiles[template];
@@ -173,6 +183,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                     assert.strictEqual(scriptConf.length, 1, `1 config should be defined for ${templateFiles[template]} in the folder ${languageFolderPath}`);
                     //now let's generate it
                     var template_str = fs.readFileSync(templateFile, 'utf8');
+                    logger.trace(`Dataset definition that will be passed into mustache for final template:`);
+                    logger.trace(`${JSON.stringify(dataSetFinalConfig)}`);   
                     var fc = exports.generate_file_content_from_template(template_str, dataSetFinalConfig, generatedFolder)
                     var outputFileDir = generatedFolder + "/" + templateLanguageConfig.language; 
                     if (!fs.existsSync(outputFileDir)) fs.mkdirSync(outputFileDir);                                   
@@ -307,7 +319,6 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
         }        
     });
     //now remove the column definitions from the source/target
-    dataSetFinalConfig.source.columns = null;
     templateLanguageConfig.target.columns = null;
     //remove the spaces from the name and fix the last for all the arrays
     dataSetFinalConfig.source.date_columns = exports.remove_spaces_and_fix_last(dataSetFinalConfig.source.date_columns);

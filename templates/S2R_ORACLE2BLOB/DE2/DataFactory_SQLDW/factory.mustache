@@ -14,7 +14,7 @@
                 "typeProperties": {
                     "source": {
                         "type": "SqlDWSource",
-                        "sqlReaderQuery": "Select CONVERT(VARCHAR(20),isnull(max({{source.delta_column}}),'{{source.delta_column_format}}'),121) as maxDate From [Main].[{{source.database}}_{{source.schema}}_{{source.tablename}}];"
+                        "sqlReaderQuery": "Select CONVERT(VARCHAR(20),isnull(max({{source.delta_column}}),'{{source.delta_column_format}}'),121) as delta_max From [Main].[{{source.database}}_{{source.schema}}_{{source.tablename}}];"
                     },
                     "dataset": {
                         "referenceName": "{{properties.sqldwsource}}",
@@ -23,7 +23,7 @@
                 }
             },
             {
-                "name": "Stage temp file",
+                "name": "Extract delta rows from source table",
                 "type": "Copy",
                 "dependsOn": [
                     {
@@ -43,7 +43,7 @@
                     "source": {
                         "type": "OracleSource",
                         "oracleReaderQuery": {
-                            "value": "SELECT SELECT {{#columns}}REPLACE(REPLACE({{name}}, CHR(13), '    '), CHR(10), '    '){{^last}},{{/last}}{{/columns}} FROM W_WAGON_ALL \nWHERE TM_MODIFIED_TIMESTAMP > '@{activity('Get Maximum Value').output.firstRow.maxDate }  '",
+                            "value": "SELECT {{#columns}}REPLACE(REPLACE([{{name}}], CHR(13), '    '), CHR(10), '    '){{^last}},{{/last}}{{/columns}} FROM {{ source.schema }}{{ source.tablename }} \nWHERE {{ delta_column }} > '@{activity('Get Maximum Value').output.firstRow.maxDate }  '",
                             "type": "Expression"
                         }
                     },
@@ -55,73 +55,27 @@
                 },
                 "inputs": [
                     {
-                        "referenceName": "TMS_TM_ALCN",
+                        "referenceName": "MAIN_DUMMY",
                         "type": "DatasetReference"
                     }
                 ],
                 "outputs": [
                     {
-                        "referenceName": "RAW_TEMP_DUMMY",
+                        "referenceName": "RAW_{{source.database}}_DUMMY",
                         "type": "DatasetReference",
                         "parameters": {
-                            "subfolder": "TMSDW_WAGON_ALL",
-                            "filename": "temp.dsv"
-                        }
-                    }
-                ]
-            },
-            {
-                "name": "Insert using merge",
-                "type": "Copy",
-                "dependsOn": [
-                    {
-                        "activity": "Stage temp file",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "7.00:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false
-                },
-                "typeProperties": {
-                    "source": {
-                        "type": "BlobSource",
-                        "recursive": false
-                    },
-                    "sink": {
-                        "type": "BlobSink",
-                        "copyBehavior": "MergeFiles"
-                    },
-                    "enableStaging": false,
-                    "dataIntegrationUnits": 0
-                },
-                "inputs": [
-                    {
-                        "referenceName": "RAW_TEMP_DUMMY",
-                        "type": "DatasetReference",
-                        "parameters": {
-                            "subfolder": "TMSDW_WAGON_ALL",
-                            "filename": "temp.dsv"
-                        }
-                    }
-                ],
-                "outputs": [
-                    {
-                        "referenceName": "BLOB_TMS_TM_ALCN",
-                        "type": "DatasetReference",
-                        "parameters": {
-                            "FileName": "@{activity('Get Maximum Value').output.firstRow.MaxDate }.dsv"
+                            "subfolder": "{{source.schema}}_{{source.tablename}}",
+                            "filename": "@{pipeline().triggerTime}_{{ template_config.properties.pattern }}_Delta.dsv"
                         }
                     }
                 ]
             }
         ],
         "folder": {
-            "name": "SRC_TO_RAW_DL2"
-        }
+            "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}"
+        },
+        "annotations": [
+            "Templator: v{{templator_info.version}}"
+        ]
     }
 }
