@@ -1,0 +1,22 @@
+{
+    "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}",
+    "properties": {
+        "runtimeState": "{{ properties.trigger_status }}",
+        "pipelines": [
+            {
+                "pipelineReference": {
+                    "referenceName": "{{template_config.outputs.1.output_file.name}}",
+                    "type": "PipelineReference"
+                }
+            }
+        ],
+        "type": "BlobEventsTrigger",
+        "typeProperties": {
+            "blobPathBeginsWith": "/raw-{{source.database}}/blobs/{{source.database}}_{{source.schema}}_{{source.tablename}}",
+            "scope": "/subscriptions/{{ properties.azure_subscription_id }}/resourceGroups/{{ properties.resource_group }}/providers/Microsoft.Storage/storageAccounts/{{ properties.storage_account }}",
+            "events": [
+                "Microsoft.Storage.BlobCreated"
+            ]
+        }
+    }
+}

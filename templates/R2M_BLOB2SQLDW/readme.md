@@ -36,3 +36,6 @@ The options at present (10/18/2018) are:
 
 #### 3. Have a dataset in Azure Data Factory pointing to SQL DW
 You will requrie a dataset in Data Factory that is pointing to the right SQL DW. The activity declared in Data Factory will then use this as a connection. It will not use the table if you have specified a table in the dataset.
+
+#### 4. Enable Event Grid for the subscription that the Azure storage account sits in
+Please enable event grid as a resource provider for the subscription that the Azure Storage Account sits in. This is used by Data Factory to trigger based on Blob Storage.
