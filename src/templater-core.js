@@ -109,7 +109,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
             logger.info(`Template ${templateToGenerate.name} selected for ${datasetToGenerate.name} | ${corrid}`);
             //ensure that the pattern requested is supported
             var pattern_folder_path = path.resolve(templates_path() + templateToGenerate.name.toUpperCase() + "/");
-            assert.strictEqual(fs.existsSync(pattern_folder_path), true, `The pattern ${templateToGenerate.name.toUpperCase()} is not one of the supported patterns. Please use one of the following: blah`);
+            var available_patterns = fs.readdirSync(path.resolve(templates_path())).filter(file => fs.lstatSync(templates_path() + "/" + file).isDirectory()).join(",");
+            assert.strictEqual(fs.existsSync(pattern_folder_path), true, `The template family ${templateToGenerate.name.toUpperCase()} is not one of the supported template families. Please use one of the following: please use one of the following ${available_patterns}`);
             //now loop through the languages requested
             //pli = index of the language to implement for the pattern
             logger.info(`${templateToGenerate.generate.length} implementations chosen to template.`)
@@ -128,7 +129,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 //find the template folder
                 var languageFolderPath = pattern_folder_path + "/" + templateLanguageConfig.language.toUpperCase();
                 //ensure that the language requested is supported
-                assert.strictEqual(fs.existsSync(languageFolderPath), true, `The pattern ${templateToGenerate.name.toUpperCase()} does not support ${templateLanguageConfig.language.toUpperCase()} as language, please use one of the following: blah ...`);
+                var available_languages = fs.readdirSync(pattern_folder_path).filter(file => fs.lstatSync(pattern_folder_path + "/" + file).isDirectory()).join(",");
+                assert.strictEqual(fs.existsSync(languageFolderPath), true, `The language ${templateToGenerate.name.toUpperCase()} does not support ${templateLanguageConfig.language.toUpperCase()} as language, please use one of the following: ${available_languages}`);
                 //get the template files under that language
                 var templateFiles = fs.readdirSync(languageFolderPath)
                                       .filter(function(file) { return file.substr(-9) == ".mustache" })
