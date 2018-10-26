@@ -209,9 +209,16 @@
                 "typeProperties": {
                     "url": "{{properties.logic_app_url}}",
                     "method": "POST",
-                    "body": {
-                        "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\",\n     \"activity\": \"R2M_DL1\",\n     \"output\": \"@{activity('R2M_DL1').output.runPageUrl}\"\n}",
-                        "type": "Expression"
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body":
+                    {
+                        "filename": "@{pipeline().parameters.table}",
+                        "table": "@{pipeline().parameters.table}",
+                        "pipeline": "@{pipeline().Pipeline}",
+                        "triggered": "@{pipeline().TriggerTime}",
+                        "activity": "R2M"
                     }
                 }
             },
@@ -235,9 +242,16 @@
                 "typeProperties": {
                     "url": "{{properties.logic_app_url}}",
                     "method": "POST",
-                    "body": {
-                        "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\",\n     \"activity\": \"Reconcilliation_and_Capture_Run_Data\",\n     \"output\": \"@{activity('Reconcilliation_and_Capture_Run_Data').output.runPageUrl}\"\n}",
-                        "type": "Expression"
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body":
+                    {
+                        "filename": "@{pipeline().parameters.table}",
+                        "table": "@{pipeline().parameters.table}",
+                        "pipeline": "@{pipeline().Pipeline}",
+                        "triggered": "@{pipeline().TriggerTime}",
+                        "activity": "Reconcilliation_and_Capture_Run_Data"
                     }
                 }
             },
@@ -259,11 +273,18 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "url": "https://prod-11.australiaeast.logic.azure.com:443/workflows/81aa8883a52945abba04289b9035b92c/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ig4jJ1uCudaaltTY37EBY7tF3HTgRdqvM1Zd9V4fOdo",
+                    "url": "{{properties.logic_app_url}}",
                     "method": "POST",
-                    "body": {
-                        "value": "{\n    \"filename\": \"@{pipeline().parameters.filename}\",\n    \"table\": \"@{pipeline().parameters.table}\",\n    \"pipeline\": \"@{pipeline().Pipeline}\",\n    \"triggered\": \"@{pipeline().TriggerTime}\",\n     \"activity\": \"Backup\",\n     \"output\": \"@{activity('Backup').output.runPageUrl}\"\n}",                        
-                        "type": "Expression"
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body":
+                    {
+                        "filename": "@{pipeline().parameters.table}",
+                        "table": "@{pipeline().parameters.table}",
+                        "pipeline": "@{pipeline().Pipeline}",
+                        "triggered": "@{pipeline().TriggerTime}",
+                        "activity": "Backup"
                     }
                 }
             }
@@ -302,7 +323,7 @@
             }
         },
         "annotations": [
-            "BFG: {{ bfg }}",
+            "Target DB: {{ target.database }}",
             "Templator: v{{templator_info.version}}"
         ]
     }
