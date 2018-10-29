@@ -1,6 +1,6 @@
 # The Templator 
 
-Migrating datasets or tables into some system? that's what this was originally built for. An experiment between some data engineers. A templating utility with in built templates, fed by a config and a minimal code footprint. Developer productivity here we come!
+Migrating datasets or tables into some system? That's what this was originally built for. An experiment between some data engineers. A templating utility with in built templates, fed by a config and a minimal code footprint. Developer productivity here we come!
 
 So welcome to the templator, be a consumer or even a template author. If you develop a new template, submit a pull request! 
 
@@ -13,7 +13,7 @@ The templator works off a config that you define. It should be JSON format and i
 
 The templator uses [Mustache](https://www.npmjs.com/package/mustache) under the covers to use your config defined in step 1 and apply it to a template that a template author has defined. 
 
-Let's see an example of how we could use it. Suppose the template your wishing to invoke requires that you specify the target table to insert the data into. You know that the target table is going to be named the same as the source table name. We could define this in mustache with:
+Let's see an example of how we could use it. Suppose the template you're wishing to invoke requires that you specify the target table to insert the data into. You know that the target table is going to be named the same as the source table name. We could define this in mustache with:
 
 ```json
 "target": {
