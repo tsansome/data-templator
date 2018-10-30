@@ -4,7 +4,7 @@
         "description": "pipeline description",
         "activities": [
             {
-                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.load_pattern}}",
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
                 "type": "Copy",
                 "policy": {
                     "timeout": "7.00:00:00",
@@ -43,7 +43,7 @@
             }
         ],
         "folder": {
-            "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.load_pattern}}"
+            "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}"
         },
         "annotations": [
             "Templator: v{{templator_info.version}}"
