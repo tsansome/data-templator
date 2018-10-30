@@ -329,7 +329,7 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
     dataSetFinalConfig.columns = exports.remove_spaces_and_fix_last(dataSetFinalConfig.columns);    
     
     //add in our string manipulation functions
-    dataSetFinalConfig.string = {
+    dataSetFinalConfig.string_func = {
         lower: function() {
             return function(data, render) {
                 return render(data).toLowerCase();
