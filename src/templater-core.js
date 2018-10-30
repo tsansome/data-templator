@@ -338,18 +338,18 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
         upper: function() {
             return function(data, render) {
                 return render(data).toUpperCase();
-            }
+            };
         },
         capitalize: function() {
             return function(data, render) {
                 var toRet = render(data);
                 return toRet.charAt(0).toUpperCase() + toRet.slice(1);
-            }
+            };
         },
         length: function() {
             return function(data, render) {
                 return render(data).length;
-            }
+            };
         }
     };
     
