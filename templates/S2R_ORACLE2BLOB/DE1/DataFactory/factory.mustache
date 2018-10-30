@@ -14,7 +14,7 @@
                 "typeProperties": {
                     "source": {
                         "type": "OracleSource",
-                        "oracleReaderQuery": "SELECT {{#columns}}REPLACE(REPLACE({{name}}, CHR(13), '    '), CHR(10), '    '){{^last}},{{/last}}{{/columns}}"
+                        "oracleReaderQuery": "SELECT {{#columns}}REPLACE(REPLACE({{name}}, CHR(13), '    '), CHR(10), '    '){{^last}},{{/last}}{{/columns}} FROM {{source.schema}}.{{source.tablename}}"
                     },
                     "sink": {
                         "type": "BlobSink"
@@ -24,17 +24,17 @@
                 },
                 "inputs": [
                     {
-                        "referenceName": "{{source.dataset}}",
+                        "referenceName": "{{source.dummysource}}",
                         "type": "DatasetReference"
                     }
                 ],
                 "outputs": [
                     {
-                        "referenceName": "{{target.dataset}}",
+                        "referenceName": "{{target.genericdataset}}",
                         "type": "DatasetReference",
                         "parameters": {
-                            "container": "{{target.Container}}",
-                            "table": "{{target.Table}}",
+                            "container": "{{target.container}}",
+                            "table": "{{source.tablename}}",
                             "subdirectory": "",
                             "filename": "out"
                         }
@@ -43,7 +43,10 @@
             }
         ],
         "folder": {
-            "name": "{{template_config.dam_prefix}}_{{template_config.load_pattern}}"
-        }
+            "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.load_pattern}}"
+        },
+        "annotations": [
+            "Templator: v{{templator_info.version}}"
+        ]
     }
 }
