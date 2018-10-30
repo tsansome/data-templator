@@ -4,7 +4,7 @@
         "description": "pipeline description",
         "activities": [
             {
-                "name": "{{template_config.dam_prefix}}_{{template_config.load_pattern}}",
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.load_pattern}}",
                 "type": "Copy",
                 "policy": {
                     "timeout": "7.00:00:00",
@@ -24,7 +24,7 @@
                 },
                 "inputs": [
                     {
-                        "referenceName": "{{source.dummysource}}",
+                        "referenceName": "{{source.genericdataset}}",
                         "type": "DatasetReference"
                     }
                 ],
@@ -33,7 +33,7 @@
                         "referenceName": "{{target.genericdataset}}",
                         "type": "DatasetReference",
                         "parameters": {
-                            "container": "{{target.container}}",
+                            "container": "{{target.storage_container}}",
                             "table": "{{source.tablename}}",
                             "subdirectory": "",
                             "filename": "out"
