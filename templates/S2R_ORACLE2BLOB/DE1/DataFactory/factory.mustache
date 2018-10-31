@@ -33,8 +33,8 @@
                         "referenceName": "{{target.genericdataset}}",
                         "type": "DatasetReference",
                         "parameters": {
-                            "subfolder": "@concat('{{source.tablename}}', '_rId_', pipeline().RunId, '_dt_', pipeline().TriggerTime)",
-                            "filename": "out.dsv"
+                            "subfolder": "{{source.tablename}}'",
+                            "filename": "@concat('out.dsv", '_rId_', pipeline().RunId, '_dt_', pipeline().TriggerTime)"
                         }
                     }
                 ]
