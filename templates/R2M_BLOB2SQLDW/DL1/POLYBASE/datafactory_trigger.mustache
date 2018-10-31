@@ -7,6 +7,9 @@
                 "pipelineReference": {
                     "referenceName": "{{template_config.outputs.1.output_file.name}}",
                     "type": "PipelineReference"
+                },
+                "parameters": {
+                    "BLOB_PATH": "@concat(@triggerBody().folderPath, \"/', @triggerBody().fileName) "
                 }
             }
         ],
