@@ -9,7 +9,7 @@
                     "type": "PipelineReference"
                 },
                 "parameters": {
-                    "BLOB_PATH": "concat(@{triggerBody().folderPath}, '/', @{triggerBody().filename})"
+                    "BLOB_PATH": "@{replace(triggerBody().folderPath, '{{properties.storage_container}}/', '')}/@{triggerBody().filename}"
                 }
             }
         ],
