@@ -14,7 +14,7 @@
                 "typeProperties": {
                     "source": {
                         "type": "OracleSource",
-                        "oracleReaderQuery": "SELECT {{#columns}}REPLACE(REPLACE({{name}}, CHR(13), '    '), CHR(10), '    '){{^last}},{{/last}}{{/columns}} FROM {{source.schema}}.{{source.tablename}}"
+                        "oracleReaderQuery": "SELECT {{#columns}}REPLACE(REPLACE({{name}}, CHR(13), '    '), CHR(10), '    '){{^last}},{{/last}}{{/columns}} FROM '{{source.schema}}'.'{{source.tablename}}'"
                     },
                     "sink": {
                         "type": "BlobSink"
