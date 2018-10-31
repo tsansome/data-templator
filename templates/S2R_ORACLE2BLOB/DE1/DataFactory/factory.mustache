@@ -1,7 +1,7 @@
 {
     "name": "{{ template_config.outputs.0.output_file.name }}",
     "properties": {
-        "description": "pipeline description",
+        "description": "A pipeline that extracts the full table from {{source.schema}}.{{source.tablename}} from the database {{source.database}}. It then drops it into the {{target.storage_container}} using {{target.genericdataset}} as a reference for the Blob storage account.",
         "activities": [
             {
                 "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
