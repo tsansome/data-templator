@@ -9,7 +9,7 @@
                     "type": "PipelineReference"
                 },
                 "parameters": {
-                    "BLOB_PATH": "@concat(@triggerBody().folderPath, \"/', @triggerBody().fileName) "
+                    "BLOB_PATH": "concat(@{triggerBody().folderPath}, '/', @{triggerBody().filename})"
                 }
             }
         ],
