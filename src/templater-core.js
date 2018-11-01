@@ -340,8 +340,16 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
 exports.remove_spaces_and_fix_last = function(arr) {
     if (arr == null || arr.length == 0) return arr;
     arr[arr.length - 1].last = true;
-    arr = arr.map(function(v) { v.name_without_spaces = v.name.replace(/ /g,"_"); return v; });
+    arr = arr.map(function(v) { v.name_without_spaces = exports.replace_illegal_characters(name); return v; });
     return arr;
+}
+
+
+exports.replace_illegal_characters = function(str) {
+    var string_first = str.replace(/[^a-zA-Z0-9 _&]/g, '');
+    string_first = string_first.replace(/ /g, '_');
+    string_first = string_first.replace(/&/g,'and')
+    return string_first;
 }
 
 /**
