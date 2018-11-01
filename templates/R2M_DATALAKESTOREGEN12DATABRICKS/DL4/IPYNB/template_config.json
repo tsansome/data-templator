@@ -5,7 +5,7 @@
             "output_file": {
                 "extension": "ipynb", 
                 "sub_folder": "ipynb/{{target.database}}/Master",           
-                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}"
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}"
             }
         }
     ],
@@ -17,6 +17,6 @@
         "pattern": "DL4"
     },
     "variables": {
-        "source_tablename_formatted": "{{#string_func.replace_illegal_characters}}{{source.tablename}}{{/string_func.replace_illegal_characters}}"
+        "source_tablename_formatted": "{{#string_func.replace_illegal_characters}}{{source_tablename_formatted}}{{/string_func.replace_illegal_characters}}"
     }
 }

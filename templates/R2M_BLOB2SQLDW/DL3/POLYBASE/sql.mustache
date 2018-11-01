@@ -1,6 +1,6 @@
-IF EXISTS(SELECT * FROM sys.objects WHERE type = 'P' AND name = '{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}') DROP PROCEDURE {{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}};
+IF EXISTS(SELECT * FROM sys.objects WHERE type = 'P' AND name = '{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}') DROP PROCEDURE {{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source_tablename_formatted}};
 GO
-CREATE PROC {{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}} AS
+CREATE PROC {{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source_tablename_formatted}} AS
     @BLOBPATH NVARCHAR(200)
 AS
 BEGIN
@@ -31,28 +31,28 @@ BEGIN
     ';
 
     SET @CreateMainTableIfNotExistsString = '
-        if object_id (''main.{{source.database}}_{{source.schema}}_{{source.tablename}}'',''U'') is null
-        CREATE TABLE [Main].[{{source.database}}_{{source.schema}}_{{source.tablename}}] (
+        if object_id (''main.{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}'',''U'') is null
+        CREATE TABLE [Main].[{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}] (
             {{#source.columns}}{{name}} nvarchar(100){{^last}},{{/last}}{{/source.columns}}
         );
     ';
 
     SET @InsertNewRowsString = '
-        INSERT INTO [main].[{{source.database}}_{{source.schema}}_{{source.tablename}}]
+        INSERT INTO [main].[{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}]
         SELECT *
         FROM [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] Tmp
         WHERE NOT EXISTS(SELECT 1
-                         FROM [main].[{{source.database}}_{{source.schema}}_{{source.tablename}}] C
+                         FROM [main].[{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}] C
                          WHERE {{#source.primary_keys}}C.{{name}} = Tmp.{{name}}{{/source.primary_keys}}) 
         OPTION(LABEL = ''InsertNewRows_' + CONVERT(varchar(255), @myid) + ''');   
     ';
 
     SET @UpdateExistingRecordsString = '
-        UPDATE  [main].[{{source.database}}_{{source.schema}}_{{source.tablename}}]
+        UPDATE  [main].[{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}]
         SET
             {{#source.columns}}[{{name}}] = Tmp.[{{name}}]{{^last}},{{/last}}{{/source.columns}}
         From [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] Tmp 
-        WHERE {{#source.primary_keys}}[main].[{{source.database}}_{{source.schema}}_{{source.tablename}}].{{name}} = Tmp.{{name}}{{/source.primary_keys}} 
+        WHERE {{#source.primary_keys}}[main].[{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}].{{name}} = Tmp.{{name}}{{/source.primary_keys}} 
         OPTION(LABEL = ''UpdateRows_' + CONVERT(varchar(255), @myid) + '''); 
     ';
 

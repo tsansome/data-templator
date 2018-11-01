@@ -1,6 +1,6 @@
-IF EXISTS(SELECT * FROM sys.objects WHERE type = 'P' AND name = '{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}') DROP PROCEDURE {{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}};
+IF EXISTS(SELECT * FROM sys.objects WHERE type = 'P' AND name = '{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}') DROP PROCEDURE {{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source_tablename_formatted}};
 GO
-CREATE PROCEDURE dbo.{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source.tablename}}
+CREATE PROCEDURE dbo.{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}
     @BLOBPATH NVARCHAR(200)
 AS
 BEGIN
@@ -30,8 +30,8 @@ BEGIN
     ';
 
     SET @CreateMainTableIfNotExistsString = '
-        if object_id (''main.{{source.database}}_{{source.schema}}_{{source.tablename}}'',''U'') is null
-        CREATE TABLE [Main].[{{source.database}}_{{source.schema}}_{{source.tablename}}] (
+        if object_id (''main.{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}'',''U'') is null
+        CREATE TABLE [Main].[{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}] (
             {{#source.columns}}{{name}} nvarchar(100){{^last}},{{/last}}{{/source.columns}}
         );
     ';
@@ -41,8 +41,8 @@ BEGIN
     ';
 
     SET @LoadString = '
-              if object_id (''main.{{source.database}}_{{source.schema}}_{{source.tablename}}'',''U'') is not null drop table [main].[{{source.database}}_{{source.schema}}_{{source.tablename}}];
-        INSERT INTO [main].[{{source.database}}_{{source.schema}}_{{source.tablename}}]
+              if object_id (''main.{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}'',''U'') is not null drop table [main].[{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}];
+        INSERT INTO [main].[{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}]
         SELECT * FROM [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +']
         OPTION(LABEL = ''' + CONVERT(varchar(255), @myid) + ''');
     ';
