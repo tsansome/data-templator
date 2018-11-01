@@ -30,7 +30,7 @@
         {
             "cell_type": "code",
             "source": [
-                "%sql\nDROP TABLE IF EXISTS {{ target.database }}_master.{{ source.database}}_{{ source.tablename }}_temp;\n\nCREATE TABLE {{ target.database }}_master.{{ source.database}}_{{ source.tablename }}_temp\n USING parquet\n    AS\n    SELECT *\n      FROM sdf;"
+                "%sql\nDROP TABLE IF EXISTS {{ target.database }}_master.{{ source.database}}_{{ template_config.variables.source_tablename_formatted }}_temp;\n\nCREATE TABLE {{ target.database }}_master.{{ source.database}}_{{ template_config.variables.source_tablename_formatted }}_temp\n USING parquet\n    AS\n    SELECT *\n      FROM sdf;"
             ],
             "metadata": {},
             "outputs": [],
@@ -39,7 +39,7 @@
         {
             "cell_type": "code",
             "source": [
-                "%sql\n\nDROP TABLE IF EXISTS {{ target.database }}_master.{{ source.database}}_{{ source.tablename }};\n\nALTER TABLE {{ target.database }}_master.{{ source.database}}_{{ source.tablename }}_temp RENAME TO {{ target.database }}_master.{{ source.database}}_{{ source.tablename }};"
+                "%sql\n\nDROP TABLE IF EXISTS {{ target.database }}_master.{{ source.database}}_{{ template_config.variables.source_tablename_formatted }};\n\nALTER TABLE {{ target.database }}_master.{{ source.database}}_{{ template_config.variables.source_tablename_formatted }}_temp RENAME TO {{ target.database }}_master.{{ source.database}}_{{ template_config.variables.source_tablename_formatted }};"
             ],
             "metadata": {},
             "outputs": [],
@@ -47,7 +47,7 @@
         }
     ],
     "metadata": {
-        "name": "R2M_DL1_{{ source.tablename }}"
+        "name": "R2M_DL1_{{ template_config.variables.source_tablename_formatted }}"
     },
     "nbformat": 4,
     "nbformat_minor": 0

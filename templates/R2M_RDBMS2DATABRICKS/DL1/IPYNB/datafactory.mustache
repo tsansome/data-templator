@@ -290,7 +290,7 @@
             },
             "table": {
                 "type": "String",
-                "defaultValue": "{{target.database}}_master.{{ source.database}}_{{ source.tablename }}"
+                "defaultValue": "{{target.database}}_master.{{ source.database}}_{{ template_config.variables.source_tablename_formatted }}"
             },
             "business_function_group": {
                 "type": "String",

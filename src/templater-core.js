@@ -158,6 +158,9 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                         templateFiles = templateFiles.concat(linkedTemplateFiles);
                     });
                 }
+                
+                //mustache any remaining on the template config                
+                templateConfigObj = JSON.parse(exports.mustache_recursive(JSON.stringify( templateConfigObj), dataSetFinalConfig));
                 //now process the outputs
                 var scriptConfigs = templateConfigObj
                                         .scripts
@@ -169,8 +172,9 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 //now attach back as the outputs
                 templateConfigObj.outputs = scriptConfigs;
                 templateConfigObj.scripts = null;
+                
                 dataSetFinalConfig.template_config = templateConfigObj;
-                exports.print_dataset_definition(`Dataset definition with outputs variable:`, dataSetFinalConfig);
+                exports.print_dataset_definition(`Dataset definition with outputs variable:`, dataSetFinalConfig)
                 //now loop and generate                
                 for (var template in templateFiles) {
                     var templateFile = templateFiles[template];
@@ -350,6 +354,11 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
             return function(data, render) {
                 return render(data).length;
             };
+        },
+        replace_illegal_characters: function() {
+            return function(data, render) {
+                return exports.replace_illegal_characters(render(data));
+            }
         }
     };
     
@@ -366,7 +375,7 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
 exports.remove_spaces_and_fix_last = function(arr) {
     if (arr == null || arr.length == 0) return arr;
     arr[arr.length - 1].last = true;
-    arr = arr.map(function(v) { v.name_without_spaces = exports.replace_illegal_characters(name); return v; });
+    arr = arr.map(function(v) { v.name_without_spaces = exports.replace_illegal_characters(v.name); return v; });
     return arr;
 }
 

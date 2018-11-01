@@ -30,7 +30,7 @@
         {
             "cell_type": "code",
             "source": [
-                "sdf = spark.sql(\"\"\"\nCREATE TABLE IF NOT EXISTS {{ target.database }}_master.{{ source.database}}_{{ source.tablename }}(\n{{#source.date_columns}}\t`{{name_without_spaces}}_UTC` timestamp,\n{{/source.date_columns}}{{#columns}}\t`{{name_without_spaces}}` string{{^last}},\n {{/last}}{{/columns}},\n`run_date_utc` timestamp) \nUSING parquet\n\"\"\")"
+                "sdf = spark.sql(\"\"\"\nCREATE TABLE IF NOT EXISTS {{ target.database }}_master.{{ source.database}}_{{ template_config.variables.source_tablename_formatted }}(\n{{#source.date_columns}}\t`{{name_without_spaces}}_UTC` timestamp,\n{{/source.date_columns}}{{#columns}}\t`{{name_without_spaces}}` string{{^last}},\n {{/last}}{{/columns}},\n`run_date_utc` timestamp) \nUSING parquet\n\"\"\")"
             ],
             "metadata": {},
             "outputs": [],
@@ -39,7 +39,7 @@
         {
             "cell_type": "code",
             "source": [
-                "%sql\nINSERT INTO TABLE {{ target.database }}_master.{{ source.database}}_{{ source.tablename }}\n    SELECT *\n      FROM sdf;"
+                "%sql\nINSERT INTO TABLE {{ target.database }}_master.{{ source.database}}_{{ template_config.variables.source_tablename_formatted }}\n    SELECT *\n      FROM sdf;"
             ],
             "metadata": {},
             "outputs": [],
@@ -47,7 +47,7 @@
         }
     ],
     "metadata": {
-        "name": "R2M_DL2_{{ source.tablename }}"
+        "name": "R2M_DL2_{{ template_config.variables.source_tablename_formatted }}"
     },
     "nbformat": 4,
     "nbformat_minor": 0
