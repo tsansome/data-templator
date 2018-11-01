@@ -27,7 +27,7 @@
                         }
                     },
                     "dataset": {
-                        "referenceName": "{{properties.dummysource}}",
+                        "referenceName": "{{target.genericdataset}}",
                         "type": "DatasetReference"
                     }
                 }
@@ -77,6 +77,9 @@
                 "type": "String",
                 "defaultValue": "~~~~"
             }
+        },
+        "folder": {
+            "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}"
         },
         "annotations": [
             "Templator: v{{templator_info.version}}"

@@ -6,11 +6,11 @@ AS
 BEGIN
     SET NOCOUNT ON;
     DECLARE @RowsInserted INT;
-    DECLARE @CreateExternalTableString nvarchar(500)
-    DECLARE @CreateMainTableIfNotExistsString nvarchar(500)
-    DECLARE @DropExternalTableString nvarchar(500)
-    DECLARE @FindRowCountsString nvarchar(500)
-    DECLARE @LoadString nvarchar(500)
+    DECLARE @CreateExternalTableString nvarchar(max)
+    DECLARE @CreateMainTableIfNotExistsString nvarchar(max)
+    DECLARE @DropExternalTableString nvarchar(max)
+    DECLARE @FindRowCountsString nvarchar(max)
+    DECLARE @LoadString nvarchar(max)
     DECLARE @myid uniqueidentifier  
     SET @myid = NEWID()  
 

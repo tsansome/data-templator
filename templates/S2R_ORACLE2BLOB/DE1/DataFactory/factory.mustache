@@ -1,10 +1,10 @@
 {
     "name": "{{ template_config.outputs.0.output_file.name }}",
     "properties": {
-        "description": "pipeline description",
+        "description": "A pipeline that extracts the full table from {{source.schema}}.{{source.tablename}} from the database {{source.database}}. It then drops it into the {{target.storage_container}} using {{target.genericdataset}} as a reference for the Blob storage account.",
         "activities": [
             {
-                "name": "{{template_config.dam_prefix}}_{{template_config.load_pattern}}",
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
                 "type": "Copy",
                 "policy": {
                     "timeout": "7.00:00:00",
@@ -14,7 +14,7 @@
                 "typeProperties": {
                     "source": {
                         "type": "OracleSource",
-                        "oracleReaderQuery": "SELECT {{#columns}}REPLACE(REPLACE({{name}}, CHR(13), '    '), CHR(10), '    '){{^last}},{{/last}}{{/columns}}"
+                        "oracleReaderQuery": "SELECT {{#columns}}REPLACE(REPLACE({{name}}, CHR(13), '    '), CHR(10), '    '){{^last}},{{/last}}{{/columns}} FROM {{source.schema}}.{{source.tablename}}"
                     },
                     "sink": {
                         "type": "BlobSink"
@@ -24,26 +24,27 @@
                 },
                 "inputs": [
                     {
-                        "referenceName": "{{source.dataset}}",
+                        "referenceName": "{{source.genericdataset}}",
                         "type": "DatasetReference"
                     }
                 ],
                 "outputs": [
                     {
-                        "referenceName": "{{target.dataset}}",
+                        "referenceName": "{{target.genericdataset}}",
                         "type": "DatasetReference",
                         "parameters": {
-                            "container": "{{target.Container}}",
-                            "table": "{{target.Table}}",
-                            "subdirectory": "",
-                            "filename": "out"
+                            "subfolder": "{{source.tablename}}",
+                            "filename": "@concat('out', '_rId_', pipeline().RunId, '_dt_', pipeline().TriggerTime,'.dsv')"
                         }
                     }
                 ]
             }
         ],
         "folder": {
-            "name": "{{template_config.dam_prefix}}_{{template_config.load_pattern}}"
-        }
+            "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}"
+        },
+        "annotations": [
+            "Templator: v{{templator_info.version}}"
+        ]
     }
 }
