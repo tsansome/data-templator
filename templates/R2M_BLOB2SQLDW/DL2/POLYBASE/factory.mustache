@@ -1,9 +1,9 @@
 {
-    "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}",
+    "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}",
     "properties": {
         "activities": [
             {
-                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}",
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}",
                 "type": "Lookup",
                 "policy": {
                     "timeout": "7.00:00:00",
@@ -15,7 +15,7 @@
                 "typeProperties": {
                     "source": {
                         "type": "SqlDWSource",
-                        "sqlReaderStoredProcedureName": "[dbo].[{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}]",
+                        "sqlReaderStoredProcedureName": "[dbo].[{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]",
                         "storedProcedureParameters": {
                             "BLOBPATH": {
                                 "type": "String",
@@ -37,7 +37,7 @@
                 "type": "WebActivity",
                 "dependsOn": [
                     {
-                        "activity": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}",
+                        "activity": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -57,9 +57,9 @@
                         "Content-Type": "application/json"
                     },
                     "body": {
-                        "message": "@{activity('{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}').error.message}",
-                        "Subject": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source_tablename_formatted}} failed",
-                        "numberOfRecords": "@{activity('{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{source_tablename_formatted}}').output.dataWritten}",
+                        "message": "@{activity('{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}').error.message}",
+                        "Subject": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}} failed",
+                        "numberOfRecords": "@{activity('{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}').output.dataWritten}",
                         "dataFactoryName": "@{pipeline().DataFactory}",
                         "pipelineName": "@{pipeline().Pipeline}",
                         "receiver": "@pipeline().parameters.receiver",
