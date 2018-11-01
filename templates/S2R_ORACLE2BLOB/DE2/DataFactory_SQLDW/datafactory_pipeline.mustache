@@ -14,7 +14,7 @@
                 "typeProperties": {
                     "source": {
                         "type": "SqlDWSource",
-                        "sqlReaderQuery": "Select CONVERT(VARCHAR(20),isnull(max({{source.delta_column}}),'{{source.delta_column_format}}'),121) as delta_max From [Main].[{{source.database}}_{{source.schema}}_{{source.tablename}}];"
+                        "sqlReaderQuery": "Select CONVERT(VARCHAR(20),isnull(max({{source.delta_column}}),'{{source.delta_column_format}}'),121) as delta_max From [Main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}];"
                     },
                     "dataset": {
                         "referenceName": "{{properties.sqldwsource}}",
@@ -64,7 +64,7 @@
                         "referenceName": "RAW_{{source.database}}_DUMMY",
                         "type": "DatasetReference",
                         "parameters": {
-                            "subfolder": "{{source.schema}}_{{source.tablename}}",
+                            "subfolder": "{{template_config.variables.source_tablename_formatted}}",
                             "filename": "@{pipeline().triggerTime}_{{ template_config.properties.pattern }}_Delta.dsv"
                         }
                     }

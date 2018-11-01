@@ -1,7 +1,7 @@
 {
     "scripts": [
         {
-            "script_name": "factory",
+            "script_name": "datafactory_pipeline",
             "output_file": {
                 "extension": "json", 
                 "sub_folder": "adf/pipelines",           
