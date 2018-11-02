@@ -44,7 +44,7 @@
                     "source": {
                         "type": "OracleSource",
                         "oracleReaderQuery": {
-                            "value": "SELECT {{#columns}}REPLACE(REPLACE([{{name}}], CHR(13), '    '), CHR(10), '    '){{^last}},{{/last}}{{/columns}} FROM {{ source.schema }}{{ source.tablename }} \nWHERE {{ delta_column }} > '@{activity('Get Maximum Value').output.firstRow.delta_max }  '",
+                            "value": "SELECT {{#columns}}REPLACE(REPLACE([{{name}}], CHR(13), '    '), CHR(10), '    '){{^last}},{{/last}}{{/columns}} FROM {{ source.schema }}{{ source.tablename }} \nWHERE {{ delta_column }} > '@{activity('Find Delta Maximum Value').output.firstRow.delta_max }  '",
                             "type": "Expression"
                         }
                     },
