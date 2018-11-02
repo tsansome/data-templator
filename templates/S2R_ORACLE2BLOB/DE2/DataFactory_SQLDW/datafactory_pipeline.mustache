@@ -1,9 +1,10 @@
 {
     "name": "{{ template_config.outputs.0.output_file.name }}",
     "properties": {
+        "description": "A pipeline that extracts the delta of newly created rows from {{source.schema}}.{{source.tablename}} from the database {{source.database}} by comparing it to {{source.schema}}.{{template_config.variables.source_tablename_formatted}} in the target database using the Dataset reference of {{properties.sqldwsource}} in Data Factory. It then drops it into the {{target.storage_container}} using {{target.genericdataset}} as a reference for the Blob storage account.",
         "activities": [
             {
-                "name": "Get Maximum Value",
+                "name": "Find Delta Maximum Value",
                 "type": "Lookup",
                 "policy": {
                     "timeout": "7.00:00:00",
@@ -27,7 +28,7 @@
                 "type": "Copy",
                 "dependsOn": [
                     {
-                        "activity": "Get Maximum Value",
+                        "activity": "Find Delta Maximum Value",
                         "dependencyConditions": [
                             "Succeeded"
                         ]
@@ -43,7 +44,7 @@
                     "source": {
                         "type": "OracleSource",
                         "oracleReaderQuery": {
-                            "value": "SELECT {{#columns}}REPLACE(REPLACE([{{name}}], CHR(13), '    '), CHR(10), '    '){{^last}},{{/last}}{{/columns}} FROM {{ source.schema }}{{ source.tablename }} \nWHERE {{ delta_column }} > '@{activity('Get Maximum Value').output.firstRow.maxDate }  '",
+                            "value": "SELECT {{#columns}}REPLACE(REPLACE([{{name}}], CHR(13), '    '), CHR(10), '    '){{^last}},{{/last}}{{/columns}} FROM {{ source.schema }}{{ source.tablename }} \nWHERE {{ delta_column }} > '@{activity('Get Maximum Value').output.firstRow.delta_max }  '",
                             "type": "Expression"
                         }
                     },
