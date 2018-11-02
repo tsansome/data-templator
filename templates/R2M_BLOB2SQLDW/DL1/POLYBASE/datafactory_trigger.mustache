@@ -15,7 +15,7 @@
         ],
         "type": "BlobEventsTrigger",
         "typeProperties": {
-            "blobPathBeginsWith": "/{{properties.storage_container}}/blobs/{{template_config.variables.source_tablename_formatted}}",
+            "blobPathBeginsWith": "/{{properties.storage_container}}/blobs/{{source.schema}}_{{template_config.variables.source_tablename_formatted}}",
             "scope": "/subscriptions/{{ properties.azure_subscription_id }}/resourceGroups/{{ properties.resource_group }}/providers/Microsoft.Storage/storageAccounts/{{ properties.storage_account }}",
             "events": [
                 "Microsoft.Storage.BlobCreated"
