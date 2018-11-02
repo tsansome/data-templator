@@ -1,0 +1,31 @@
+{
+    "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}",
+    "properties": {
+        "runtimeState": "{{ properties.trigger_status }}",
+        "pipelines": [
+            {
+                "pipelineReference": {
+                    "referenceName": "{{template_config.outputs.1.output_file.name}}",
+                    "type": "PipelineReference"
+                },
+                "parameters": {
+                    "BLOB_PATH": "@{replace(triggerBody().folderPath, '{{properties.storage_container}}/', '')}/@{triggerBody().filename}"
+                }
+            }
+        ],
+        "type": "BlobEventsTrigger",
+        "typeProperties": {
+            "blobPathBeginsWith": "/{{properties.storage_container}}/blobs/{{source.schema}}_{{template_config.variables.source_tablename_formatted}}",
+            "scope": "/subscriptions/{{ properties.azure_subscription_id }}/resourceGroups/{{ properties.resource_group }}/providers/Microsoft.Storage/storageAccounts/{{ properties.storage_account }}",
+            "events": [
+                "Microsoft.Storage.BlobCreated"
+            ]
+        },
+        "folder": {
+            "name": "TEMPLATED"
+        },
+        "annotations": [
+            "Templator: v{{templator_info.version}}"
+        ]
+    }
+}
