@@ -15,7 +15,10 @@
                 "typeProperties": {
                     "source": {
                         "type": "SqlDWSource",
-                        "sqlReaderQuery": "Select Cast(MAX({{source.delta_column_date.name}}) as date) as delta_max From [Main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}];"
+                        "sqlReaderQuery": "IF object_id('main.{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}','U') is not null 
+	                                            SELECT Cast(MAX([{{source.delta_column_date.name}}]) as date) as delta_max From [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
+                                           ELSE 
+	                                       SELECT NULL as delta_max"
                     },
                     "dataset": {
                         "referenceName": "{{properties.sqldwsource}}",

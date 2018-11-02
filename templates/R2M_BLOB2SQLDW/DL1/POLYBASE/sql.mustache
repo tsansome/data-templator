@@ -33,7 +33,7 @@ BEGIN
     ';
 
     SET @LoadString = '
-              if object_id (''main.{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}'',''U'') is not null drop table [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}];
+        if object_id (''main.{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}'',''U'') is not null drop table [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}];
         CREATE TABLE [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
         WITH
         ( 
