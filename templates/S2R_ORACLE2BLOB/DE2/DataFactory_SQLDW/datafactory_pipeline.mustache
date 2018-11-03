@@ -16,9 +16,9 @@
                     "source": {
                         "type": "SqlDWSource",
                         "sqlReaderQuery": "IF object_id('main.{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}','U') is not null 
-	                                            SELECT Cast(MAX([{{source.delta_column_date.name}}]) as date) as delta_max From [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
+	                                            SELECT CONVERT(varchar, CAST(MAX([{{source.delta_column_date.name}}]) as datetime), 121) as delta_max From [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
                                            ELSE 
-	                                            SELECT CAST('{{source.delta_column_date.default_if_no_rows}}' as datetime) as delta_max"
+	                                            SELECT CONVERT(varchar, CAST('{{source.delta_column_date.default_if_no_rows}}' as datetime), 121) as delta_max"
                     },
                     "dataset": {
                         "referenceName": "{{properties.sqldwsource}}",
@@ -47,7 +47,7 @@
                     "source": {
                         "type": "OracleSource",
                         "oracleReaderQuery": {
-                            "value": "SELECT {{#columns}}REPLACE(REPLACE([{{name}}], CHR(13), '    '), CHR(10), '    '){{^last}},{{/last}}{{/columns}} FROM {{ source.schema }}{{ source.tablename }} \nWHERE {{ delta_column }} > '@{activity('Find Delta Maximum Value').output.firstRow.delta_max }  '",
+                            "value": "SELECT {{#columns}}REPLACE(REPLACE(\"{{name}}\", CHR(13), '    '), CHR(10), '    ') AS \"{{name_without_spaces}}\"{{^last}},{{/last}}{{/columns}} FROM {{ source.schema }}.{{ source.tablename }} \nWHERE {{ delta_column_date.name }} >= TO_TIMESTAMP('@{activity('Find Delta Maximum Value').output.firstRow.delta_max }','YYYY-MM-DD HH24:MI:SS')",
                             "type": "Expression"
                         }
                     },
