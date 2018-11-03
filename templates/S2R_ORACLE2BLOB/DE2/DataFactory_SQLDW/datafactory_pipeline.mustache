@@ -5,6 +5,7 @@
         "activities": [
             {
                 "name": "Find Delta Maximum Value",
+                "description": "Determine the maximum of the delta column {{source.delta_column_date}}{{source.delta_column_ordinal}} in the target database using the Dataset reference of {{properties.sqldwsource}}.",
                 "type": "Lookup",
                 "policy": {
                     "timeout": "7.00:00:00",
@@ -19,13 +20,13 @@
                         "sqlReaderQuery": "IF object_id('main.{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}','U') is not null 
 	                                            SELECT CONVERT(varchar, CAST(MAX([{{source.delta_column_date.name}}]) as datetime), 120) as delta_max From [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
                                            ELSE 
-	                                            SELECT CONVERT(varchar, CAST('{{source.delta_column_date.default_if_no_rows}}' as datetime), 120) as delta_max"
+	                                            SELECT CONVERT(varchar, CAST('{{#source.delta_column_date.default_if_no_rows}}{{source.delta_column_date.default_if_no_rows}}{{/source.delta_column_date.default_if_no_rows}}{{^source.delta_column_date.default_if_no_rows}}1900-01-01 00:00:00{{/source.delta_column_date.default_if_no_rows}}' as datetime), 120) as delta_max"
                         {{/source.delta_column_date}}
                         {{#source.delta_column_ordinal}}
                         "sqlReaderQuery": "IF object_id('main.{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}','U') is not null 
-	                                            SELECT CAST(MAX([{{source.delta_column_date.name}}]) as BIGINT) as delta_max From [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
+	                                            SELECT CAST(MAX([{{source.delta_column_ordinal.name}}]) as BIGINT) as delta_max From [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
                                            ELSE 
-	                                            SELECT 0 as delta_max"
+	                                            SELECT {{#source.delta_column_ordinal.default_if_no_rows}}{{source.delta_column_ordinal.default_if_no_rows}}{{/source.delta_column_ordinal.default_if_no_rows}}{{^source.delta_column_ordinal.default_if_no_rows}}0{{/source.delta_column_ordinal.default_if_no_rows}} as delta_max"
                         {{/source.delta_column_ordinal}}
                     },
                     "dataset": {
@@ -37,6 +38,7 @@
             {
                 "name": "Extract delta rows from source table",
                 "type": "Copy",
+                "description": "Execute the delta query on the source, extract results into the RAW folder {{source.schema}}_{{template_config.variables.source_tablename_formatted}} in container {{target.storage_container}}",
                 "dependsOn": [
                     {
                         "activity": "Find Delta Maximum Value",
@@ -76,7 +78,7 @@
                         "referenceName": "{{target.genericdataset}}",
                         "type": "DatasetReference",
                         "parameters": {
-                            "subfolder": "{{template_config.variables.source_tablename_formatted}}",
+                            "subfolder": "{{source.schema}}_{{template_config.variables.source_tablename_formatted}}",
                             "filename": "@{pipeline().triggerTime}_{{ template_config.properties.pattern }}_Delta.dsv"
                         }
                     }
