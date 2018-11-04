@@ -44,7 +44,10 @@
             "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}"
         },
         "annotations": [
-            "Templator: v{{templator_info.version}}"
+            "Templator: v{{templator_info.version}}"{{#tags}},{{/tags}}
+            {{#tags}}
+                {{label}}{{^last}},{{/last}}
+            {{/tags}}
         ]
     }
 }

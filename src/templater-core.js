@@ -120,7 +120,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                 //now split off the template family
                 selectedTemplates.add(templateToGenerate.name + "/" + templateLanguageConfig.language);
                 //finalise the config
-                var dataSetFinalConfig = exports.prepare_final_config(datasetToGenerate, templateLanguageConfig, templateToGenerate, templatorConfig.global);
+                var dataSetFinalConfig = exports.prepare_final_config(datasetToGenerate, templateLanguageConfig, templateToGenerate.name, templateToGenerate.tags, templatorConfig.global);
                 exports.print_dataset_definition(`Dataset definition after mustache resolution within dataset definition:`, dataSetFinalConfig);
                 //now we'll just attach some versioning around the templator being used        
                 dataSetFinalConfig.templator_info = templator_info_obj;
@@ -285,9 +285,10 @@ exports.profile_file = function(sample) {
  * @param {Object} datasetToGenerate The definition supplied for the dataset
  * @param {Object} templateLanguageConfig The definition for the pattern chosen for the dataset
  * @param {string} patternName The name of the pattern chosen to implement
+ * @param {Array} templateTags The tags assosciated at the template chosen level.
  * @param {Object} global The global property set for all configs.
 */
-exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfig, patternName, global) {
+exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfig, patternName, templateTags, global) {
     //now prepare the final config for the mustache template
     var dataSetFinalConfig = datasetToGenerate;
     //first let's flatten the source and target defined
@@ -332,6 +333,31 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
     dataSetFinalConfig.source.primary_key = exports.remove_spaces_and_fix_last(dataSetFinalConfig.source.primary_key);
     dataSetFinalConfig.columns = exports.remove_spaces_and_fix_last(dataSetFinalConfig.columns);    
     
+    //now fix the tags array if supplied
+    //merge dataset level flags with template language choice flags
+    if (templateLanguageConfig.tags != null) {
+        if (dataSetFinalConfig.tags == null) {
+            dataSetFinalConfig.tags = templateLanguageConfig.tags;
+        } else {
+            dataSetFinalConfig.tags.push(templateLanguageConfig.tags);
+        }
+    }
+    //merge the template tags with the other tags
+    if (templateTags != null) {
+        if (dataSetFinalConfig.tags == null) {
+            dataSetFinalConfig.tags = templateTags;
+        } else {
+            dataSetFinalConfig.tags.push(templateTags);
+        }
+    }
+    //now handle the resultant tag array
+    if (dataSetFinalConfig.tags != null) {
+        dataSetFinalConfig.tags = dataSetFinalConfig.tags.map(function(v) { return { label: v, last: false}; });
+        if (dataSetFinalConfig.tags.length > 0) {
+            dataSetFinalConfig.tags[dataSetFinalConfig.tags.length - 1].last = true;
+        }
+    }
+
     //add in our string manipulation functions
     dataSetFinalConfig.string_func = {
         lower: function() {
