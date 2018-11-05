@@ -22,7 +22,10 @@
             ]
         },
         "annotations": [
-            "Templator: v{{templator_info.version}}"
+            "Templator: v{{templator_info.version}}"{{#tags}},{{/tags}}
+            {{#tags}}
+                {{label}}{{^last}},{{/last}}
+            {{/tags}}
         ]
     }
 }
