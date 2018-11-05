@@ -41,7 +41,6 @@ BEGIN
     ';
 
     SET @LoadString = '
-              if object_id (''main.{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}'',''U'') is not null drop table [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}];
         INSERT INTO [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
         SELECT * FROM [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +']
         OPTION(LABEL = ''' + CONVERT(varchar(255), @myid) + ''');
