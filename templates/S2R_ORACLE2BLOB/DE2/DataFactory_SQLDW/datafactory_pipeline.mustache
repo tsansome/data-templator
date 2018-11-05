@@ -79,7 +79,7 @@
                         "type": "DatasetReference",
                         "parameters": {
                             "subfolder": "{{source.schema}}_{{template_config.variables.source_tablename_formatted}}",
-                            "filename": "@{pipeline().triggerTime}_{{ template_config.properties.pattern }}_Delta.dsv"
+                            "filename": "@concat('out', '_rId_', pipeline().RunId, '_dt_', pipeline().TriggerTime,'.dsv')"
                         }
                     }
                 ]
