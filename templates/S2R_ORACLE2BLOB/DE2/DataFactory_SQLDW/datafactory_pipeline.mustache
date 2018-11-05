@@ -5,7 +5,7 @@
         "activities": [
             {
                 "name": "Find Delta Maximum Value",
-                "description": "Determine the maximum of the delta column {{source.delta_column_date}}{{source.delta_column_ordinal}} in the target database using the Dataset reference of {{properties.sqldwsource}}.",
+                "description": "Determine the maximum of the delta column {{#source.delta_column_date}}{{source.delta_column_date.name}}{{/source.delta_column_date}}{{#source.delta_column_ordinal}}{{source.delta_column_ordinal.name}}{{/source.delta_column_ordinal}} in the target database using the Dataset reference of {{properties.sqldwsource}}.",
                 "type": "Lookup",
                 "policy": {
                     "timeout": "7.00:00:00",
