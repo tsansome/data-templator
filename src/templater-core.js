@@ -185,7 +185,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                     var template_str = fs.readFileSync(templateFile, 'utf8');
                     exports.print_dataset_definition(`Dataset definition that will be passed into mustache for final template:`, dataSetFinalConfig);
                     var fc = exports.generate_file_content_from_template(template_str, dataSetFinalConfig, generatedFolder)
-                    var outputFileDir = generatedFolder + "/" + templateLanguageConfig.language; 
+                    var outputFileDir = generatedFolder;
                     if (!fs.existsSync(outputFileDir)) fs.mkdirSync(outputFileDir);                                   
                     exports.write_output(outputFileDir, fc, scriptConf[0]);
                 }
