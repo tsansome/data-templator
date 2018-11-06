@@ -18,7 +18,7 @@ BEGIN
 
     SET @CreateExternalTableString = '
         CREATE EXTERNAL TABLE [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] (
-            {{#source.columns}}{{name}} nvarchar(100){{^last}},{{/last}}{{/source.columns}}
+            {{#columns}}{{name}} nvarchar(100){{^last}},{{/last}}{{/columns}}
         )
         WITH ( 
             LOCATION = ''' + @BLOBPATH + ''',   
@@ -32,7 +32,7 @@ BEGIN
     SET @CreateMainTableIfNotExistsString = '
         if object_id (''main.{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}'',''U'') is null
         CREATE TABLE [Main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}] (
-            {{#source.columns}}{{name}} nvarchar(100){{^last}},{{/last}}{{/source.columns}}
+            {{#columns}}[{{name_without_spaces}}] nvarchar(100){{^last}},{{/last}}{{/columns}}
         );
     ';
 
@@ -42,7 +42,9 @@ BEGIN
 
     SET @LoadString = '
         INSERT INTO [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
-        SELECT * FROM [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +']
+        SELECT 
+            {{#columns}}[{{name}}] AS {{name_without_spaces}}{{^last}},{{/last}}{{/columns}}
+        FROM [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +']
         OPTION(LABEL = ''' + CONVERT(varchar(255), @myid) + ''');
     ';
 
