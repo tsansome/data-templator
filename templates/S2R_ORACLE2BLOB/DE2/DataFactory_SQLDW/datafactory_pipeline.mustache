@@ -57,7 +57,7 @@
                     "source": {
                         "type": "OracleSource",
                         "oracleReaderQuery": {
-                            "value": "SELECT {{#columns}}REPLACE(REPLACE(\"{{name}}\", CHR(13), '    '), CHR(10), '    ') AS \"{{name_without_spaces}}\"{{^last}},{{/last}}{{/columns}} FROM {{ source.schema }}.{{ source.tablename }} \n{{#source.delta_column_date}}WHERE \TO_TIMESTAMP("{{ source.delta_column_date.name }}\") > TO_TIMESTAMP('@{activity('Find Delta Maximum Value').output.firstRow.delta_max }','YYYY-MM-DD HH24:MI:SS'){{/source.delta_column_date}}{{#source.delta_column_ordinal}}WHERE \"{{ source.delta_column_ordinal.name }}\" > @{activity('Find Delta Maximum Value').output.firstRow.delta_max }{{/source.delta_column_ordinal}}",
+                            "value": "SELECT {{#columns}}REPLACE(REPLACE(\"{{name}}\", CHR(13), '    '), CHR(10), '    ') AS \"{{name_without_spaces}}\"{{^last}},{{/last}}{{/columns}} FROM {{ source.schema }}.{{ source.tablename }} \n{{#source.delta_column_date}}WHERE \TO_TIMESTAMP(\"{{ source.delta_column_date.name }}\") > TO_TIMESTAMP('@{activity('Find Delta Maximum Value').output.firstRow.delta_max }','YYYY-MM-DD HH24:MI:SS'){{/source.delta_column_date}}{{#source.delta_column_ordinal}}WHERE \"{{ source.delta_column_ordinal.name }}\" > @{activity('Find Delta Maximum Value').output.firstRow.delta_max }{{/source.delta_column_ordinal}}",
                             "type": "Expression"
                         }
                     },
