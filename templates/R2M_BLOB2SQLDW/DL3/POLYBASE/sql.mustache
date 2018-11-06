@@ -19,7 +19,7 @@ BEGIN
 
     SET @CreateExternalTableString = '
         CREATE EXTERNAL TABLE [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] (
-            {{#source.columns}}{{name}} nvarchar(100){{^last}},{{/last}}{{/source.columns}}
+            {{#columns}}{{name}} nvarchar(100){{^last}},{{/last}}{{/columns}}
         )
         WITH ( 
             LOCATION = ''' + @BLOBPATH + ''',   
@@ -33,8 +33,12 @@ BEGIN
     SET @CreateMainTableIfNotExistsString = '
         if object_id (''main.{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}'',''U'') is null
         CREATE TABLE [Main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}] (
-            {{#source.columns}}{{name}} nvarchar(100){{^last}},{{/last}}{{/source.columns}}
+            {{#columns}}[{{name_without_spaces}}] nvarchar(100){{^last}},{{/last}}{{/columns}}
         );
+    ';
+
+    SET @DropExternalTableString = '
+        DROP EXTERNAL TABLE [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'];
     ';
 
     SET @InsertNewRowsString = '
@@ -50,14 +54,10 @@ BEGIN
     SET @UpdateExistingRecordsString = '
         UPDATE  [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
         SET
-            {{#source.columns}}[{{name}}] = Tmp.[{{name}}]{{^last}},{{/last}}{{/source.columns}}
+            {{#columns}}[{{name}}] = Tmp.[{{name}}]{{^last}},{{/last}}{{/columns}}
         From [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] Tmp 
         WHERE {{#source.primary_keys}}[main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}].{{name}} = Tmp.{{name}}{{/source.primary_keys}} 
         OPTION(LABEL = ''UpdateRows_' + CONVERT(varchar(255), @myid) + '''); 
-    ';
-
-    SET @DropExternalTableString = '
-        DROP EXTERNAL TABLE [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'];
     ';
 
     SET @FindRowCountsString = '

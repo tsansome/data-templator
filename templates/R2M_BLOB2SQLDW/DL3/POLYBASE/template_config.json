@@ -9,10 +9,18 @@
             }
         },
         {
-            "script_name": "factory",
+            "script_name": "datafactory_pipeline",
             "output_file": {
                 "extension": "json", 
                 "sub_folder": "adf/pipelines",           
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}"
+            }
+        },
+        {
+            "script_name": "datafactory_trigger",
+            "output_file": {
+                "extension": "json", 
+                "sub_folder": "adf/triggers",           
                 "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}"
             }
         }
@@ -22,6 +30,6 @@
         "pattern": "DL3"
     },
     "variables": {
-        "source_tablename_formatted": "{{#string_func.replace_illegal_characters}}{{template_config.variables.source_tablename_formatted}}{{/string_func.replace_illegal_characters}}"
+        "source_tablename_formatted": "{{#string_func.replace_illegal_characters}}{{source.tablename}}{{/string_func.replace_illegal_characters}}"
     }
 }
