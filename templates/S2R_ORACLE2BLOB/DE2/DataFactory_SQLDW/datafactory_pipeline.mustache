@@ -18,13 +18,13 @@
                         "type": "SqlDWSource",
                         {{#source.delta_column_date}}
                         "sqlReaderQuery": "IF object_id('main.{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}','U') is not null 
-	                                            SELECT CONVERT(varchar, CAST(MAX([{{source.delta_column_date.name}}]) as datetime), 120) as delta_max From [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
+	                                            SELECT CONVERT(varchar, MAX(CAST([{{source.delta_column_date.name}}] as datetime)), 120) as delta_max From [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
                                            ELSE 
 	                                            SELECT CONVERT(varchar, CAST('{{#source.delta_column_date.default_if_no_rows}}{{source.delta_column_date.default_if_no_rows}}{{/source.delta_column_date.default_if_no_rows}}{{^source.delta_column_date.default_if_no_rows}}1900-01-01 00:00:00{{/source.delta_column_date.default_if_no_rows}}' as datetime), 120) as delta_max"
                         {{/source.delta_column_date}}
                         {{#source.delta_column_ordinal}}
                         "sqlReaderQuery": "IF object_id('main.{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}','U') is not null 
-	                                            SELECT CAST(MAX([{{source.delta_column_ordinal.name}}]) as BIGINT) as delta_max From [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
+	                                            SELECT MAX(CAST([{{source.delta_column_ordinal.name}}] as BIGINT)) as delta_max From [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
                                            ELSE 
 	                                            SELECT {{#source.delta_column_ordinal.default_if_no_rows}}{{source.delta_column_ordinal.default_if_no_rows}}{{/source.delta_column_ordinal.default_if_no_rows}}{{^source.delta_column_ordinal.default_if_no_rows}}0{{/source.delta_column_ordinal.default_if_no_rows}} as delta_max"
                         {{/source.delta_column_ordinal}}
