@@ -17,7 +17,7 @@ BEGIN
 
     SET @CreateExternalTableString = '
         CREATE EXTERNAL TABLE [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] (
-            {{#columns}}{{name}} {{#hasTargetDefinition}}{{target.datatype}}{{/hasTargetDefinition}}{{^hasTargetDefinition}}nvarchar(100){{/hasTargetDefinition}}{{^last}},{{/last}}{{/columns}}
+            {{#columns}}{{name}} {{#hasTargetDefinition}}{{target.datatype}}{{/hasTargetDefinition}}{{^hasTargetDefinition}}{{#properties.default_datatype}}{{properties.default_datatype}}{{/properties.default_datatype}}{{^properties.default_datatype}}nvarchar(100){{/properties.default_datatype}}{{/hasTargetDefinition}}{{^last}},{{/last}}{{/columns}}
         )
         WITH ( 
             LOCATION = ''' + @BLOBPATH + ''',   
@@ -37,8 +37,8 @@ BEGIN
         CREATE TABLE [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
         WITH
         ( 
-            DISTRIBUTION = {{properties.distribution}},
-            CLUSTERED COLUMNSTORE INDEX
+            DISTRIBUTION = {{properties.distribution}}{{#properties.index}},{{/properties.index}}
+            {{#properties.index}}{{properties.index}}{{/properties.index}}
         )
         AS
         SELECT * FROM [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +']
