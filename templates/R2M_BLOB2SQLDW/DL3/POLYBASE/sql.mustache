@@ -50,7 +50,7 @@ BEGIN
         FROM [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] Tmp
         WHERE NOT EXISTS(SELECT 1
                          FROM [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}] C
-                         WHERE {{#source.primary_keys}}C.{{name}} = Tmp.{{name}}{{/source.primary_keys}}) 
+                         WHERE {{#source.primary_key}}C.{{name_without_spaces}} = Tmp.{{name_without_spaces}}{{/source.primary_key}}) 
         OPTION(LABEL = ''InsertNewRows_' + CONVERT(varchar(255), @myid) + ''');   
     ';
 
@@ -59,7 +59,7 @@ BEGIN
         SET
             {{#columns}}[{{name}}] = Tmp.[{{name}}]{{^last}},{{/last}}{{/columns}}
         From [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] Tmp 
-        WHERE {{#source.primary_keys}}[main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}].{{name}} = Tmp.{{name}}{{/source.primary_keys}} 
+        WHERE {{#source.primary_key}}[main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}].{{name_without_spaces}} = Tmp.{{name_without_spaces}}{{/source.primary_key}} 
         OPTION(LABEL = ''UpdateRows_' + CONVERT(varchar(255), @myid) + '''); 
     ';
 
