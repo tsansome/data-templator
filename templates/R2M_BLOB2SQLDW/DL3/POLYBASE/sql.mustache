@@ -1,6 +1,6 @@
 IF EXISTS(SELECT * FROM sys.objects WHERE type = 'P' AND name = '{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}') DROP PROCEDURE {{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}};
 GO
-CREATE PROC {{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}} AS
+CREATE PROCEDURE {{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}} AS
     @BLOBPATH NVARCHAR(200)
 AS
 BEGIN
