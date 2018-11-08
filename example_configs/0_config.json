@@ -20,6 +20,9 @@
                         {
                             "language": "REL",
                             "target": {
+                                "columns": [
+                                    { "name": "PersonID", "datatype":"nvarchar(20)" }
+                                ],
                                 "database": "TargetDB",
                                 "table": "TargetTable",
                                 "date_format": "yyyy-MM-dd"

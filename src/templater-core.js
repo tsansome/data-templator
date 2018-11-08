@@ -302,6 +302,7 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
     assert.notStrictEqual(dataSetFinalConfig.source.columns, null, `It seems like you did not define any columns for the dataset. This is not allowed. Please provide either through samples or the config.`);
     assert.notStrictEqual(dataSetFinalConfig.source.columns.length, 0, `You cannot have 0 columns in a dataset.`);
     //Set the columns by unifying them into one defined set
+    logger.trace("preparing columns...");
     if (templateLanguageConfig.target.columns == null) templateLanguageConfig.target.columns = [];
     dataSetFinalConfig.columns = dataSetFinalConfig.source.columns.map(x => { 
         var scd = dataSetFinalConfig.source.columns.filter(y => y.name == x.name)[0];
@@ -326,6 +327,7 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
             hasTargetDefinition: tcd != null ? true : false
         }        
     });
+    logger.trace(`After preparation: ${JSON.stringify(dataSetFinalConfig.columns)}`);
     //now remove the column definitions from the source/target
     templateLanguageConfig.target.columns = null;
     //remove the spaces from the name and fix the last for all the arrays
