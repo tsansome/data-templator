@@ -17,6 +17,6 @@
         "pattern": "DL4"
     },
     "variables": {
-        "source_tablename_formatted": "{{#string_func.replace_illegal_characters}}{{template_config.variables.source_tablename_formatted}}{{/string_func.replace_illegal_characters}}"
+        "source_tablename_formatted": "{{#string_func.replace_illegal_characters}}{{source.tablename}}{{/string_func.replace_illegal_characters}}"
     }
 }

@@ -3,7 +3,7 @@
     "properties": {
         "activities": [
             {
-                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                "name": "R2M_DL1",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
@@ -20,13 +20,7 @@
                     "secureOutput": false
                 },
                 "typeProperties": {
-                    "notebookPath": "/Shared/Operational/{{target.database}}/Master/{{template_config.outputs.0.output_file.name}}",
-                    "baseParameters": {
-                        "filename": {
-                            "value": "@pipeline().parameters.filename",
-                            "type": "Expression"
-                        }
-                    }
+                    "notebookPath": "/Shared/Operational/{{target.database}}/Master/{{ template_config.outputs.1.output_file.name }}"
                 },
                 "linkedServiceName": {
                     "referenceName": "AzureDatabricks",
@@ -123,10 +117,6 @@
                             "value": "@pipeline().parameters.business_function_group",
                             "type": "Expression"
                         },
-                        "filename": {
-                            "value": "@pipeline().parameters.filename",
-                            "type": "Expression"
-                        },
                         "full_table_name": {
                             "value": "@pipeline().parameters.table",
                             "type": "Expression"
@@ -214,14 +204,11 @@
                     },
                     "body":
                     {
-                        "messageID": "{{properties.R2M_fail_error_message_id}}",
-                        "parameters": {
-                            "filename": "@{pipeline().parameters.table}",
-                            "table": "@{pipeline().parameters.table}",
-                            "pipeline": "@{pipeline().Pipeline}",
-                            "triggered": "@{pipeline().TriggerTime}",
-                            "activity": "R2M"
-                        }
+                        "filename": "@{pipeline().parameters.table}",
+                        "table": "@{pipeline().parameters.table}",
+                        "pipeline": "@{pipeline().Pipeline}",
+                        "triggered": "@{pipeline().TriggerTime}",
+                        "activity": "R2M"
                     }
                 }
             },
@@ -250,14 +237,11 @@
                     },
                     "body":
                     {
-                        "messageID": "{{properties.R2M_fail_error_message_id}}",
-                        "parameters": {
-                            "filename": "@{pipeline().parameters.table}",
-                            "table": "@{pipeline().parameters.table}",
-                            "pipeline": "@{pipeline().Pipeline}",
-                            "triggered": "@{pipeline().TriggerTime}",
-                            "activity": "Reconcilliation_and_Capture_Run_Data"
-                        }
+                        "filename": "@{pipeline().parameters.table}",
+                        "table": "@{pipeline().parameters.table}",
+                        "pipeline": "@{pipeline().Pipeline}",
+                        "triggered": "@{pipeline().TriggerTime}",
+                        "activity": "Reconcilliation_and_Capture_Run_Data"
                     }
                 }
             },
@@ -286,14 +270,11 @@
                     },
                     "body":
                     {
-                        "messageID": "{{properties.R2M_fail_error_message_id}}",
-                        "parameters": {
-                            "filename": "@{pipeline().parameters.table}",
-                            "table": "@{pipeline().parameters.table}",
-                            "pipeline": "@{pipeline().Pipeline}",
-                            "triggered": "@{pipeline().TriggerTime}",
-                            "activity": "Backup"
-                        }
+                        "filename": "@{pipeline().parameters.table}",
+                        "table": "@{pipeline().parameters.table}",
+                        "pipeline": "@{pipeline().Pipeline}",
+                        "triggered": "@{pipeline().TriggerTime}",
+                        "activity": "Backup"
                     }
                 }
             }
@@ -310,9 +291,6 @@
             "table": {
                 "type": "String",
                 "defaultValue": "{{target.database}}_master.{{ source.database}}_{{ template_config.variables.source_tablename_formatted }}"
-            },
-            "filename": {
-                "type": "String"
             },
             "business_function_group": {
                 "type": "String",
