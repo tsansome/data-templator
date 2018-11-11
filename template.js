@@ -40,14 +40,3 @@ if (fs.lstatSync(configPath).isDirectory()) {
     //pointing at a specific config
     templater.process_config(configPath, generatedFolder, program.samples, program.log);
 }
-
-
-const arrayToObject = (array) =>
-   array.reduce((obj, item) => {
-     obj[item.id] = item
-     return obj
-   }, {})
-
-var Label = "Name";
-var userObj = arrayToObject([ { id: "DL1_IPYNB", value: fs.readFileSync} ]);
-

@@ -15,6 +15,15 @@ var ProgressBar = require('progress');
 const templates_path = () => __dirname + "/../templates/";
 const type_mappings_path = () => __dirname + "/../type_mappings/";
 
+//Taken from https://gist.github.com/kethinov/6658166
+const walkSync = (d) => fs.statSync(d).isDirectory() ? fs.readdirSync(d).map(f => walkSync(path.join(d, f))) : d
+//other utility
+const arrayToObject = (array) =>
+   array.reduce((obj, item) => {
+     obj[item.id] = item
+     return obj
+   }, {})
+
 const pkg = require(__dirname + "/../package.json");
 
 /**
@@ -106,6 +115,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         //pi = index of the pattern
         for(var pi in datasetToGenerate.templates) {
             var templateToGenerate = datasetToGenerate.templates[pi];
+            var targetTemplateFamily = templateToGenerate.name.split('/')[0];
             logger.info(`Template ${templateToGenerate.name} selected for ${datasetToGenerate.name} | ${corrid}`);
             //ensure that the pattern requested is supported
             var pattern_folder_path = path.resolve(templates_path() + templateToGenerate.name.toUpperCase() + "/");
@@ -115,7 +125,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
             //pli = index of the language to implement for the pattern
             logger.info(`${templateToGenerate.generate.length} implementations chosen to template.`)
             for (var pli in templateToGenerate.generate) {
-                var templateLanguageConfig = templateToGenerate.generate[pli];
+                var templateLanguageConfig = templateToGenerate.generate[pli];                
+                templator.global = exports.load_shared(templatorConfig.global, targetTemplateFamily);
                 logger.info(`Code Generation for ${templateLanguageConfig.language} implementation commencing. | ${corrid}`);
                 //now split off the template family
                 selectedTemplates.add(templateToGenerate.name + "/" + templateLanguageConfig.language);
@@ -184,7 +195,13 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                     //now let's generate it
                     var template_str = fs.readFileSync(templateFile, 'utf8');
                     exports.print_dataset_definition(`Dataset definition that will be passed into mustache for final template:`, dataSetFinalConfig);
-                    var fc = exports.generate_file_content_from_template(template_str, dataSetFinalConfig, generatedFolder)
+                    //gather the partials to be passed through to generating our output
+                    var partialsToApply = null;
+                    if (global.partials != null) {
+                        partialsToApply = global.partials.filter(pn => pn.coll_name == targetTemplateFamily)[0];
+                    }
+                    //now preview our config file, then generate
+                    var fc = exports.generate_file_content_from_template(template_str, dataSetFinalConfig, partialsToApply)
                     var outputFileDir = generatedFolder;
                     if (!fs.existsSync(outputFileDir)) fs.mkdirSync(outputFileDir);                                   
                     exports.write_output(outputFileDir, fc, scriptConf[0]);
@@ -227,12 +244,16 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
 
 }
 
-exports.mustache_recursive = function(TemplateStr, objectToApplyToTemplate, max_iter) {
+exports.mustache_recursive = function(TemplateStr, objectToApplyToTemplate, partials, max_iter) {
     var templateString = TemplateStr;
     var i = 0;
     if (max_iter == null) max_iter = 5
     while (i <= max_iter || templateString.indexOf("{{") != -1) {
-        templateString = Mustache.render(templateString, objectToApplyToTemplate)
+        if (partials == null) {
+            templateString = Mustache.render(templateString, objectToApplyToTemplate)
+        } else {
+
+        }
         i++;
     }
     return templateString;
@@ -255,6 +276,38 @@ exports.resolve_global = function(global, datasetToGenerate) {
     }
     var MustachedDatasetToGenerateString = Mustache.render(template, datasetToGenerate);
     return JSON.parse(MustachedDatasetToGenerateString);
+}
+
+exports.load_shared = function(global, targetTemplateFamily) {
+    logger.info(`Loading any shared code fragments for ${targetTemplateFamily}`);
+    var shared_path = templates_path() + "/" + targetTemplateFamily + "/SHARED/";
+    if (fs.existsSync(shared_path)) {
+        if (global.partials == null) global.partials = [];
+        if (global.partials.filter(t => t.coll_name = targetTemplateFamily).length == 0) {
+            var elem = {
+                coll_name: targetTemplateFamily,
+                code_fragments: null
+            };
+            //read in the partials under the shared folder
+            var fragments = walkSync(shared_path).map(function(fp) { 
+                                var id = fp.replace(shared_path, "").replace("/","_").replace("." + path.extname(fp), "").toUpperCase();
+                                return { "id":  id, item: fs.readFileSync(fp) };
+                            });   
+            logger.debug(`Found ${fragments.length} to load.`)
+            logger.trace("Shared code fragments that will be loaded.");
+            logger.trace(JSON.stringify(fragments));
+            //now flatten  
+            elem.code_fragments = arrayToObject(fragments);
+            global.partials.push(elem);
+            logger.trace("Our new global with the shared code fragments");
+            logger.trace(`${JSON.stringify(global)}`);        
+        } else {
+            logger.info(`Shared code fragments already loaded in a previous processing, skipping...`);
+        }
+    } else {
+        logger.info(`Folder for shared code not found so not loading any.`)
+    }
+    return global;
 }
 
 /**
@@ -421,9 +474,9 @@ exports.replace_illegal_characters = function(str) {
  * @param {string} templateDefinition A string representation of the mustache content to put with the config.
  * @param {Object} configDefinition Flattened config generated from the original config specified by the user.
  */
-exports.generate_file_content_from_template = function(templateDefinition, configDefinition){
+exports.generate_file_content_from_template = function(templateDefinition, configDefinition, partials){
     //so template it
-    return exports.mustache_recursive(templateDefinition, configDefinition);     
+    return exports.mustache_recursive(templateDefinition, configDefinition, partials);     
 }
 
 /**
