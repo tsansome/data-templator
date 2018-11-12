@@ -57,7 +57,7 @@ BEGIN
     SET @UpdateExistingRecordsString = '
         UPDATE  [main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}]
         SET
-            {{#columns}}[{{name}}] = Tmp.[{{name}}]{{^last}},{{/last}}{{/columns}}
+            {{#columns}}[{{name_without_spaces}}] = Tmp.[{{name_without_spaces}}]{{^last}},{{/last}}{{/columns}}
         From [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] Tmp 
         WHERE {{#source.primary_key}}[main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}].{{name_without_spaces}} = Tmp.{{name_without_spaces}}{{/source.primary_key}} 
         OPTION(LABEL = ''UpdateRows_' + CONVERT(varchar(255), @myid) + '''); 
