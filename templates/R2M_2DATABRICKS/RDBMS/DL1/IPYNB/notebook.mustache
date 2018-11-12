@@ -1,0 +1,20 @@
+{
+    "cells": [
+        {
+            "cell_type": "code",
+            "source": [
+                "jdbcUrl = dbutils.secrets.get('{{ source.secret_scope}}', '{{ source.database_connection_string_secret_name}}')\npushdown_query = \"(select * from {{template_config.variables.source_tablename_formatted}}) as blah\"\nmyRecords = sqlContext.read.format(\"jdbc\").options(url=jdbcUrl, dbtable=pushdown_query).load()\n\nmyRecords.createOrReplaceTempView(\"myRecords\")\ndisplay(myRecords)"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": 1
+        },
+        {{> DL1_IPYNB_NOTEBOOK}}
+    ],
+    "metadata": {
+        "name": "R2M_DL1_VoyageJob",
+        "notebookId": 1044016511868675
+    },
+    "nbformat": 4,
+    "nbformat_minor": 0
+}

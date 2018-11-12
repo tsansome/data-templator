@@ -20,8 +20,5 @@
     "properties": {
         "dam_prefix": "R2M",
         "pattern": "DL1"
-    },
-    "variables": {
-        "source_tablename_formatted": "{{#string_func.replace_illegal_characters}}{{source.tablename}}{{/string_func.replace_illegal_characters}}"
     }
 }
