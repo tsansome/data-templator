@@ -126,7 +126,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
             logger.info(`${templateToGenerate.generate.length} implementations chosen to template.`)
             for (var pli in templateToGenerate.generate) {
                 var templateLanguageConfig = templateToGenerate.generate[pli];                
-                templator.global = exports.load_shared(templatorConfig.global, targetTemplateFamily);
+                templatorConfig.global = exports.load_shared(templatorConfig.global, targetTemplateFamily);
                 logger.info(`Code Generation for ${templateLanguageConfig.language} implementation commencing. | ${corrid}`);
                 //now split off the template family
                 selectedTemplates.add(templateToGenerate.name + "/" + templateLanguageConfig.language);
