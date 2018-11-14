@@ -64,20 +64,20 @@ BEGIN
     ';
 
     SET @FindRowCountsString = '
-            SELECT @RowsAffected = [NumInserts] + [NumUpdates]
-            FROM
+        SELECT @RowsAffected = t1.[NumInserts] + t2.[NumUpdates]
+        FROM 
             (
-                SELECT  max(row_count) as [NumInserts]
-                    FROM sys.dm_pdw_request_steps rs
-                    JOIN sys.dm_pdw_exec_requests r ON rs.request_id = r.request_id 
-                    WHERE r.[label] = ''InsertNewRows_' + CONVERT(varchar(255), @myid) + ''')
-            UNION 
+                SELECT max(row_count) as [NumInserts]
+                FROM sys.dm_pdw_request_steps rs
+                JOIN sys.dm_pdw_exec_requests r ON rs.request_id = r.request_id 
+                WHERE r.[label] = ''InsertNewRows_' + CONVERT(varchar(255), @myid) + '''
+            ) t1,
             (
-                SELECT  max(row_count) as [NumInserts]
-                    FROM sys.dm_pdw_request_steps rs
-                    JOIN sys.dm_pdw_exec_requests r ON rs.request_id = r.request_id 
-                    WHERE r.[label] = ''UpdateRows_' + CONVERT(varchar(255), @myid) + '''
-            )
+                SELECT  max(row_count) as [NumUpdates]
+                FROM sys.dm_pdw_request_steps rs
+                JOIN sys.dm_pdw_exec_requests r ON rs.request_id = r.request_id 
+                WHERE r.[label] = ''UpdateRows_' + CONVERT(varchar(255), @myid) + '''
+            ) t2	
     ';
 
     EXEC sp_executesql @CreateExternalTableString;
