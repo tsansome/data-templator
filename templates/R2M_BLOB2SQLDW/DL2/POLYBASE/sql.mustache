@@ -18,7 +18,7 @@ BEGIN
 
     SET @CreateExternalTableString = '
         CREATE EXTERNAL TABLE [dbo].[extTmp'+ CONVERT(varchar(255), @myid)  +'] (
-            {{#columns}}[{{name}}] {{#hasTargetDefinition}}{{target.datatype}}{{/hasTargetDefinition}}{{^hasTargetDefinition}}{{#properties.default_datatype}}{{properties.default_datatype}}{{/properties.default_datatype}}{{^properties.default_datatype}}nvarchar(100){{/properties.default_datatype}}{{/hasTargetDefinition}}{{^last}},{{/last}}{{/columns}}
+            {{#source.date_columns}}[{{name}}] {{#hasTargetDefinition}}{{target.datatype}}{{/hasTargetDefinition}}{{^hasTargetDefinition}}{{#properties.default_datatype}}{{properties.default_datatype}}{{/properties.default_datatype}}{{^properties.default_datatype}}nvarchar(100){{/properties.default_datatype}}{{/hasTargetDefinition}},{{/source.date_columns}}{{#columns}}[{{name_without_spaces}}] {{#hasTargetDefinition}}{{target.datatype}}{{/hasTargetDefinition}}{{^hasTargetDefinition}}{{#properties.default_datatype}}{{properties.default_datatype}}{{/properties.default_datatype}}{{^properties.default_datatype}}nvarchar(100){{/properties.default_datatype}}{{/hasTargetDefinition}}{{^last}},{{/last}}{{/columns}}
         )
         WITH ( 
             LOCATION = ''' + @BLOBPATH + ''',   
@@ -32,11 +32,11 @@ BEGIN
     SET @CreateMainTableIfNotExistsString = '
         if object_id (''main.{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}'',''U'') is null
         CREATE TABLE [Main].[{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}] (
-            {{#columns}}[{{name_without_spaces}}] {{#hasTargetDefinition}}{{target.datatype}}{{/hasTargetDefinition}}{{^hasTargetDefinition}}{{#properties.default_datatype}}{{properties.default_datatype}}{{/properties.default_datatype}}{{^properties.default_datatype}}nvarchar(100){{/properties.default_datatype}}{{/hasTargetDefinition}}{{^last}},{{/last}}{{/columns}}
+            {{#source.date_columns}}[{{name_without_spaces}}] {{#hasTargetDefinition}}{{target.datatype}}{{/hasTargetDefinition}}{{^hasTargetDefinition}}{{#properties.default_datatype}}{{properties.default_datatype}}{{/properties.default_datatype}}{{^properties.default_datatype}}nvarchar(100){{/properties.default_datatype}}{{/hasTargetDefinition}},{{/source.date_columns}}{{#columns}}[{{name_without_spaces}}] {{#hasTargetDefinition}}{{target.datatype}}{{/hasTargetDefinition}}{{^hasTargetDefinition}}{{#properties.default_datatype}}{{properties.default_datatype}}{{/properties.default_datatype}}{{^properties.default_datatype}}nvarchar(100){{/properties.default_datatype}}{{/hasTargetDefinition}}{{^last}},{{/last}}{{/columns}}
         ) WITH (
             DISTRIBUTION = {{properties.distribution}}{{#properties.index}},{{/properties.index}}
             {{#properties.index}}{{properties.index}}{{/properties.index}}
-        );
+        );        
     ';
 
     SET @DropExternalTableString = '
