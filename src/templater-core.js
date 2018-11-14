@@ -385,7 +385,7 @@ exports.prepare_final_config = function(datasetToGenerate, templateLanguageConfi
     templateLanguageConfig.target.columns = null;
     //remove the spaces from the name and fix the last for all the arrays
     dataSetFinalConfig.source.date_columns = exports.remove_spaces_and_fix_last(dataSetFinalConfig.source.date_columns);
-    dataSetFinalConfig.source.primary_key = exports.remove_spaces_and_fix_last(dataSetFinalConfig.source.primary_key);
+    dataSetFinalConfig.source.primary_keys = exports.remove_spaces_and_fix_last(dataSetFinalConfig.source.primary_keys);
     dataSetFinalConfig.columns = exports.remove_spaces_and_fix_last(dataSetFinalConfig.columns);    
     
     //now fix the tags array if supplied
