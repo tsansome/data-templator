@@ -3,6 +3,7 @@ const Mustache = require("mustache");
 var fs = require("fs-extra");
 const path = require("path");
 const assert = require("assert");
+const lodash = require("lodash");
 
 const uuid = require('uuid')
 const corrid = uuid.v1()
@@ -197,8 +198,8 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                     exports.print_dataset_definition(`Dataset definition that will be passed into mustache for final template:`, dataSetFinalConfig);
                     //gather the partials to be passed through to generating our output
                     var partialsToApply = null;
-                    if (global.partials != null) {
-                        partialsToApply = global.partials.filter(pn => pn.coll_name == targetTemplateFamily)[0];
+                    if (templatorConfig.global.partials != null) {
+                        partialsToApply = templatorConfig.global.partials.filter(pn => pn.coll_name == targetTemplateFamily)[0];
                     }
                     //now preview our config file, then generate
                     var fc = exports.generate_file_content_from_template(template_str, dataSetFinalConfig, partialsToApply)
@@ -289,9 +290,9 @@ exports.load_shared = function(global, targetTemplateFamily) {
                 code_fragments: null
             };
             //read in the partials under the shared folder
-            var fragments = walkSync(shared_path).map(function(fp) { 
+            var fragments = lodash.flattenDeep(walkSync(shared_path)).map(function(fp) {
                                 var id = fp.replace(shared_path, "").replace("/","_").replace("." + path.extname(fp), "").toUpperCase();
-                                return { "id":  id, item: fs.readFileSync(fp) };
+                                return { "id":  id, content: fs.readFileSync(fp).toString() };
                             });   
             logger.debug(`Found ${fragments.length} to load.`)
             logger.trace("Shared code fragments that will be loaded.");
