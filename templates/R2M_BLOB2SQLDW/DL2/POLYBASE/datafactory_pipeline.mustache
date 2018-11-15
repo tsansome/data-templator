@@ -59,7 +59,7 @@
                     "body": {
                         "message": "@{activity('{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}').error.message}",
                         "Subject": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}} failed",
-                        "numberOfRecords": "@{activity('{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}').output.dataWritten}",
+                        "numberOfRecords": "0",
                         "dataFactoryName": "@{pipeline().DataFactory}",
                         "pipelineName": "@{pipeline().Pipeline}",
                         "receiver": "@pipeline().parameters.receiver",
