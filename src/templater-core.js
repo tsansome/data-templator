@@ -3,6 +3,7 @@ const Mustache = require("mustache");
 var fs = require("fs-extra");
 const path = require("path");
 const assert = require("assert");
+const lodash = require("lodash");
 
 const uuid = require('uuid')
 const corrid = uuid.v1()
@@ -20,7 +21,7 @@ const walkSync = (d) => fs.statSync(d).isDirectory() ? fs.readdirSync(d).map(f =
 //other utility
 const arrayToObject = (array) =>
    array.reduce((obj, item) => {
-     obj[item.id] = item
+     obj[item.id] = item.value
      return obj
    }, {})
 
@@ -197,8 +198,10 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                     exports.print_dataset_definition(`Dataset definition that will be passed into mustache for final template:`, dataSetFinalConfig);
                     //gather the partials to be passed through to generating our output
                     var partialsToApply = null;
-                    if (global.partials != null) {
-                        partialsToApply = global.partials.filter(pn => pn.coll_name == targetTemplateFamily)[0];
+                    if (templatorConfig.global.partials != null) {
+                        if (templatorConfig.global.partials.filter(pn => pn.coll_name == targetTemplateFamily).length > 0) {
+                            partialsToApply = templatorConfig.global.partials.filter(pn => pn.coll_name == targetTemplateFamily)[0].code_fragments;
+                        }
                     }
                     //now preview our config file, then generate
                     var fc = exports.generate_file_content_from_template(template_str, dataSetFinalConfig, partialsToApply)
@@ -248,11 +251,11 @@ exports.mustache_recursive = function(TemplateStr, objectToApplyToTemplate, part
     var templateString = TemplateStr;
     var i = 0;
     if (max_iter == null) max_iter = 5
-    while (i <= max_iter || templateString.indexOf("{{") != -1) {
+    while (i <= max_iter && templateString.indexOf("{{") != -1) {
         if (partials == null) {
-            templateString = Mustache.render(templateString, objectToApplyToTemplate)
+            templateString = Mustache.render(templateString, objectToApplyToTemplate);
         } else {
-
+            templateString = Mustache.render(templateString, objectToApplyToTemplate, partials);
         }
         i++;
     }
@@ -280,8 +283,9 @@ exports.resolve_global = function(global, datasetToGenerate) {
 
 exports.load_shared = function(global, targetTemplateFamily) {
     logger.info(`Loading any shared code fragments for ${targetTemplateFamily}`);
-    var shared_path = templates_path() + "/" + targetTemplateFamily + "/SHARED/";
+    var shared_path = templates_path() + targetTemplateFamily + "/SHARED/";
     if (fs.existsSync(shared_path)) {
+        shared_path = path.resolve(shared_path);
         if (global.partials == null) global.partials = [];
         if (global.partials.filter(t => t.coll_name = targetTemplateFamily).length == 0) {
             var elem = {
@@ -289,9 +293,9 @@ exports.load_shared = function(global, targetTemplateFamily) {
                 code_fragments: null
             };
             //read in the partials under the shared folder
-            var fragments = walkSync(shared_path).map(function(fp) { 
-                                var id = fp.replace(shared_path, "").replace("/","_").replace("." + path.extname(fp), "").toUpperCase();
-                                return { "id":  id, item: fs.readFileSync(fp) };
+            var fragments = lodash.flattenDeep(walkSync(shared_path)).map(function(fp) {
+                                var id = fp.replace(shared_path + "\\", "").replace(/\\/g,"_").replace(path.extname(fp), "").toUpperCase();
+                                return { "id":  id, value: fs.readFileSync(fp).toString() };
                             });   
             logger.debug(`Found ${fragments.length} to load.`)
             logger.trace("Shared code fragments that will be loaded.");

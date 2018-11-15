@@ -4,7 +4,7 @@
         "description": "A pipeline that extracts the full table from {{source.schema}}.{{source.tablename}} from the database {{source.database}}. It then drops it into the {{target.storage_container}} using {{target.genericdataset}} as a reference for the Blob storage account.",
         "activities": [
             {
-                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                "name": "Extract full table from source table",
                 "type": "Copy",
                 "policy": {
                     "timeout": "7.00:00:00",
@@ -38,6 +38,41 @@
                         }
                     }
                 ]
+            },
+            {
+                "name": "Send Failed Email",
+                "type": "WebActivity",
+                "dependsOn": [
+                    {
+                        "activity": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "typeProperties": {
+                    "url": "{{properties.logic_app_url}}",
+                    "method": "POST",
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body": {
+                        "message": "@{activity('Extract full table from source table').error.message}",
+                        "Subject": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}} failed",
+                        "numberOfRecords": "0",
+                        "dataFactoryName": "@{pipeline().DataFactory}",
+                        "pipelineName": "@{pipeline().Pipeline}",
+                        "receiver": "@pipeline().parameters.receiver",
+                        "Guid": "{{properties.logic_app_secret}}"
+                    }
+                }
             }
         ],
         "folder": {
