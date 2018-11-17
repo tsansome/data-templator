@@ -1,0 +1,27 @@
+{
+    "cell_type": "code",
+    "source": [
+        "sdf = spark.sql(\"\"\"\nSELECT \n{{#source.date_columns}}to_utc_timestamp(CAST(UNIX_TIMESTAMP(`{{name}}`, \"{{ source.date_format }}\") AS TIMESTAMP), '{{source.date_locale}}') AS `{{name_without_spaces}}_UTC`,\n{{/source.date_columns}}{{#columns}}\tTRIM(m.`{{name}}`) as `{{name_without_spaces}}`,\n {{/columns}}\tcurrent_timestamp() AS run_date_utc\n   FROM myRecords AS m\n\"\"\")\nsdf.createOrReplaceTempView(\"sdf\")"
+    ],
+    "metadata": {},
+    "outputs": [],
+    "execution_count": null
+},
+{
+    "cell_type": "code",
+    "source": [
+        "sdf = spark.sql(\"\"\"\nCREATE TABLE IF NOT EXISTS {{ target.database }}_master.{{ source.database}}_{{ template_config.variables.source_tablename_formatted }}(\n{{#source.date_columns}}\t`{{name_without_spaces}}_UTC` timestamp,\n{{/source.date_columns}}{{#columns}}\t`{{name_without_spaces}}` string{{^last}},\n {{/last}}{{/columns}},\n`run_date_utc` timestamp) \nUSING parquet\n\"\"\")"
+    ],
+    "metadata": {},
+    "outputs": [],
+    "execution_count": null
+},
+{
+    "cell_type": "code",
+    "source": [
+        "%sql\nINSERT INTO TABLE {{ target.database }}_master.{{ source.database}}_{{ template_config.variables.source_tablename_formatted }}\n    SELECT *\n      FROM sdf;"
+    ],
+    "metadata": {},
+    "outputs": [],
+    "execution_count": null
+}
