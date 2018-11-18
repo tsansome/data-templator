@@ -1,4 +1,4 @@
-{
+{    
     "scripts": [
         {
             "script_name": "notebook",
@@ -10,10 +10,13 @@
         }
     ],
     "linked_templates": [
-        "R2M_2DATABRICKS/RDBMS/ORCHESTRATION/DATAFACTORY"
+        "R2M_2DATABRICKS/DATALAKESTORAGEGEN1/ORCHESTRATION/DATAFACTORY"
     ],
     "properties": {
         "dam_prefix": "R2M",
-        "pattern": "DL1"
+        "pattern": "DL4"
+    },
+    "variables": {
+        "source_tablename_formatted": "{{#string_func.replace_illegal_characters}}{{source.tablename}}{{/string_func.replace_illegal_characters}}"
     }
 }

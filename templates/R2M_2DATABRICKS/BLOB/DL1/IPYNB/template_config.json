@@ -10,13 +10,13 @@
         }
     ],
     "linked_templates": [
-        "R2M_DATALAKESTOREGEN12DATABRICKS/ORCHESTRATION/DATAFACTORY"
+        "R2M_2DATABRICKS/BLOB/ORCHESTRATION/DATAFACTORY"
     ],
     "properties": {
         "dam_prefix": "R2M",
         "pattern": "DL1"
     },
     "variables": {
-        "source_tablename_formatted": "{{#string_func.replace_illegal_characters}}{{template_config.variables.source_tablename_formatted}}{{/string_func.replace_illegal_characters}}"
+        "source_tablename_formatted": "{{#string_func.replace_illegal_characters}}{{source.tablename}}{{/string_func.replace_illegal_characters}}"
     }
 }

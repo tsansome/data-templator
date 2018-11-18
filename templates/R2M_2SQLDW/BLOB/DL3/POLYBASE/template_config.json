@@ -1,20 +1,20 @@
 {
     "scripts": [
         {
-            "script_name": "notebook",
+            "script_name": "sql",
             "output_file": {
-                "extension": "ipynb", 
-                "sub_folder": "ipynb/{{target.database}}/Master",           
+                "extension": "sql", 
+                "sub_folder": "sql/storedprocedures",           
                 "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}"
             }
         }
     ],
     "linked_templates": [
-        "R2M_2DATABRICKS/DATALAKESTORAGEGEN1/ORCHESTRATION/DATAFACTORY"
+        "R2M_2SQLDW/BLOB/ORCHESTRATION/DATAFACTORY"
     ],
     "properties": {
         "dam_prefix": "R2M",
-        "pattern": "DL2"
+        "pattern": "DL3"
     },
     "variables": {
         "source_tablename_formatted": "{{#string_func.replace_illegal_characters}}{{source.tablename}}{{/string_func.replace_illegal_characters}}"
