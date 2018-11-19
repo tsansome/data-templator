@@ -35,7 +35,7 @@ const pkg = require(__dirname + "/../package.json");
  * @param {string} samplesFolder The folder path to the samples. 
  * @param {string} logLevel The level to log out to.  
 */
-exports.process_config = function(configPath, generatedFolder, samplesFolder, logLevel) {
+exports.process_config = function(configPath, generatedFolder, samplesFolder, logLevel, envFilePath) {
     // TODO: remove this and find a way to escape '/' only
     Mustache.escape = function(text) {return text;};
 
@@ -72,7 +72,14 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
                                     }
                                 });                 
     templatorConfig.global.type_mappings.push(builtInTypeMappings);
+    
+    //now just read in the environment file if supplied
+    if (envFilePath != null) {
+        assert.strictEqual(fs.existsSync(envFilePath), true, `No environment json file found at ${envFilePath}.`);
+        templatorConfig.env = JSON.parse(fs.readFileSync(envFilePath, 'utf8'));
+    }
 
+    //now continue
     var selectedTemplates = new Set();
 
     //di = dataset index
@@ -82,7 +89,7 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
         logger.info('-------------------------------------------------------');
         logger.info(`Processing request for dataset ${datasetToGenerate.name} .. | ${corrid}`);     
         //apply the global config if defined
-        dataSetToGenerate = exports.resolve_global(templatorConfig.global, datasetToGenerate);
+        dataSetToGenerate = exports.resolve_global(templatorConfig.global, datasetToGenerate, templatorConfig.env);
         exports.print_dataset_definition(`Dataset definition after global substitutions:`, dataSetToGenerate);
         //let's validate that they've deffined the dataset properly
         //firstly we ensure the columns are defined either through config or a sample
@@ -270,7 +277,12 @@ exports.print_dataset_definition = function(caption, ds_def) {
     logger.trace(`:::::::::::::::::::::::::::::::::::::::::::::`);
 }
 
-exports.resolve_global = function(global, datasetToGenerate) {
+exports.resolve_global = function(global, datasetToGenerate, env) {
+    //first apply the env variables to the global
+    if (env != null) {
+        var template = JSON.stringify(global);
+        
+    }
     //let's just apply mustache on the config so they can use anything in the dataset
     var template = JSON.stringify(datasetToGenerate);
     if (global != null) {

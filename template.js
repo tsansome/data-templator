@@ -16,6 +16,7 @@ program
   .option('-o, --outputs <folderpath>', 'Folder Path to location to put outputted folders / files.')
   .option('-s, --samples_path [folderpath]', 'Folder Path to location of samples. (Optional)')
   .option('-l, --log [logLevel]', 'Log level to output (INFO, WARN, DEBUG, ERROR)')
+  .option('-e, --env_file [filepath]', 'A path to an optional env.json object')
   .parse(process.argv);
 
 if (program.config == undefined) throw Error("You must supply a valid path to a folder or a single config file using the parameter -c");
@@ -34,9 +35,9 @@ if (fs.lstatSync(configPath).isDirectory()) {
     for(var ci in configs) {
         var configForProcessing = configs[ci];
         var configForProcessingPath = configPath + "/" + configForProcessing;
-        templater.process_config(configForProcessingPath, generatedFolder, program.samples, program.logLevel);
+        templater.process_config(configForProcessingPath, generatedFolder, program.samples, program.logLevel, program.e);
     }
 } else {
     //pointing at a specific config
-    templater.process_config(configPath, generatedFolder, program.samples, program.log);
+    templater.process_config(configPath, generatedFolder, program.samples, program.log, program.e);
 }
