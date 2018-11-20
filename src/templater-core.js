@@ -280,8 +280,14 @@ exports.print_dataset_definition = function(caption, ds_def) {
 exports.resolve_global = function(global, datasetToGenerate, env) {
     //first apply the env variables to the global
     if (env != null) {
+        logger.debug(`Env properties are defined. | ${corrid}`);
         var template = JSON.stringify(global);
-        
+        try {
+            global = JSON.parse(exports.mustache_recursive(template,{ env: env }));
+        } catch (ex) {
+            logger.error(`Non compatible JSON string after substituting environment variables into global.`);
+        }
+        datasetToGenerate.env = env;
     }
     //let's just apply mustache on the config so they can use anything in the dataset
     var template = JSON.stringify(datasetToGenerate);
