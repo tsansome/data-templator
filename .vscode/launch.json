@@ -10,7 +10,7 @@
             "name": "No Samples",
             "program": "${workspaceFolder}/template.js",
             "args": [
-                "-c", "C:/Users/tsansome/Development/linxcc/DataLake-Templator-Scripts/master_area_maximo_config.json", "-o", "../tmp"
+                "-c", "C:/Development/sample_confs/0_config.json", "-o", "../tmp", "-e", "C:/Development/sample_confs/env.json"
             ]
         }
     ]

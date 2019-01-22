@@ -1,24 +1,8 @@
 {
     "cells": [
-        {
-            "cell_type": "code",
-            "source": [
-                "dbutils.widgets.text(\"filename\", \"\",\"\")\ndbutils.widgets.get(\"filename\")\nfilename = getArgument(\"filename\")\nprint (\"Param -\\'input':\")\nprint (filename)\nspark.conf.set(\"dfs.adls.oauth2.access.token.provider.type\", \"ClientCredential\")\nspark.conf.set(\"dfs.adls.oauth2.client.id\", \"{{ source.client_id }}\")\nspark.conf.set(\"dfs.adls.oauth2.credential\", \"{{ source.client_credential }}\")\nspark.conf.set(\"dfs.adls.oauth2.refresh.url\", \"https://login.microsoftonline.com/{{source.tenant_id}}/oauth2/token \")"
-            ],
-            "metadata": {},
-            "outputs": [],
-            "execution_count": null
-        },
-        {
-            "cell_type": "code",
-            "source": [
-                "raw_folder = \"{{ source.raw_folder }}\"\ninfile = \"/Raw/\" + raw_folder + \"/\" + filename\n\nmyRecords = spark.read.option(\"delimiter\", \"{{ source.delimiter }}\").csv(\"adl://{{ source.datalakestore_accountname }}.azuredatalakestore.net/\" + infile, quote='\"', escape='\"', header=True)\nmyRecords.createOrReplaceTempView(\"myRecords\")"
-            ],
-            "metadata": {},
-            "outputs": [],
-            "execution_count": null
-        },
+        {{> LOAD_FROM_BLOB_NOTEBOOK}}
         {{> DL1_IPYNB_NOTEBOOK}}
+        
     ],
     "metadata": {
         "name": "R2M_DL1_{{ template_config.variables.source_tablename_formatted }}"
