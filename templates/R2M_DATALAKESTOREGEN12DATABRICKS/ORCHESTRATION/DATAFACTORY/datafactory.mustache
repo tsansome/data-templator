@@ -104,7 +104,7 @@
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL1",
+                        "activity": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
                         "dependencyConditions": [
                             "Succeeded"
                         ]
@@ -155,7 +155,7 @@
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL1",
+                        "activity": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -194,7 +194,7 @@
                 "type": "WebActivity",
                 "dependsOn": [
                     {
-                        "activity": "R2M_DL1",
+                        "activity": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
                         "dependencyConditions": [
                             "Failed"
                         ]

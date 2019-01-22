@@ -204,11 +204,14 @@
                     },
                     "body":
                     {
-                        "filename": "@{pipeline().parameters.table}",
-                        "table": "@{pipeline().parameters.table}",
-                        "pipeline": "@{pipeline().Pipeline}",
-                        "triggered": "@{pipeline().TriggerTime}",
-                        "activity": "R2M"
+                        "messageID": "{{properties.R2M_fail_error_message_id}}",
+                        "parameters": {
+                            "filename": "@{pipeline().parameters.table}",
+                            "table": "@{pipeline().parameters.table}",
+                            "pipeline": "@{pipeline().Pipeline}",
+                            "triggered": "@{pipeline().TriggerTime}",
+                            "activity": "R2M"
+                        }
                     }
                 }
             },
@@ -237,11 +240,14 @@
                     },
                     "body":
                     {
-                        "filename": "@{pipeline().parameters.table}",
-                        "table": "@{pipeline().parameters.table}",
-                        "pipeline": "@{pipeline().Pipeline}",
-                        "triggered": "@{pipeline().TriggerTime}",
-                        "activity": "Reconcilliation_and_Capture_Run_Data"
+                        "messageID": "{{properties.R2M_fail_error_message_id}}",
+                        "parameters": {
+                            "filename": "@{pipeline().parameters.table}",
+                            "table": "@{pipeline().parameters.table}",
+                            "pipeline": "@{pipeline().Pipeline}",
+                            "triggered": "@{pipeline().TriggerTime}",
+                            "activity": "Reconcilliation_and_Capture_Run_Data"
+                        }
                     }
                 }
             },
@@ -270,11 +276,14 @@
                     },
                     "body":
                     {
-                        "filename": "@{pipeline().parameters.table}",
-                        "table": "@{pipeline().parameters.table}",
-                        "pipeline": "@{pipeline().Pipeline}",
-                        "triggered": "@{pipeline().TriggerTime}",
-                        "activity": "Backup"
+                        "messageID": "{{properties.R2M_fail_error_message_id}}",
+                        "parameters": {
+                            "filename": "@{pipeline().parameters.table}",
+                            "table": "@{pipeline().parameters.table}",
+                            "pipeline": "@{pipeline().Pipeline}",
+                            "triggered": "@{pipeline().TriggerTime}",
+                            "activity": "Backup"
+                        }
                     }
                 }
             }
