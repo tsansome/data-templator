@@ -45,8 +45,8 @@
                 "typeProperties": {
                     "notebookPath": "{{ properties.backup_notebook_path}}",
                     "baseParameters": {
-                        "container": {
-                            "value": "@pipeline().parameters.container",
+                        "file_system": {
+                            "value": "@pipeline().parameters.file_system",
                             "type": "Expression"
                         },
                         "backup_folder": {
@@ -84,8 +84,8 @@
                 "typeProperties": {
                     "notebookPath": "{{ properties.restore_notebook_path }}",
                     "baseParameters": {
-                        "container": {
-                            "value": "@pipeline().parameters.container",
+                        "file_system": {
+                            "value": "@pipeline().parameters.file_system",
                             "type": "Expression"
                         },
                         "backup_filename": {
@@ -112,7 +112,7 @@
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                        "activity": "R2M_DL1",
                         "dependencyConditions": [
                             "Succeeded"
                         ]
@@ -163,7 +163,7 @@
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
-                        "activity": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                        "activity": "R2M_DL1",
                         "dependencyConditions": [
                             "Failed"
                         ]
@@ -178,8 +178,8 @@
                 "typeProperties": {
                     "notebookPath": "{{properties.restore_notebook_path}}",
                     "baseParameters": {
-                        "container": {
-                            "value": "@pipeline().parameters.container",
+                        "file_system": {
+                            "value": "@pipeline().parameters.file_system",
                             "type": "Expression"
                         },
                         "backup_filename": {
@@ -203,7 +203,7 @@
             }
         ],
         "parameters": {
-            "container": {
+            "file_system": {
                 "type": "String",
                 "defaultValue": "{{#string_func.lower}}{{ source.database }}{{/string_func.lower}}"
             },

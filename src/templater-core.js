@@ -38,7 +38,7 @@ const pkg = require(__dirname + "/../package.json");
 exports.process_config = function(configPath, generatedFolder, samplesFolder, logLevel, envFilePath) {
     // TODO: remove this and find a way to escape '/' only
     Mustache.escape = function(text) {return text;};
-
+    
     if (logLevel == undefined) {
         logger.level = 'silent';
     } else {        

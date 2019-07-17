@@ -35,7 +35,7 @@ if (fs.lstatSync(configPath).isDirectory()) {
     for(var ci in configs) {
         var configForProcessing = configs[ci];
         var configForProcessingPath = configPath + "/" + configForProcessing;
-        templater.process_config(configForProcessingPath, generatedFolder, program.samples, program.logLevel, program.env_file);
+        templater.process_config(configForProcessingPath, generatedFolder, program.samples, program.log, program.env_file);
     }
 } else {
     //pointing at a specific config

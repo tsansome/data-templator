@@ -1,0 +1,18 @@
+{
+    "cell_type": "code",
+    "source": [
+        "dbutils.widgets.text(\"filename\", \"\",\"\")\ndbutils.widgets.get(\"filename\")\nfilename = getArgument(\"filename\")\nprint (\"Param -\\'input':\")\nprint (filename)\nspark.conf.set(\"fs.azure.account.key.{{ source.blobstorage_accountname }}.blob.core.windows.net\", dbutils.secrets.get(scope = \"key-vault-secrets\", key = \"{{ source.keyvault_secret }}\"))"
+    ],
+    "metadata": {},
+    "outputs": [],
+    "execution_count": null
+},
+{
+    "cell_type": "code",
+    "source": [
+        "raw_folder = \"{{ source.raw_folder }}\"\ninfile = \"/\" + raw_folder + \"/\" + filename\n\nmyRecords = spark.read.option(\"delimiter\", \"{{ source.delimiter }}\").csv(\"wasbs://{{ source.storage_container}}@{{ source.blobstorage_accountname }}.blob.core.windows.net/\" + infile, quote='\"', escape='\"', header=True)\nmyRecords.createOrReplaceTempView(\"myRecords\")"
+    ],
+    "metadata": {},
+    "outputs": [],
+    "execution_count": null
+},
