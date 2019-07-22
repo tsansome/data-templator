@@ -1,0 +1,106 @@
+{
+    "name": "{{ template_config.outputs.0.output_file.name }}",
+    "properties": {
+        "description": "A pipeline that extracts the full table from {{source.schema}}.{{source.tablename}} from the database {{source.database}}. It then drops it into the {{target.storage_container}} using {{target.genericdataset}} as a reference for the Blob storage account.",
+        "activities": [
+            {
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "Determine_Delta",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30
+                },
+                "typeProperties": {
+                    "source": {
+                        "type": "RelationalSource",
+                        "query": {
+                            "value": "@concat('SELECT * FROM \"{{source.schema}}\".\"{{source.tablename}}\" WHERE {{source.delta_column_date.name}} > ', '''', formatDateTime(activity('Determine_Delta').output.firstRow.latest, '{{source.delta_column_date.format}}'),'''')",
+                            "type": "Expression"
+                        }
+                    },
+                    "sink": {
+                        "type": "DelimitedTextSink",
+                        "storeSettings": {
+                            "type": "AzureBlobStorageWriteSetting"
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextWriteSetting",
+                            "quoteAllText": true,
+                            "fileExtension": "."
+                        }
+                    },
+                    "enableStaging": false,
+                    "dataIntegrationUnits": 0
+                },
+                "inputs": [
+                    {
+                        "referenceName": "{{source.genericdataset}}",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "TABLENAME": "{{source.tablename}}",
+                            "SCHEMA": "{{source.schema}}"
+                        }
+                    }
+                ],
+                "outputs": [
+                     {
+                        "referenceName": "{{target.genericdataset}}",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "FILENAME": "@concat(formatDateTime(utcnow(), 'dd-MM-yyyy'), '__rId_', pipeline().RunId, '.csv')",
+                            "SUBFOLDER": "{{#string_func.upper}}{{source.schema}}{{/string_func.upper}}_{{#string_func.upper}}{{source.tablename}}{{/string_func.upper}}"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Determine_Delta",
+                "type": "Lookup",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "AzureSqlSource",
+                        "sqlReaderStoredProcedureName": "health.get_latest_delta ",
+                        "storedProcedureParameters": {
+                            "table_to_get": {
+                                "type": "String",
+                                "value": "{{#string_func.lower}}{{target.database}}_master.{{source.database}}_{{source.tablename}}{{/string_func.lower}}"
+                            }
+                        }
+                    },
+                    "dataset": {
+                        "referenceName": "{{properties.health_genericdataset}}",
+                        "type": "DatasetReference"
+                    }
+                }
+            }
+
+        ],
+        "folder": {
+            "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}"
+        },
+        "annotations": [
+            "Templator: v{{templator_info.version}}"{{#tags}},{{/tags}}
+            {{#tags}}
+                {{label}}{{^last}},{{/last}}
+            {{/tags}}
+        ]
+    }
+}
