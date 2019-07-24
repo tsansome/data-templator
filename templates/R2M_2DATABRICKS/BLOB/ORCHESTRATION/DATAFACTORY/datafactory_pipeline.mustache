@@ -147,6 +147,10 @@
                             "value": "@pipeline().parameters.raw_folder",
                             "type": "Expression"
                         },
+                        {{#source.delta_column_date}}"delta_column": {
+                            "value": "@pipeline().parameters.delta_column",
+                            "type": "Expression"
+                        },{{/source.delta_column_date}}
                         "source_database": {
                             "value": "@pipeline().parameters.source_database",
                             "type": "Expression"
@@ -234,6 +238,10 @@
                 "type": "String",
                 "defaultValue": "{{ source.raw_folder }}"
             },
+            {{#source.delta_column_date}}"delta_column": {
+                "type": "string",
+                "defaultValue": "tr_date"
+            },{{/source.delta_column_date}}
             "source_database": {
                 "type": "String",
                 "defaultValue": "{{ source.database }}"
