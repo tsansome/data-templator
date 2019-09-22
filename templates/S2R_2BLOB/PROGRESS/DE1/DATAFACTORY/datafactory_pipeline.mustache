@@ -89,7 +89,7 @@
                     }
                 },
                 "linkedServiceName": {
-                    "referenceName": "IntegrationFunctions",
+                    "referenceName": "{{properties.azure_function_service}}",
                     "type": "LinkedServiceReference"
                 }
             },
@@ -125,7 +125,7 @@
                     }
                 },
                 "linkedServiceName": {
-                    "referenceName": "{{[properties.azure_function_service]}}",
+                    "referenceName": "{{properties.azure_function_service}}",
                     "type": "LinkedServiceReference"
                 }
             }
