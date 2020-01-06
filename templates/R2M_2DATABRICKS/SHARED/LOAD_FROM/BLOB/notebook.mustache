@@ -10,7 +10,7 @@
 {
     "cell_type": "code",
     "source": [
-        "raw_folder = \"{{ source.raw_folder }}\"\ninfile = \"/\" + raw_folder + \"/\" + filename\n\nmyRecords = spark.read.option(\"delimiter\", \"{{ source.delimiter }}\").csv(\"wasbs://{{ source.storage_container}}@{{ source.blobstorage_accountname }}.blob.core.windows.net/\" + infile, quote='\"', escape='\"', header=True)\nmyRecords.createOrReplaceTempView(\"myRecords\")"
+        "raw_folder = \"{{ source.raw_folder }}\"\ninfile = \"/\" + raw_folder + \"/\" + filename\n\nmyRecords = spark.read.option(\"delimiter\", \"{{ source.delimiter }}\").option(\"multiLine\", \"true\").option(\"ignoreTrailingWhiteSpace\", \"true\").csv(\"wasbs://{{ source.storage_container}}@{{ source.blobstorage_accountname }}.blob.core.windows.net/\" + infile, quote='\"', escape='\"', header=True)\nmyRecords.createOrReplaceTempView(\"myRecords\")"
     ],
     "metadata": {},
     "outputs": [],
