@@ -45,11 +45,92 @@
                         "referenceName": "{{target.genericdataset}}",
                         "type": "DatasetReference",
                         "parameters": {
-                            "FILENAME": "out.csv",
+                            "FILENAME": {
+                                "value": "@concat('AEST_', formatDateTime(convertFromUtc(utcnow(), 'AUS Eastern Standard Time'), 'yyyy-MM-ddTHH_mm_ss'), '__rId_', pipeline().RunId, '_out.csv')",
+                                "type": "Expression"
+                            },
                             "SUBFOLDER": "{{#string_func.upper}}{{source.schema}}{{/string_func.upper}}_{{#string_func.upper}}{{source.tablename}}{{/string_func.upper}}"
                         }
                     }
                 ]
+            },
+            {
+                "name": "Notify",
+                "description": "Notify that the extraction failed.",
+                "type": "AzureFunctionActivity",
+                "dependsOn": [
+                    {
+                        "activity": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "functionName": "EncodeMessage",
+                    "method": "POST",
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body": {
+                        "friendlyMessageID": "Activity_Fail",
+                        "payload": {
+                            "datafactory_name": "@{pipeline().DataFactory}",
+                            "pipeline_name": "@{pipeline().Pipeline}",
+                            "pipeline_runId": "@{pipeline().RunId}",
+                            "error_message": "@{activity('{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}').output.errors[0].message}",
+                            "activity_name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "IntegrationFunctions",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "RaiseError",
+                "type": "AzureFunctionActivity",
+                "dependsOn": [
+                    {
+                        "activity": "Notify",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.01:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "functionName": "RaiseError",
+                    "method": "POST",
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body": {
+                        "payload": {
+                            "error_message": "@{activity('{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}').output.errors[0].message}"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "DataHubIntegrationFunctions",
+                    "type": "LinkedServiceReference"
+                }
             }
         ],
         "folder": {

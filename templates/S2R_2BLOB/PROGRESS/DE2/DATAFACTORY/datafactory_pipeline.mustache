@@ -56,12 +56,12 @@
                         "referenceName": "{{target.genericdataset}}",
                         "type": "DatasetReference",
                         "parameters": {
-                            "FILENAME": "@concat(formatDateTime(utcnow(), 'dd-MM-yyyy'), '__rId_', pipeline().RunId, '.csv')",
+                            "FILENAME": "@concat('AEST_', convertFromUtc(utcnow(), 'AUS Eastern Standard Time'), '__rId_', pipeline().RunId, '_out.csv')",
                             "SUBFOLDER": "{{#string_func.upper}}{{source.schema}}{{/string_func.upper}}_{{#string_func.upper}}{{source.tablename}}{{/string_func.upper}}"
                         }
                     }
                 ]
-            },
+            },  
             {
                 "name": "Determine_Delta",
                 "type": "Lookup",

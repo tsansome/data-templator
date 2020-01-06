@@ -204,6 +204,88 @@
                     "referenceName": "AzureDatabricks",
                     "type": "LinkedServiceReference"
                 }
+            },
+            {
+                "name": "R2M_Fail_Notify",
+                "type": "AzureFunctionActivity",
+                "dependsOn": [
+                    {
+                        "activity": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "functionName": "EncodeMessage",
+                    "method": "POST",
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body": {
+                        "friendlyMessageID": "Activity_Fail",
+                        "payload": {
+                            "datafactory_name": "@{pipeline().DataFactory}",
+                            "pipeline_name": "@{pipeline().Pipeline}",
+                            "pipeline_runId": "@{pipeline().RunId}",
+                            "error_message": "@{concat(activity('{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}').Output.runError, ': ', activity('R2M_DL1').Output.runPageUrl)}",
+                            "activity_name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "DataHubIntegrationFunctions",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "CaptureRunData_Fail_Notify",
+                "type": "AzureFunctionActivity",
+                "dependsOn": [
+                    {
+                        "activity": "Reconcilliation_and_Capture_Run_Data",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "functionName": "EncodeMessage",
+                    "method": "POST",
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body": {
+                        "friendlyMessageID": "Activity_Fail",
+                        "payload": {
+                            "datafactory_name": "@{pipeline().DataFactory}",
+                            "pipeline_name": "@{pipeline().Pipeline}",
+                            "pipeline_runId": "@{pipeline().RunId}",
+                            "error_message": "@{concat(activity('Reconcilliation_and_Capture_Run_Data').Output.runError, ': ', activity('Reconcilliation_and_Capture_Run_Data').Output.runPageUrl)}",
+                            "activity_name": "Reconcilliation_and_Capture_Run_Data"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "DataHubIntegrationFunctions",
+                    "type": "LinkedServiceReference"
+                }
             }
         ],
         "parameters": {
