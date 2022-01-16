@@ -1,0 +1,65 @@
+{
+    "name": "{{ template_config.outputs.0.output_file.name }}",
+    "properties": {
+        "description": "A pipeline that extracts the full table from {{source.schema}}.{{source.tablename}} from the database {{source.database}}. It then drops it into the {{target.storage_container}} using {{target.genericdataset}} as a reference for the Blob storage account.",
+        "activities": [
+            {
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                "type": "Copy",
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30
+                },
+                "typeProperties": {
+                    "source": {
+                        "type": "RelationalSource",
+                        "query": "SELECT * FROM \"{{source.schema}}\".\"{{source.tablename}}\""
+                    },
+                    "sink": {
+                        "type": "DelimitedTextSink",
+                        "storeSettings": {
+                            "type": "AzureBlobFSWriteSetting"
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextWriteSetting",
+                            "quoteAllText": true,
+                            "fileExtension": ".{{properties.fileExtension}}"
+                        }
+                    },
+                    "enableStaging": false,
+                    "dataIntegrationUnits": 0
+                },
+                "inputs": [
+                    {
+                        "referenceName": "{{source.genericdataset}}",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "TABLENAME": "{{source.tablename}}",
+                            "SCHEMA": "{{source.schema}}"
+                        }
+                    }
+                ],
+                "outputs": [
+                     {
+                        "referenceName": "{{target.genericdataset}}",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "FILENAME": "out.csv",
+                            "SUBFOLDER": "{{#string_func.upper}}{{source.schema}}{{/string_func.upper}}_{{#string_func.upper}}{{source.tablename}}{{/string_func.upper}}"
+                        }
+                    }
+                ]
+            }
+        ],
+        "folder": {
+            "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}"
+        },
+        "annotations": [
+            "Templator: v{{templator_info.version}}"{{#tags}},{{/tags}}
+            {{#tags}}
+                {{label}}{{^last}},{{/last}}
+            {{/tags}}
+        ]
+    }
+}

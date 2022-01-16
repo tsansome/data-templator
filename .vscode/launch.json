@@ -10,7 +10,7 @@
             "name": "No Samples",
             "program": "${workspaceFolder}/template.js",
             "args": [
-                "-c", "./example_configs/0_config.json", "-o", "../tmp"
+                "-c", "C:/Development/sample_confs/0_config.json", "-o", "../tmp", "-e", "C:/Development/sample_confs/env.json"
             ]
         }
     ]

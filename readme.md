@@ -7,7 +7,7 @@ So welcome to the templator, be a consumer or even a template author. If you dev
 ## Getting Started
 ### Step 1. Define your config
 
-The templator works off a config that you define. It should be JSON format and it should define a collection of datasets that you wish to invoke templates for. See the samples folder for several config examples to teach you how to define the config.
+The templator works off a config that you define. It should be JSON format and it should define a collection of datasets that you wish to invoke templates for. See the examples folder for several config examples to teach you how to define the config.
 
 ### Step 2. Make use of Mustache
 
@@ -59,7 +59,30 @@ This can be very useful for declaring variables that you can use across all your
 }
 ```
 
-### Step 4. Run the templator
+### Step 4. Do you need to reference one of the outputted files?
+If in the config an attribute asks for the name of the file that was outputted e.g. an orchestration config setting may require the name of the file outputted by the templator: You can simply refer to it by placing a mustache variable 
+
+{{ template_config.outputs.[index_of_output].output_file.name }}
+
+An example where we refer to the first outputted file:
+
+```json
+{
+  "generate": [
+    {
+      "language": "IPYNB",
+      "source": {
+         "default_date_format": "{{global.date_format}}"
+      },
+      "properties": {
+        "notebookpath": "/Shared/{{ template_config.outputs.0.output_file.name }}"
+      }
+    }
+  ]
+}
+```
+
+### Step 5. Run the templator
 
 With your config defined, you can run the templator. 
 

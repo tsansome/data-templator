@@ -1,0 +1,146 @@
+{
+    "name": "{{ template_config.outputs.0.output_file.name }}",
+    "properties": {
+        "description": "A pipeline that extracts the full table from {{source.schema}}.{{source.tablename}} from the database {{source.database}}. It then drops it into the {{target.storage_container}} using {{target.genericdataset}} as a reference for the Blob storage account.",
+        "activities": [
+            {
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                "type": "Copy",
+                "policy": {
+                    "timeout": "0.06:00:00",
+                    "retry": 2,
+                    "retryIntervalInSeconds": 30
+                },
+                "typeProperties": {
+                    "source": {
+                        "type": "RelationalSource",
+                        "query": "SELECT * FROM \"{{source.schema}}\".\"{{source.tablename}}\""
+                    },
+                    "sink": {
+                        "type": "DelimitedTextSink",
+                        "storeSettings": {
+                            "type": "AzureBlobFSWriteSetting"
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextWriteSetting",
+                            "quoteAllText": true,
+                            "fileExtension": ".{{properties.fileExtension}}"
+                        }
+                    },
+                    "enableStaging": false,
+                    "dataIntegrationUnits": 0
+                },
+                "inputs": [
+                    {
+                        "referenceName": "{{source.genericdataset}}",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "TABLENAME": "{{source.tablename}}",
+                            "SCHEMA": "{{source.schema}}"
+                        }
+                    }
+                ],
+                "outputs": [
+                     {
+                        "referenceName": "{{target.genericdataset}}",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "FILENAME": {
+                                "value": "@concat('AEST_', formatDateTime(convertFromUtc(utcnow(), 'AUS Eastern Standard Time'), 'yyyy-MM-ddTHH_mm_ss'), '__rId_', pipeline().RunId, '_out.csv')",
+                                "type": "Expression"
+                            },
+                            "SUBFOLDER": "{{#string_func.upper}}{{source.schema}}{{/string_func.upper}}_{{#string_func.upper}}{{source.tablename}}{{/string_func.upper}}"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Notify",
+                "description": "Notify that the extraction failed.",
+                "type": "AzureFunctionActivity",
+                "dependsOn": [
+                    {
+                        "activity": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "functionName": "EncodeMessage",
+                    "method": "POST",
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body": {
+                        "friendlyMessageID": "Activity_Fail",
+                        "payload": {
+                            "datafactory_name": "@{pipeline().DataFactory}",
+                            "pipeline_name": "@{pipeline().Pipeline}",
+                            "pipeline_runId": "@{pipeline().RunId}",
+                            "error_message": "@{activity('{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}').output.errors[0].message}",
+                            "activity_name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "IntegrationFunctions",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "RaiseError",
+                "type": "AzureFunctionActivity",
+                "dependsOn": [
+                    {
+                        "activity": "Notify",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.01:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "functionName": "RaiseError",
+                    "method": "POST",
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body": {
+                        "payload": {
+                            "error_message": "@{activity('{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}').output.errors[0].message}"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "DataHubIntegrationFunctions",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "folder": {
+            "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}"
+        },
+        "annotations": [
+            "Templator: v{{templator_info.version}}"{{#tags}},{{/tags}}
+            {{#tags}}
+                {{label}}{{^last}},{{/last}}
+            {{/tags}}
+        ]
+    }
+}
