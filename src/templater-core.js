@@ -82,7 +82,6 @@ exports.process_config = function(configPath, generatedFolder, samplesFolder, lo
     //now continue
     var selectedTemplates = new Set();
 
-    //di = dataset index
     for(var di in templatorConfig.datasets) {
         //now that we have the dataset
         datasetToGenerate = templatorConfig.datasets[di];
