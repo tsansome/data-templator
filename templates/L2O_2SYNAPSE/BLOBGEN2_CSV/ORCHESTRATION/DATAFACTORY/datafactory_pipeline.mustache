@@ -1,0 +1,299 @@
+{
+    "name": "{{ template_config.outputs.0.output_file.name }}",
+    "properties": {
+        "activities": [
+            {
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                "type": "SynapseNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Backup",
+                        "dependencyConditions": [
+                            "Completed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "notebookPath": "/Shared/Operational/{{target.database}}/Master/{{template_config.outputs.0.output_file.name}}",
+                    "baseParameters": {
+                        "filename": {
+                            "value": "@pipeline().parameters.filename",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Backup",
+                "type": "SynapseNotebook",
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "notebookPath": "{{ properties.backup_notebook_path}}",
+                    "baseParameters": {
+                        "container": {
+                            "value": "@pipeline().parameters.container",
+                            "type": "Expression"
+                        },
+                        "backup_folder": {
+                            "value": "@pipeline().parameters.backup_folder",
+                            "type": "Expression"
+                        },
+                        "table": {
+                            "value": "@pipeline().parameters.table",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Reconcilliation_Restore",
+                "type": "SynapseNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Reconcilliation_and_Capture_Run_Data",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "notebookPath": "{{ properties.restore_notebook_path }}",
+                    "baseParameters": {
+                        "container": {
+                            "value": "@pipeline().parameters.container",
+                            "type": "Expression"
+                        },
+                        "backup_filename": {
+                            "value": "@pipeline().parameters.backup_filename",
+                            "type": "Expression"
+                        },
+                        "backup_folder": {
+                            "value": "@pipeline().parameters.backup_folder",
+                            "type": "Expression"
+                        },
+                        "table": {
+                            "value": "@pipeline().parameters.table",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Reconcilliation_and_Capture_Run_Data",
+                "type": "SynapseNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "notebookPath": "{{ properties.reconcilliation_notebook_path}}",
+                    "baseParameters": {
+                        "business_function_group": {
+                            "value": "@pipeline().parameters.business_function_group",
+                            "type": "Expression"
+                        },
+                        "filename": {
+                            "value": "@pipeline().parameters.filename",
+                            "type": "Expression"
+                        },
+                        "full_table_name": {
+                            "value": "@pipeline().parameters.table",
+                            "type": "Expression"
+                        },
+                        "load_pattern": {
+                            "value": "@pipeline().parameters.load_pattern",
+                            "type": "Expression"
+                        },
+                        "raw_folder": {
+                            "value": "@pipeline().parameters.raw_folder",
+                            "type": "Expression"
+                        },
+                        {{#source.delta_column_date}}"delta_column": {
+                            "value": "@pipeline().parameters.delta_column",
+                            "type": "Expression"
+                        },{{/source.delta_column_date}}
+                        "source_database": {
+                            "value": "@pipeline().parameters.source_database",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "L2O_Restore",
+                "type": "SynapseNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false
+                },
+                "typeProperties": {
+                    "notebookPath": "{{properties.restore_notebook_path}}",
+                    "baseParameters": {
+                        "container": {
+                            "value": "@pipeline().parameters.container",
+                            "type": "Expression"
+                        },
+                        "backup_filename": {
+                            "value": "@pipeline().parameters.backup_filename",
+                            "type": "Expression"
+                        },
+                        "backup_folder": {
+                            "value": "@pipeline().parameters.backup_folder",
+                            "type": "Expression"
+                        },
+                        "table": {
+                            "value": "@pipeline().parameters.table",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "L2O_Fail_Notify",
+                "type": "AzureFunctionActivity",
+                "dependsOn": [
+                    {
+                        "activity": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "functionName": "EncodeMessage",
+                    "method": "POST",
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body": {
+                        "friendlyMessageID": "Activity_Fail",
+                        "payload": {
+                            "datafactory_name": "@{pipeline().DataFactory}",
+                            "pipeline_name": "@{pipeline().Pipeline}",
+                            "pipeline_runId": "@{pipeline().RunId}",
+                            "error_message": "@{concat(activity('{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}').Output.runError, ': ', activity('L2O_DL1').Output.runPageUrl)}",
+                            "activity_name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "DataHubIntegrationFunctions",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "parameters": {
+            "container": {
+                "type": "String",
+                "defaultValue": "{{#string_func.lower}}{{ source.database }}{{/string_func.lower}}"
+            },
+            "backup_filename": {
+                "type": "String",
+                "defaultValue": "LATEST"
+            },
+            "backup_folder": {
+                "type": "String",
+                "defaultValue": "{{ properties.backup_folder }}"
+            },
+            "table": {
+                "type": "String",
+                "defaultValue": "{{target.database}}_master.{{ source.database}}_{{ source.schema}}_{{ template_config.variables.source_tablename_formatted }}"
+            },
+            "filename": {
+                "type": "String"
+            },
+            "business_function_group": {
+                "type": "String",
+                "defaultValue": "{{ target.database }}"
+            },
+            "load_pattern": {
+                "type": "String",
+                "defaultValue": "{{template_config.properties.pattern}}"
+            },
+            "raw_folder": {
+                "type": "String",
+                "defaultValue": "{{ source.raw_folder }}"
+            },
+            {{#source.delta_column_date}}"delta_column": {
+                "type": "string",
+                "defaultValue": "tr_date"
+            },{{/source.delta_column_date}}
+            "source_database": {
+                "type": "String",
+                "defaultValue": "{{ source.database }}"
+            }
+        },
+        "folder": {
+            "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}"
+        },
+        "annotations": [
+            "Target DB: {{ target.database }}",
+            "Templator: v{{templator_info.version}}"
+        ]
+    }
+}

@@ -1,0 +1,53 @@
+{
+    "name": "{{ template_config.outputs.0.output_file.name }}",
+    "properties": {
+        "activities": [
+            {
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                "type": "SynapseNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebook": {
+                        "referenceName": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}_{{source.database}}_{{source.schema}}_{{template_config.variables.source_tablename_formatted}}",
+                        "type": "NotebookReference"
+                    },
+                    "parameters": {
+                        "filename": {
+                            "value": {
+                                "value": "@pipeline().parameters.filename",
+                                "type": "Expression"
+                            },
+                            "type": "string"
+                        }
+                    },
+                    "snapshot": true,
+                    "sparkPool": {
+                        "referenceName": "OPERATIONS",
+                        "type": "BigDataPoolReference"
+                    }
+                }
+            }
+        ],
+        "parameters": {
+            "filename": {
+                "type": "string"
+            }
+        },
+        "folder": {
+            "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}"
+        },
+        "annotations": [
+            "Target DB: {{ target.database }}",
+            "Templator: v{{templator_info.version}}"
+        ]
+    },
+    "type": "Microsoft.Synapse/workspaces/pipelines"
+}

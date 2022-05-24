@@ -1,0 +1,41 @@
+        {
+            "cell_type": "code",
+            "source": [
+                "from pyspark.sql.functions import expr, lit, col\n",
+                "from pyspark.sql.functions import to_timestamp, current_timestamp, to_utc_timestamp, unix_timestamp\n",
+                "\n",
+                "date = filename.split(\"--\")[0].replace(\"T\",\" \")\n",
+                "\n",
+                "sdf = myRecords\\\n",
+                {{#source.date_columns}}"\t\t.withColumn(\"{{name_without_spaces}}_UTC\", to_utc_timestamp(to_timestamp(unix_timestamp(col(\"{{name}}\"), \"{{source.date_format}}\")), \"{{source.date_locale}}\"))\\\n",{{/source.date_columns}}
+                "\t\t.withColumn(\"run_date_utc\", to_timestamp(lit(date), \"dd-MM-yyyy HH\"))\\\n",
+                "\t\t.withColumn(\"run_date_synapse_utc\", current_timestamp())\n",
+                "\n",
+                "sdf.createOrReplaceTempView(\"sdf\")"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": null
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "tblExists = spark.catalog._jcatalog.tableExists(\"{{ target.database }}.{{ source.database}}_{{ source.schema}}_{{ template_config.variables.source_tablename_formatted }}\")\r\n",
+                "\r\n",
+                "if (tblExists): \r\n",
+                "    print(\"Table exists, inserting\");\r\n",
+                "    spark.sql(\"INSERT INTO TABLE {{ target.database }}.{{ source.database}}_{{ source.schema}}_{{ template_config.variables.source_tablename_formatted }} SELECT * FROM sdf\")\r\n",
+                "else:\r\n",
+                "    print(\"No table found, perform a DL1\");\r\n",
+                "    spark.sql('''\r\n",
+                "        CREATE TABLE {{ target.database }}_master.{{ source.database}}_{{ source.schema}}_{{ template_config.variables.source_tablename_formatted }}\r\n",
+                "        USING parquet\r\n",
+                "            AS\r\n",
+                "            SELECT *\r\n",
+                "            FROM sdf;\r\n",
+                "    ''')"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": null
+        }

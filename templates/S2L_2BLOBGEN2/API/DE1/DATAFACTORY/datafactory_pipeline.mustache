@@ -1,0 +1,116 @@
+{
+    "name": "{{ template_config.outputs.0.output_file.name }}",
+    "properties": {
+        "description": "A pipeline that extracts the full table from dbo.Cin7_Stock from the database threebyone. It then drops it into the  using DS_BLB_GENERIC as a reference for the Blob storage account.",
+        "activities": [
+            {
+                "name": "{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}",
+                "type": "AzureFunctionActivity",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "functionName": "GetDataOrchestrator_HttpStart",
+                    "method": "POST",
+                    "body": {
+                        "value": "@concat('{ \"table\": \"', pipeline().parameters.table, '\", \"source\":\"', pipeline().parameters.source, '\" }')",
+                        "type": "Expression"
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "{{source.retrieverlinkedservice}}",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Check status",
+                "type": "WebActivity",
+                "dependsOn": [
+                    {
+                        "activity": "S2L_DE1",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "url": {
+                        "value": "@activity('{{template_config.properties.dam_prefix}}_{{template_config.properties.pattern}}').output.statusQueryGetUri",
+                        "type": "Expression"
+                    },
+                    "connectVia": {
+                        "referenceName": "AutoResolveIntegrationRuntime",
+                        "type": "IntegrationRuntimeReference"
+                    },
+                    "method": "GET"
+                }
+            },
+            {
+                "name": "Force fail if fail",
+                "type": "IfCondition",
+                "dependsOn": [
+                    {
+                        "activity": "Check status",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "expression": {
+                        "value": "@equals(activity('Check status').output.runtimeStatus, 'Failed')",
+                        "type": "Expression"
+                    },
+                    "ifTrueActivities": [
+                        {
+                            "name": "Fail1",
+                            "type": "Fail",
+                            "dependsOn": [],
+                            "userProperties": [],
+                            "typeProperties": {
+                                "message": {
+                                    "value": "@activity('Check status').output.output",
+                                    "type": "Expression"
+                                },
+                                "errorCode": "500"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "parameters": {
+            "table": {
+                "type": "string",
+                "defaultValue": "{{source.tablename}}"
+            },
+            "source": {
+                "type": "string",
+                "defaultValue": "{{source.database}}"
+            }
+        },
+        "folder": {
+            "name": "S2O/S2L_DE1"
+        },
+        "annotations": [
+            "Templator: v3.5.0"
+        ],
+        "lastPublishTime": "2022-05-22T08:19:52Z"
+    },
+    "type": "Microsoft.Synapse/workspaces/pipelines"
+}

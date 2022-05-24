@@ -19,11 +19,13 @@ program
   .option('-e, --env_file [filepath]', 'A path to an optional env.json object')
   .parse(process.argv);
 
-if (program.config == undefined) throw Error("You must supply a valid path to a folder or a single config file using the parameter -c");
-if (program.outputs == undefined) throw Error("You must supply a valid path to a folder for outputting all the files using the parameter -o.");
+const args = program.opts();
 
-var configPath = path.resolve(program.config);
-var generatedFolder = path.resolve(program.outputs);
+if (args.config == undefined) throw Error("You must supply a valid path to a folder or a single config file using the parameter -c");
+if (args.outputs == undefined) throw Error("You must supply a valid path to a folder for outputting all the files using the parameter -o.");
+
+var configPath = path.resolve(args.config);
+var generatedFolder = path.resolve(args.outputs);
 
 if (fs.lstatSync(configPath).isDirectory()) {
     //pointing at a folder of configs, configs should be in mustache format and have _config at the end of the filename

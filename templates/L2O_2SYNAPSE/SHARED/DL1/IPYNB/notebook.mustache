@@ -1,0 +1,37 @@
+        {
+            "cell_type": "code",
+            "source": [
+                "from pyspark.sql.functions import expr, lit, col\n",
+                "from pyspark.sql.functions import to_timestamp, current_timestamp, to_utc_timestamp, unix_timestamp\n",
+                "\n",
+                "date = filename.split(\"--\")[0].replace(\"T\",\" \")\n",
+                "\n",
+                "sdf = myRecords\\\n",
+                {{#source.date_columns}}"\t\t.withColumn(\"{{name_without_spaces}}_UTC\", to_utc_timestamp(to_timestamp(unix_timestamp(col(\"{{name}}\"), \"{{source.date_format}}\")), \"{{source.date_locale}}\"))\\\n",{{/source.date_columns}}
+                "\t\t.withColumn(\"run_date_utc\", to_timestamp(lit(date), \"dd-MM-yyyy HH\"))\\\n",
+                "\t\t.withColumn(\"run_date_synapse_utc\", current_timestamp())\n",
+                "\n",
+                "sdf.createOrReplaceTempView(\"sdf\")"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": null
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "%%sql\nDROP TABLE IF EXISTS {{ target.database }}_master.{{ source.database}}_{{source.schema}}_{{ template_config.variables.source_tablename_formatted }}_temp;\n\nCREATE TABLE {{ target.database }}_master.{{ source.database}}_{{source.schema}}_{{ template_config.variables.source_tablename_formatted }}_temp\n USING parquet\n    AS\n    SELECT *\n      FROM sdf;"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": null
+        },
+        {
+            "cell_type": "code",
+            "source": [
+                "%%sql\n\nDROP TABLE IF EXISTS {{ target.database }}_master.{{ source.database}}_{{source.schema}}_{{ template_config.variables.source_tablename_formatted }};\n\nALTER TABLE {{ target.database }}_master.{{ source.database}}_{{source.schema}}_{{ template_config.variables.source_tablename_formatted }}_temp RENAME TO {{ target.database }}_master.{{ source.database}}_{{source.schema}}_{{ template_config.variables.source_tablename_formatted }};"
+            ],
+            "metadata": {},
+            "outputs": [],
+            "execution_count": null
+        }
